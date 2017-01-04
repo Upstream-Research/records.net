@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Upstream Research, Inc.")]
 [assembly: AssemblyProduct("Records")]
-[assembly: AssemblyCopyright("Copyright © Upstream Research, Inc. 2017")]
+[assembly: AssemblyCopyright("Copyright © 2017 Upstream Research, Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]

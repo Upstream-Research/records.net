@@ -1,4 +1,4 @@
-﻿/*  Copyright (c) 2016 Upstream Research, Inc.  All Rights Reserved.  */
+﻿/*  Copyright (c) 2016 Upstream Research, Inc.  */
 
 using System;
 using System.Collections.Generic;
