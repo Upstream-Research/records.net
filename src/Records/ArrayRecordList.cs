@@ -10,28 +10,24 @@ namespace Upstream.System.Records
     /// Implements a record list on a list of record field value arrays
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
-    public class ArrayRecordList<TValue> 
-    : IRecordCollection<TValue>
+    public class ArrayRecordList<TValue,TField> 
+    : IRecordCollection<TValue,TField>
      ,IList<IRecordAccessor<TValue>>
+    where TField : IRecordFieldProperties<TValue>
     {
         private IList<string> _fieldNameList = new List<string>();
         private IList<TValue[]> _fieldValueListList = new List<TValue[]>();
+        private IList<TField> _fieldList = new List<TField>();
+        private IList<IComparer<TValue>> _fieldValueSortComparerList = new List<IComparer<TValue>>();
+        private IRecordAccessor<TField> _fieldSchema;
 
         /// <summary>
-        /// Create a new record collection using the specified field names
+        /// Create a new record collection with no fields
         /// </summary>
-        /// <param name="fieldNameEnumeration"></param>
-        public ArrayRecordList(
-            IEnumerable<string> fieldNameEnumeration
-            )
+        public ArrayRecordList()
         {
-            if (null != fieldNameEnumeration)
-            {
-                foreach (string fieldName in fieldNameEnumeration)
-                {
-                    _fieldNameList.Add(fieldName);
-                }
-            }
+            IList<IComparer<TField>> fieldSchemaComparerList = null;
+            _fieldSchema = new ListRecordAccessor<TField>(_fieldNameList, fieldSchemaComparerList, _fieldList);
         }
 
         /// <summary>
@@ -42,6 +38,13 @@ namespace Upstream.System.Records
             get
             {
                 return _fieldNameList;
+            }
+        }
+
+        private IList<IComparer<TValue>> FieldValueSortComparerList
+        {
+            get
+            {    return _fieldValueSortComparerList;
             }
         }
 
@@ -89,6 +92,14 @@ namespace Upstream.System.Records
             }
         }
 
+        public IRecordAccessor<TField> FieldSchema
+        {
+            get
+            {
+                return _fieldSchema;
+            }
+        }
+
         /// <summary>
         /// This collection is not readonly
         /// </summary>
@@ -120,7 +131,7 @@ namespace Upstream.System.Records
                     throw new ArgumentOutOfRangeException("recordPosition", recordPosition, "position is too large");
                 }
                 TValue[] fieldValueArray = BaseRecordList[recordPosition];
-                IRecordAccessor<TValue> recordAccessor = new ListRecordAccessor<TValue>(FieldNameList, fieldValueArray);
+                IRecordAccessor<TValue> recordAccessor = CreateRecordAccessor(fieldValueArray);
 
                 return recordAccessor;
             }
@@ -142,11 +153,45 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Append a new field to the records in the collection.
+        /// This is an inefficient operation if there are records already in the collection;
+        /// it is best to call it before putting any records in the collection.
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="fieldProperties"></param>
+        public void 
+        AddField(string fieldName, TField fieldProperties)
+        {
+            _fieldNameList.Add(fieldName);
+            _fieldList.Add(fieldProperties);
+            IList<TValue[]> prevFieldValueListList = _fieldValueListList;
+            int recordCount = prevFieldValueListList.Count;
+
+            // if there are any records in the record list, 
+            // then we need to make a whole new list with the initial field value appended
+            if (0 < recordCount)
+            {
+                IList<TValue[]> newFieldValueListList = new List<TValue[]>(recordCount);
+                int newFieldCount = _fieldNameList.Count;
+                const int startFieldOrdinal = 0;
+                foreach (TValue[] prevFieldValueArray in prevFieldValueListList)
+                {
+                    TValue[] newFieldValueArray = new TValue[newFieldCount];
+                    prevFieldValueArray.CopyTo(newFieldValueArray, startFieldOrdinal);
+                    newFieldValueListList.Add(newFieldValueArray);
+                }
+
+                _fieldValueListList = newFieldValueListList;
+            }
+        }
+
+        /// <summary>
         /// Insert a new record into the list
         /// </summary>
         /// <param name="recordPosition"></param>
         /// <param name="inputRecord"></param>
-        public void Insert(int recordPosition, IRecordAccessor<TValue> inputRecord)
+        public void 
+        Insert(int recordPosition, IRecordAccessor<TValue> inputRecord)
         {
             if (recordPosition < 0)
             {
@@ -248,6 +293,37 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Factory method
+        /// </summary>
+        /// <param name="fieldValueList"></param>
+        /// <returns></returns>
+        private ListRecordAccessor<TValue> 
+        CreateRecordAccessor(
+            IList<TValue> fieldValueList
+        )
+        {
+            return new ListRecordAccessor<TValue>(
+                  FieldNameList
+                , FieldValueSortComparerList
+                , fieldValueList
+                );
+        }
+
+        /// <summary>
+        /// Factory method
+        /// </summary>
+        /// <param name="fieldValueList"></param>
+        /// <returns></returns>
+        private ListRecordAccessor<TValue> 
+        CreateRecordAccessor()
+        {
+            return new ListRecordAccessor<TValue>(
+                  FieldNameList
+                , FieldValueSortComparerList
+                );
+        }
+
+        /// <summary>
         /// Delete all records from this collection
         /// </summary>
         public void Clear()
@@ -301,7 +377,7 @@ namespace Upstream.System.Records
                 )
             {
                 IList<TValue> fieldValueList = BaseRecordList[sourcePosition];
-                targetArray[targetPosition] = new ListRecordAccessor<TValue>(FieldNameList, fieldValueList);
+                targetArray[targetPosition] = CreateRecordAccessor(fieldValueList);
             }
         }
 
@@ -374,7 +450,7 @@ namespace Upstream.System.Records
         /// Create a record writer that will append records to this collection
         /// </summary>
         /// <returns></returns>
-        public IRecordCollectionBuilder<TValue> OpenRecordCollectionBuilder()
+        public IRecordCollectionBuilder<TValue> GetRecordCollectionBuilder()
         {
             return new ArrayRecordListBuilder(this);
         }
@@ -434,7 +510,7 @@ namespace Upstream.System.Records
             }
 
             IEnumerator<string> inputFieldNameEnumerator = inputRecord.GetFieldNameEnumerator();
-            ListRecordAccessor<TValue> record = new ListRecordAccessor<TValue>(FieldNameList);
+            ListRecordAccessor<TValue> record = CreateRecordAccessor();
             int recordIndex = startSearchIndex;
             while (recordIndex < BaseRecordList.Count
                 && NotFoundIndex == foundIndex
@@ -473,18 +549,18 @@ namespace Upstream.System.Records
         private class ArrayRecordListVisitor
         : IRecordListVisitor<TValue>
         {
-            private readonly ArrayRecordList<TValue> BaseList;
+            private readonly ArrayRecordList<TValue,TField> BaseList;
             private readonly ListRecordAccessor<TValue> BaseRecordAccessor;
             private int CurrentIndex = -1;
 
-            internal ArrayRecordListVisitor(ArrayRecordList<TValue> baseList)
+            internal ArrayRecordListVisitor(ArrayRecordList<TValue,TField> baseList)
             {
                 if (null == baseList)
                 {
                     throw new ArgumentNullException("baseList");
                 }
                 BaseList = baseList;
-                BaseRecordAccessor = new ListRecordAccessor<TValue>(baseList.FieldNameList);
+                BaseRecordAccessor = baseList.CreateRecordAccessor();
             }
 
             public void Dispose()
@@ -575,11 +651,11 @@ namespace Upstream.System.Records
         private class ArrayRecordListBuilder
         : IRecordCollectionBuilder<TValue>
         {
-            private readonly ArrayRecordList<TValue> BaseList;
+            private readonly ArrayRecordList<TValue,TField> BaseList;
             private readonly ListRecordAccessor<TValue> BaseRecordAccessor;
             private IList<TValue> BaseFieldValueList;
 
-            internal ArrayRecordListBuilder(ArrayRecordList<TValue> baseList)
+            internal ArrayRecordListBuilder(ArrayRecordList<TValue,TField> baseList)
             {
                 if (null == baseList)
                 {
@@ -587,7 +663,7 @@ namespace Upstream.System.Records
                 }
                 BaseList = baseList;
                 BaseFieldValueList = new TValue[BaseList.FieldCount];
-                BaseRecordAccessor = new ListRecordAccessor<TValue>(baseList.FieldNameList, BaseFieldValueList);
+                BaseRecordAccessor = BaseList.CreateRecordAccessor(BaseFieldValueList);
             }
 
             public void Dispose()

@@ -12,6 +12,7 @@ namespace Upstream.System.Records
     public class DictionaryRecordAccessor<TValue> : IRecordAccessor<TValue>
     {
         private readonly IList<string> _fieldNameList;
+        private IDictionary<string,IComparer<TValue>> _fieldComparerDictionary;
         private IDictionary<string,TValue> _baseDictionary;
 
         /// <summary>
@@ -20,6 +21,7 @@ namespace Upstream.System.Records
         /// </summary>
         public DictionaryRecordAccessor(
             IList<string> fieldNameList
+            ,IDictionary<string,IComparer<TValue>> fieldComparerDictionary
             )
         {
             if (null == fieldNameList)
@@ -28,6 +30,7 @@ namespace Upstream.System.Records
             }
 
             _fieldNameList = fieldNameList;
+            _fieldComparerDictionary = fieldComparerDictionary;
         }
 
         /// <summary>
@@ -155,12 +158,9 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the number of fields in the underlying record
         /// </summary>
-        public int FieldCount
+        public int GetFieldCount()
         {
-            get
-            {
-                return GetFieldValueDictionary().Count;
-            }
+            return GetFieldValueDictionary().Count;
         }
 
         /// <summary>
@@ -171,16 +171,46 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public int CompareFieldTo(string fieldName, TValue fieldValue2)
         {
+            IComparer<TValue> sortComparer = Comparer<TValue>.Default;
             TValue fieldValue = this[fieldName];
-            int resultNum = 1;
+            int resultNum = 0;
+            
 
-            if (null != fieldValue
+            if (null == fieldValue
+                && null == fieldValue2
+                )
+            {
+                resultNum = 0;
+            }
+            else if (null == fieldValue
                 && null != fieldValue2
                 )
             {
-                // TODO 20160104 [db] TODO This is not a good way to compare field values,
-                //  we need to know something more about the derived type of TValue.
-                resultNum = Comparer<TValue>.Default.Compare(fieldValue, fieldValue2);
+                resultNum = -1;
+            }
+            else if (null != fieldValue
+                && null == fieldValue2
+                )
+            {
+                resultNum = 1;
+            }
+            else if (null != fieldValue
+                && null != fieldValue2
+                )
+            {
+                if (null != _fieldComparerDictionary)
+                {
+                    IComparer<TValue> sortComparer2 = null;
+                    if (_fieldComparerDictionary.TryGetValue(fieldName, out sortComparer2))
+                    {
+                        if (null != sortComparer2)
+                        {
+                            sortComparer = sortComparer2;
+                        }
+                    }
+                }
+
+                resultNum = sortComparer.Compare(fieldValue, fieldValue2);
             }
 
             return resultNum;

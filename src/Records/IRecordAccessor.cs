@@ -49,14 +49,15 @@ namespace Upstream.System.Records
         /// <returns>0 if the values are equivalent,
         /// negative if this field value sorts less than the input value,
         /// postive if this field vlaue sorts greater than the input value.
-        /// positive if either of the field values is null (null is not equal to null).
+        /// null is equivalent to null.
+        /// null should compare less than non-null.
         /// </returns>
         int CompareFieldTo(string fieldName, TValue fieldValue2);
 
         /// <summary>
         /// Get the number of fields in the record
         /// </summary>
-        int FieldCount { get; }
+        int GetFieldCount();
 
         /// <summary>
         /// Get an enumerator of the field names for this record

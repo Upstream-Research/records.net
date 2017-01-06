@@ -11,11 +11,12 @@ namespace Upstream.System.Records
     /// The index cannot detect changes to the underlying list,
     /// so if the list is changed, the index must be updated separately.
     /// </summary>
-    public class RecordListIndex<TValue>
+    public class RecordListIndex<TValue,TField>
     : IRecordCollectionIndex<TValue>
+      where TField : IRecordFieldProperties<TValue>
     {
         private readonly IList<string> _keyFieldNameList;
-        private readonly IRecordList<TValue> _baseRecordList;
+        private readonly IRecordList<TValue,TField> _baseRecordList;
         /// <summary>
         /// The index will store a list of record positions for each distinct key.
         /// </summary>
@@ -29,7 +30,7 @@ namespace Upstream.System.Records
         /// <param name="recordList"></param>
         /// <param name="keyFieldNameEnumeration"></param>
         public RecordListIndex(
-             IRecordList<TValue> recordList
+             IRecordList<TValue,TField> recordList
             ,IEnumerable<string> keyFieldNameEnumeration
             )
         {
@@ -45,8 +46,16 @@ namespace Upstream.System.Records
             _keyFieldNameList = new List<string>(keyFieldNameEnumeration);
             _baseRecordList = recordList;
 
+            IList<IEqualityComparer<TValue>> fieldComparerList = new List<IEqualityComparer<TValue>>();
+            IRecordAccessor<TField> fieldSchema = recordList.FieldSchema;
+            foreach (string keyFieldName in _keyFieldNameList)
+            {
+                TField fieldInfo = fieldSchema[keyFieldName];
+                IEqualityComparer<TValue> equalityComparer = fieldInfo.ValueEqualityComparer;
+                fieldComparerList.Add(equalityComparer);
+            }
+            IEqualityComparer<TValue[]> keyComparer = new ArrayValueEqualityComparer(fieldComparerList);
             int dictionaryCapacity = recordList.Count;
-            IEqualityComparer<TValue[]> keyComparer = new ArrayValueEqualityComparer();
             _recordPositionDictionary = new Dictionary<TValue[],IList<int>>(
                 dictionaryCapacity
                 ,keyComparer
@@ -67,7 +76,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the base RecordList to which this index is attached
         /// </summary>
-        public IRecordList<TValue> RecordList
+        public IRecordList<TValue,TField> RecordList
         {
             get
             {
@@ -196,6 +205,15 @@ namespace Upstream.System.Records
         /// </remarks>
         private class ArrayValueEqualityComparer : IEqualityComparer<TValue[]>
         {
+            private readonly IList<IEqualityComparer<TValue>> _valueComparerList;
+
+            public ArrayValueEqualityComparer(
+                IList<IEqualityComparer<TValue>> valueComparerList
+                )
+            {
+                _valueComparerList = valueComparerList;
+            }
+
             public bool Equals(TValue[] x, TValue[] y)
             {
                 bool areEqual = false;
@@ -210,13 +228,24 @@ namespace Upstream.System.Records
                 {
                     int n = x.Length;
                     int i = 0;
-                    IEqualityComparer<TValue> baseComparer = EqualityComparer<TValue>.Default;
+                    IEqualityComparer<TValue> defaultComparer = EqualityComparer<TValue>.Default;
+                    IEqualityComparer<TValue> baseComparer;
 
                     areEqual = true;
                     while (i < n 
                         && areEqual
                         )
                     {
+                        if (null != _valueComparerList
+                            && i < _valueComparerList.Count
+                            )
+                        {
+                            baseComparer = _valueComparerList[i];
+                        }
+                        else
+                        {
+                            baseComparer = defaultComparer;
+                        }
                         areEqual = baseComparer.Equals(x[i], y[i]);
                         i++;
                     }

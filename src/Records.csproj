@@ -39,12 +39,14 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Records\ArrayRecordList.cs" />
+    <Compile Include="Records\BasicRecordFieldProperties.cs" />
     <Compile Include="Records\DictionaryRecordAccessor.cs" />
     <Compile Include="Records\IRecordCollectionBuilder.cs" />
     <Compile Include="Records\IRecordCollector.cs" />
     <Compile Include="Records\IRecordAccessor.cs" />
     <Compile Include="Records\IRecordCollection.cs" />
     <Compile Include="Records\IRecordCollectionIndex.cs" />
+    <Compile Include="Records\IRecordFieldProperties.cs" />
     <Compile Include="Records\IRecordList.cs" />
     <Compile Include="Records\IRecordListVisitor.cs" />
     <Compile Include="Records\ListRecordAccessor.cs" />

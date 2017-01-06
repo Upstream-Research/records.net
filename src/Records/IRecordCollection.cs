@@ -12,7 +12,7 @@ namespace Upstream.System.Records
     /// since an IRecordAccessor is a "visitor".
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
-    public interface IRecordCollection<TValue> 
+    public interface IRecordCollection<TValue,TField> 
     : IEnumerable<IRecordAccessor<TValue>>
     {
         /// <summary>
@@ -32,6 +32,11 @@ namespace Upstream.System.Records
         IEnumerable<string> FieldNames { get; }
         
         /// <summary>
+        /// Get an object that provides access to the field schema
+        /// </summary>
+        IRecordAccessor<TField> FieldSchema { get; }
+
+        /// <summary>
         /// Delete all records in this collection
         /// </summary>
         void Clear();
@@ -46,7 +51,7 @@ namespace Upstream.System.Records
         /// Get an object that can add new records to this collection.
         /// </summary>
         /// <returns></returns>
-        IRecordCollectionBuilder<TValue> OpenRecordCollectionBuilder();
+        IRecordCollectionBuilder<TValue> GetRecordCollectionBuilder();
 
     } // /interface
 

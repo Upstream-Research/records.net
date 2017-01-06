@@ -12,11 +12,12 @@ namespace Upstream.System.Records
     /// since an IRecordAccessor is a "visitor".
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TField"></typeparam>
     /// <remarks>
     /// RecordCollectionReaders created by this object must read records in the order they are stored in the list.
     /// </remarks>
-    public interface IRecordList<TValue> 
-    : IRecordCollection<TValue>
+    public interface IRecordList<TValue,TField> 
+    : IRecordCollection<TValue,TField>
     {
         /// <summary>
         /// Get a record accessor at a specified position.

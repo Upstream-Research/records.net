@@ -13,6 +13,7 @@ namespace Upstream.System.Records
     {
         private readonly IDictionary<string,int> _fieldOrdinalDictionary;
         private readonly IList<string> _fieldNameList;
+        private readonly IList<IComparer<TValue>> _fieldComparerList;
         private IList<TValue> _fieldValueList;
 
         /// <summary>
@@ -21,11 +22,13 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="fieldNameList"></param>
         public ListRecordAccessor(
-             IList<string> fieldNameList
+              IList<string> fieldNameList
+             ,IList<IComparer<TValue>> fieldComparerList
             )
         {
             _fieldOrdinalDictionary = CreateFieldOrdinalDictionary(fieldNameList);
             _fieldNameList = fieldNameList;
+            _fieldComparerList = fieldComparerList;
         }
 
         /// <summary>
@@ -36,9 +39,10 @@ namespace Upstream.System.Records
         /// <param name="fieldValueList"></param>
         public ListRecordAccessor(
               IList<string> fieldNameList
+             ,IList<IComparer<TValue>> fieldComparerList
              ,IList<TValue> fieldValueList
             )
-            :this(fieldNameList)
+            :this(fieldNameList, fieldComparerList)
         {
             _fieldValueList = fieldValueList;
         }
@@ -188,26 +192,23 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the number of values in this record.
         /// </summary>
-        public int FieldCount
+        public int GetFieldCount()
         {
-            get
-            {
-                int fieldNameCount = GetFieldOrdinalDictionary().Count;
-                int fieldValueCount = 0;
-                int fieldCount = 0;
+            int fieldNameCount = GetFieldOrdinalDictionary().Count;
+            int fieldValueCount = 0;
+            int fieldCount = 0;
                 
-                if (null != FieldValueList)
-                {
-                    fieldValueCount = FieldValueList.Count;
-                }
-                fieldCount = fieldValueCount;
-                if (fieldCount > fieldNameCount)
-                {
-                    fieldCount = fieldNameCount;
-                }
-
-                return fieldCount;
+            if (null != FieldValueList)
+            {
+                fieldValueCount = FieldValueList.Count;
             }
+            fieldCount = fieldValueCount;
+            if (fieldCount > fieldNameCount)
+            {
+                fieldCount = fieldNameCount;
+            }
+
+            return fieldCount;
         }
 
         /// <summary>
@@ -218,16 +219,51 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public int CompareFieldTo(string fieldName, TValue fieldValue2)
         {
+            IComparer<TValue> sortComparer = Comparer<TValue>.Default;
             TValue fieldValue = this[fieldName];
-            int resultNum = 1;
+            int fieldOrdinal;
+            int resultNum = 0;
+            
 
-            if (null != fieldValue
+            if (null == fieldValue
+                && null == fieldValue2
+                )
+            {
+                resultNum = 0;
+            }
+            else if (null == fieldValue
                 && null != fieldValue2
                 )
             {
-                // TODO 20160104 [db] TODO This is not a good way to compare field values,
-                //  we need to know something more about the derived type of TValue.
-                resultNum = Comparer<TValue>.Default.Compare(fieldValue, fieldValue2);
+                resultNum = -1;
+            }
+            else if (null != fieldValue
+                && null == fieldValue2
+                )
+            {
+                resultNum = 1;
+            }
+            else if (null != fieldValue
+                && null != fieldValue2
+                )
+            {
+                if (null != _fieldComparerList)
+                {
+                    IComparer<TValue> sortComparer2 = null;
+                    fieldOrdinal = GetFieldOrdinal(fieldName);
+                    if (0 <= fieldOrdinal
+                        && _fieldComparerList.Count > fieldOrdinal
+                        )
+                    {
+                        sortComparer2 = _fieldComparerList[fieldOrdinal];
+                    }
+                    if (null != sortComparer2)
+                    {
+                        sortComparer = sortComparer2;
+                    }
+                }
+
+                resultNum = sortComparer.Compare(fieldValue, fieldValue2);
             }
 
             return resultNum;
