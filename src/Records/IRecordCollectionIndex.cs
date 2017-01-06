@@ -29,11 +29,11 @@ namespace Upstream.System.Records
         IRecordAccessor<TValue> FindFirst(IRecordAccessor<TValue> keyRecord);
 
         /// <summary>
-        /// Get record reader that can enumerate all records that match the input record
+        /// Get record enumerator that can enumerate all records that match the input record
         /// </summary>
         /// <param name="keyRecord"></param>
         /// <returns></returns>
-        IRecordCollectionReader<TValue> OpenRecordCollectionReader(IRecordAccessor<TValue> keyRecord);
+        IRecordEnumerator<TValue> GetRecordEnumerator(IRecordAccessor<TValue> keyRecord);
 
     } // /interface
 } // /namespace

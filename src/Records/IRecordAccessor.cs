@@ -1,9 +1,7 @@
 ﻿/*  Copyright (c) 2016 Upstream Research, Inc.  */
 
 using System;
-using System.Collections.Generic;
-
-using Upstream.System.Collections;
+using System.Collections.Generic;  // KeyValuePair
 
 namespace Upstream.System.Records
 {
@@ -11,14 +9,36 @@ namespace Upstream.System.Records
     /// Defines a basic field-value lookup interface for tabular data records.
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
-    public interface IRecordAccessor<TValue> : INameValueLookup<TValue>
+    public interface IRecordAccessor<TValue>
+    : IEnumerable<KeyValuePair<string,TValue>>
     {
+        /// <summary>
+        /// Lookup a value associated with a field name.
+        /// If the field does not exist, the the behavior is undefined.
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <remarks>
+        /// Should raise System.Collections.Generic.KeyNotFoundException if the key does not exist
+        /// (just like generic IDictionary), but client code should not make this assumption.
+        /// Some implementations may return a null reference value.
+        /// </remarks>
+        TValue this[string fieldName] { get; set; }
+
         /// <summary>
         /// Get a field value by its order in the field list.
         /// </summary>
         /// <param name="fieldOrdinal"></param>
         /// <returns></returns>
         TValue this[int fieldOrdinal] { get; set; }
+
+        /// <summary>
+        /// Try to lookup a field value, 
+        /// if the value doesn't exist then 'false' is returned and a default value is passed back.
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="outValue"></param>
+        /// <returns>True if a value was found for the specified field name, False if the field was not found.</returns>
+        bool TryGetValue(string fieldName, out TValue outValue);
 
         /// <summary>
         /// Compare the value of a field in this record to some field value.
@@ -43,6 +63,7 @@ namespace Upstream.System.Records
         /// </summary>
         /// <returns></returns>
         IEnumerator<string> GetFieldNameEnumerator();
+
     } // /interface
     
 

@@ -37,16 +37,16 @@ namespace Upstream.System.Records
         void Clear();
 
         /// <summary>
-        /// Create a new record reader that will scan this collection
+        /// Get a visitor object that can enumerate records
         /// </summary>
         /// <returns></returns>
-        IRecordCollectionReader<TValue> OpenRecordCollectionReader();
+        IRecordEnumerator<TValue> GetRecordEnumerator();
 
         /// <summary>
-        /// Create a new record writer that will append new records to this collection
+        /// Get an object that can add new records to this collection.
         /// </summary>
         /// <returns></returns>
-        IRecordCollectionWriter<TValue> OpenRecordCollectionWriter();
+        IRecordCollectionBuilder<TValue> OpenRecordCollectionBuilder();
 
     } // /interface
 

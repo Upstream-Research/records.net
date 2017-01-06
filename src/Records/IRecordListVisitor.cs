@@ -13,16 +13,14 @@ namespace Upstream.System.Records
     /// The implementation should reuse a the current RecordAccessor object as the cursor
     /// moves over the list to avoid unnecessary creation of wrapper objects (visitor pattern).
     /// </remarks>
-    public interface IRecordListCursor<TValue>
-    : IDisposable
-     , IEnumerator<IRecordAccessor<TValue>>
-     , IRecordCollectionReader<TValue>
+    public interface IRecordListVisitor<TValue>
+    : IRecordEnumerator<TValue>
     {
         /// <summary>
         /// Set the fields in the current record to their default values.
         /// </summary>
         /// <returns>The current record associated with this writer object</returns>
-        void InitializeCurrentRecord();
+        void InitializeCurrentItem();
 
         /// <summary>
         /// Does the same thing as Seek(int), but called more like an IEnumerator method.
@@ -31,15 +29,6 @@ namespace Upstream.System.Records
         /// <returns></returns>
         bool MoveTo(int recordPosition);
         
-        /// <summary>
-        /// Try to move the cursor to a new position in the record list.
-        /// If the cursor cannot be moved, null is returned and the Current record
-        /// does not change.
-        /// </summary>
-        /// <param name="recordPosition"></param>
-        /// <returns>null if the record position could not be accessed.</returns>
-        IRecordAccessor<TValue> Seek(int recordPosition);
-
     } // /interface
 
 } // /namespace

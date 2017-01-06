@@ -11,13 +11,8 @@ namespace Upstream.System.Records
     /// <typeparam name="TValue"></typeparam>
     public interface IRecordCollectionWriter<TValue>
     : IDisposable
-     //,ICollector<IRecordAccessor<TValue>>
+     ,IRecordCollectionBuilder<TValue>
     {
-        /// <summary>
-        /// Get the current record that will be written when WriteNextRecord is called.
-        /// </summary>
-        IRecordAccessor<TValue> Current { get; }
-
         /// <summary>
         /// Write the current record to the back-end collection.
         /// </summary>
@@ -30,12 +25,6 @@ namespace Upstream.System.Records
         /// This will usually append a new record to the back-end collection.
         /// </remarks>
         IRecordAccessor<TValue> WriteCurrentRecord();
-
-        /// <summary>
-        /// Set the fields in the current record to their default values.
-        /// </summary>
-        /// <returns>The current record associated with this writer object</returns>
-        void InitializeCurrentRecord();
 
         /// <summary>
         /// Close the reader.  Must be called when the caller is finished using the reader.

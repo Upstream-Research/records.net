@@ -11,7 +11,7 @@ namespace Upstream.System.Records
     /// <typeparam name="TValue"></typeparam>
     public interface IRecordCollectionReader<TValue>
     : IDisposable
-     , IEnumerator<IRecordAccessor<TValue>>
+     , IRecordEnumerator<TValue>
     {
         /// <summary>
         /// Read the next record from the collection.

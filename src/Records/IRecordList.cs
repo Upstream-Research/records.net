@@ -21,7 +21,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get a record accessor at a specified position.
         /// Set the values in a record at a specified position.
-        /// This is not efficient for loops, use OpenRecordListCursor() in that case.
+        /// This is not efficient for loops, use GetRecordListVisitor() in that case.
         /// </summary>
         /// <param name="recordPosition"></param>
         /// <returns></returns>
@@ -41,10 +41,10 @@ namespace Upstream.System.Records
         void RemoveAt(int recordPosition);
 
         /// <summary>
-        /// Get a cursor that will allow efficient random-access to records by their position in the list
+        /// Get an object that will allow efficient random-access to records by their position in the list
         /// </summary>
         /// <returns></returns>
-        IRecordListCursor<TValue> OpenRecordListCursor();
+        IRecordListVisitor<TValue> GetRecordListVisitor();
 
     } // /interface
 

@@ -80,7 +80,8 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="keyRecord"></param>
         /// <returns></returns>
-        public IRecordAccessor<TValue> FindFirst(IRecordAccessor<TValue> keyRecord)
+        public IRecordAccessor<TValue> 
+        FindFirst(IRecordAccessor<TValue> keyRecord)
         {
             IRecordAccessor<TValue> record = null;
             IList<int> recordPositionList = null;
@@ -106,8 +107,8 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="keyRecord"></param>
         /// <returns></returns>
-        public IRecordCollectionReader<TValue> 
-        OpenRecordCollectionReader(IRecordAccessor<TValue> keyRecord)
+        public IRecordEnumerator<TValue> 
+        GetRecordEnumerator(IRecordAccessor<TValue> keyRecord)
         {
             IList<int> recordPositionList = null;
 
@@ -121,8 +122,8 @@ namespace Upstream.System.Records
                 recordPositionList = new int[0];  // empty list
             }
 
-            IRecordListCursor<TValue> recordCursor = RecordList.OpenRecordListCursor();
-            return new RecordListIndexSearchResultReader(
+            IRecordListVisitor<TValue> recordCursor = RecordList.GetRecordListVisitor();
+            return new RecordListIndexSearchResultEnumerator(
                  recordPositionList
                 ,recordCursor
                 );
@@ -133,7 +134,7 @@ namespace Upstream.System.Records
         /// </summary>
         public void BuildIndex()
         {
-            using (IRecordListCursor<TValue> recordCursor = RecordList.OpenRecordListCursor())
+            using (IRecordListVisitor<TValue> recordCursor = RecordList.GetRecordListVisitor())
             {
                 int recordCount = RecordList.Count;
                 int recordPosition;
@@ -142,19 +143,21 @@ namespace Upstream.System.Records
                 IRecordAccessor<TValue> record;
                 for (recordPosition = 0; recordPosition < recordCount; recordPosition++)
                 {
-                    record = recordCursor.Seek(recordPosition);
-                    key = CreateFieldKey(record);
-                    if (_recordPositionDictionary.TryGetValue(key, out recordPositionList))
+                    if (recordCursor.MoveTo(recordPosition))
                     {
-                        recordPositionList.Add(recordPosition);
+                        record = recordCursor.Current;
+                        key = CreateFieldKey(record);
+                        if (_recordPositionDictionary.TryGetValue(key, out recordPositionList))
+                        {
+                            recordPositionList.Add(recordPosition);
+                        }
+                        else
+                        {
+                            recordPositionList = new List<int>(1);
+                            recordPositionList.Add(recordPosition);
+                            _recordPositionDictionary.Add(key, recordPositionList);
+                        }
                     }
-                    else
-                    {
-                        recordPositionList = new List<int>(1);
-                        recordPositionList.Add(recordPosition);
-                        _recordPositionDictionary.Add(key, recordPositionList);
-                    }
-
                 }
             }
         }
@@ -242,16 +245,16 @@ namespace Upstream.System.Records
         } // /class
 
 
-        private class RecordListIndexSearchResultReader
-        : IRecordCollectionReader<TValue>
+        private class RecordListIndexSearchResultEnumerator
+        : IRecordEnumerator<TValue>
         {
             private readonly IList<int> _baseRecordPositionList;
-            private readonly IRecordListCursor<TValue> _baseCursor;
+            private readonly IRecordListVisitor<TValue> _baseCursor;
             private int _resultPosition = -1;
 
-            public RecordListIndexSearchResultReader(
+            public RecordListIndexSearchResultEnumerator(
                  IList<int> recordPositionList
-                ,IRecordListCursor<TValue> baseCursor
+                ,IRecordListVisitor<TValue> baseCursor
                 )
             {
                 _baseRecordPositionList = recordPositionList;
@@ -312,17 +315,17 @@ namespace Upstream.System.Records
                 return hasMoved;
             }
 
-            public IRecordAccessor<TValue> ReadNextRecord()
-            {
-                IRecordAccessor<TValue> currentRecord = null;
+            //public IRecordAccessor<TValue> ReadNextRecord()
+            //{
+            //    IRecordAccessor<TValue> currentRecord = null;
 
-                if (MoveNext())
-                {
-                    currentRecord = Current;
-                }
+            //    if (MoveNext())
+            //    {
+            //        currentRecord = Current;
+            //    }
 
-                return currentRecord;
-            }
+            //    return currentRecord;
+            //}
 
             public void Reset()
             {

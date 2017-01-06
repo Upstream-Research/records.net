@@ -352,31 +352,31 @@ namespace Upstream.System.Records
         /// Create a record cursor to find records in this collection
         /// </summary>
         /// <returns></returns>
-        public IRecordListCursor<TValue> 
-        OpenRecordListCursor()
+        public IRecordListVisitor<TValue> 
+        GetRecordListVisitor()
         {
             // This will return an updatable cursor
-            return new ArrayRecordListCursor(this);
+            return new ArrayRecordListVisitor(this);
         }
 
         /// <summary>
         /// Create a record reader to scan all records in this collection
         /// </summary>
         /// <returns></returns>
-        public IRecordCollectionReader<TValue> 
-        OpenRecordCollectionReader()
+        public IRecordEnumerator<TValue> 
+        GetRecordEnumerator()
         {
             // This will return an updatable cursor
-            return OpenRecordListCursor();
+            return GetRecordListVisitor();
         }
 
         /// <summary>
         /// Create a record writer that will append records to this collection
         /// </summary>
         /// <returns></returns>
-        public IRecordCollectionWriter<TValue> OpenRecordCollectionWriter()
+        public IRecordCollectionBuilder<TValue> OpenRecordCollectionBuilder()
         {
-            return new ArrayRecordListWriter(this);
+            return new ArrayRecordListBuilder(this);
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace Upstream.System.Records
         {
             // This will return an updatable cursor.
             // We can return this object from GetEnumerator() since it doesn't really need to be disposed of.
-            return new ArrayRecordListCursor(this);
+            return new ArrayRecordListVisitor(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -470,14 +470,14 @@ namespace Upstream.System.Records
         /// <summary>
         /// Implements a record reader over this record collection
         /// </summary>
-        private class ArrayRecordListCursor 
-        : IRecordListCursor<TValue>
+        private class ArrayRecordListVisitor
+        : IRecordListVisitor<TValue>
         {
             private readonly ArrayRecordList<TValue> BaseList;
             private readonly ListRecordAccessor<TValue> BaseRecordAccessor;
             private int CurrentIndex = -1;
 
-            internal ArrayRecordListCursor(ArrayRecordList<TValue> baseList)
+            internal ArrayRecordListVisitor(ArrayRecordList<TValue> baseList)
             {
                 if (null == baseList)
                 {
@@ -487,27 +487,8 @@ namespace Upstream.System.Records
                 BaseRecordAccessor = new ListRecordAccessor<TValue>(baseList.FieldNameList);
             }
 
-            protected virtual void Dispose(bool disposing)
+            public void Dispose()
             {
-                if (disposing)
-                {
-                    // dispose managed state (managed objects) here.
-                    // 20161230 [db] There is nothing to dispose of in this implementation
-                }
-            }
-
-            // This code added to correctly implement the disposable pattern.
-            void IDisposable.Dispose()
-            {
-                // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-                Dispose(true);
-                // TODO: uncomment the following line if the finalizer is overridden above.
-                // GC.SuppressFinalize(this);
-            }
-
-            public void Close()
-            {
-                Dispose(true);
             }
 
             /// <summary>
@@ -578,31 +559,7 @@ namespace Upstream.System.Records
                 CurrentIndex = -1;
             }
 
-            public IRecordAccessor<TValue> ReadNextRecord()
-            {
-                IRecordAccessor<TValue> record = null;
-
-                if (MoveNext())
-                {
-                    record = Current;
-                }
-
-                return record;
-            }
-
-            public IRecordAccessor<TValue>  Seek(int recordPosition)
-            {
-                IRecordAccessor<TValue> foundRecord = null;
-
-                if (MoveTo(recordPosition))
-                {
-                    foundRecord = BaseRecordAccessor;
-                }
-
-                return foundRecord;
-            }
-
-            public void InitializeCurrentRecord()
+            public void InitializeCurrentItem()
             {
                 if (null != BaseRecordAccessor.FieldValueList)
                 {
@@ -615,14 +572,14 @@ namespace Upstream.System.Records
         /// <summary>
         /// Implements a record collection writer on an array record collection
         /// </summary>
-        private class ArrayRecordListWriter 
-        : IRecordCollectionWriter<TValue>
+        private class ArrayRecordListBuilder
+        : IRecordCollectionBuilder<TValue>
         {
             private readonly ArrayRecordList<TValue> BaseList;
             private readonly ListRecordAccessor<TValue> BaseRecordAccessor;
             private IList<TValue> BaseFieldValueList;
 
-            internal ArrayRecordListWriter(ArrayRecordList<TValue> baseList)
+            internal ArrayRecordListBuilder(ArrayRecordList<TValue> baseList)
             {
                 if (null == baseList)
                 {
@@ -633,27 +590,8 @@ namespace Upstream.System.Records
                 BaseRecordAccessor = new ListRecordAccessor<TValue>(baseList.FieldNameList, BaseFieldValueList);
             }
 
-            protected virtual void Dispose(bool disposing)
+            public void Dispose()
             {
-                if (disposing)
-                {
-                    // dispose managed state (managed objects) here.
-                    // 20161230 [db] Nothint to dispose of in this record collection implementation
-                }
-            }
-
-            // This code added to correctly implement the disposable pattern.
-            void IDisposable.Dispose()
-            {
-                // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-                Dispose(true);
-                // TODO: uncomment the following line if the finalizer is overridden above.
-                // GC.SuppressFinalize(this);
-            }
-
-            public void Close()
-            {
-                Dispose(true);
             }
             
             public IRecordAccessor<TValue> Current
@@ -664,12 +602,13 @@ namespace Upstream.System.Records
                 }
             }
 
-            public void InitializeCurrentRecord()
+            public void InitializeCurrentItem()
             {
                 BaseList.InitializeRecord(BaseFieldValueList);
             }
 
-            public IRecordAccessor<TValue> WriteCurrentRecord()
+            public bool 
+            AddCurrentItem()
             {
                 // copy the current field values into a new field value array and add it to the collection,
                 //  leave the current field value list alone so that the client can continue to modify it
@@ -682,7 +621,22 @@ namespace Upstream.System.Records
                 }
                 BaseList.BaseRecordList.Add(fieldValueArray);
 
-                return Current;
+                return true;
+            }
+
+
+            public bool 
+            Add(IRecordAccessor<TValue> record)
+            {
+                bool recordWasAdded = false;
+
+                if (null != record)
+                {
+                    BaseList.Add(record);
+                    recordWasAdded = true;
+                }
+
+                return recordWasAdded;
             }
 
         } // /class
