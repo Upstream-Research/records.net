@@ -45,8 +45,6 @@
     <Compile Include="Records\IRecordAccessor.cs" />
     <Compile Include="Records\IRecordCollection.cs" />
     <Compile Include="Records\IRecordCollectionIndex.cs" />
-    <Compile Include="Records\IRecordCollectionReader.cs" />
-    <Compile Include="Records\IRecordCollectionWriter.cs" />
     <Compile Include="Records\IRecordList.cs" />
     <Compile Include="Records\IRecordListVisitor.cs" />
     <Compile Include="Records\ListRecordAccessor.cs" />
