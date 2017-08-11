@@ -19,11 +19,11 @@ namespace Upstream.System.Records
         /// <summary>
         /// Set the fields in the current record to their default values.
         /// </summary>
-        /// <returns>The current record associated with this writer object</returns>
+        /// <returns>The current record associated with this visitor object</returns>
         void InitializeCurrentItem();
 
         /// <summary>
-        /// Does the same thing as Seek(int), but called more like an IEnumerator method.
+        /// Seek to a specific record by its offset in the record list.
         /// </summary>
         /// <param name="recordPosition"></param>
         /// <returns></returns>

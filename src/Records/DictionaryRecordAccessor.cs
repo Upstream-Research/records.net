@@ -9,10 +9,14 @@ namespace Upstream.System.Records
     /// <summary>
     /// Implements IRecordAccessor over a .Net Dictionary
     /// </summary>
-    public class DictionaryRecordAccessor<TValue> : IRecordAccessor<TValue>
+    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TFieldType"></typeparam>
+    public class DictionaryRecordAccessor<TValue, TFieldType> 
+    : IRecordAccessorAdapter<TValue,IDictionary<string,TValue>>
+    where TFieldType : IRecordFieldType<TValue>
     {
         private readonly IList<string> _fieldNameList;
-        private IDictionary<string,IComparer<TValue>> _fieldComparerDictionary;
+        private IDictionary<string,TFieldType> _fieldTypeDictionary;
         private IDictionary<string,TValue> _baseDictionary;
 
         /// <summary>
@@ -21,7 +25,7 @@ namespace Upstream.System.Records
         /// </summary>
         public DictionaryRecordAccessor(
             IList<string> fieldNameList
-            ,IDictionary<string,IComparer<TValue>> fieldComparerDictionary
+            ,IDictionary<string,TFieldType> fieldComparerDictionary
             )
         {
             if (null == fieldNameList)
@@ -30,7 +34,7 @@ namespace Upstream.System.Records
             }
 
             _fieldNameList = fieldNameList;
-            _fieldComparerDictionary = fieldComparerDictionary;
+            _fieldTypeDictionary = fieldComparerDictionary;
         }
 
         /// <summary>
@@ -47,8 +51,8 @@ namespace Upstream.System.Records
             {
                 throw new ArgumentNullException("baseDictionary");
             }
-            FieldValueDictionary = baseDictionary;
             _fieldNameList = new List<string>(baseDictionary.Keys);
+            AttachTo(baseDictionary);
         }
 
         /// <summary>
@@ -62,10 +66,15 @@ namespace Upstream.System.Records
             {
                 return _baseDictionary;
             }
-            set
-            {
-                _baseDictionary = value;
-            }
+        }
+
+        /// <summary>
+        /// Attach the dictionary record accessor to a new dictionary of field values
+        /// </summary>
+        /// <param name="fieldValueDictionary"></param>
+        public void AttachTo(IDictionary<string,TValue> fieldValueDictionary)
+        {
+            _baseDictionary = fieldValueDictionary;
         }
 
         /// <summary>
@@ -76,7 +85,7 @@ namespace Upstream.System.Records
         {
             if (null == FieldValueDictionary)
             {
-                throw new InvalidOperationException("BaseDictionary is not assigned");
+                throw new InvalidOperationException("Dictionary record accessor is not attached to a dictionary");
             }
 
             return FieldValueDictionary;
@@ -107,6 +116,30 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Determine if a field value can be assigned to the specified field
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="fieldValue"></param>
+        /// <returns></returns>
+        private bool FieldValueIsValid(string fieldName, TValue fieldValue)
+        {
+            bool isValid = true;
+            TFieldType fieldType;
+            
+            if (null != _fieldTypeDictionary
+                && _fieldTypeDictionary.TryGetValue(fieldName, out fieldType)
+                )
+            {
+                if (null != fieldType)
+                {
+                    isValid = fieldType.IsValid(fieldValue);
+                }
+            }
+
+            return isValid;
+        }
+
+        /// <summary>
         /// Get/Set the value stored under a given field name.
         /// </summary>
         /// <param name="fieldName"></param>
@@ -119,7 +152,11 @@ namespace Upstream.System.Records
             }
             set
             {
-                GetFieldValueDictionary()[fieldName] = value;
+                TValue fieldValue = value;
+                if (FieldValueIsValid(fieldName, fieldValue))
+                {
+                    GetFieldValueDictionary()[fieldName] = fieldValue;
+                }
             }
         }
 
@@ -139,8 +176,12 @@ namespace Upstream.System.Records
             }
             set
             {
+                TValue fieldValue = value;
                 string fieldName = GetFieldName(fieldOrdinal);
-                GetFieldValueDictionary()[fieldName] = value;
+                if (FieldValueIsValid(fieldName, fieldValue))
+                {
+                    GetFieldValueDictionary()[fieldName] = fieldValue;
+                }
             }
         }
 
@@ -198,11 +239,12 @@ namespace Upstream.System.Records
                 && null != fieldValue2
                 )
             {
-                if (null != _fieldComparerDictionary)
+                if (null != _fieldTypeDictionary)
                 {
-                    IComparer<TValue> sortComparer2 = null;
-                    if (_fieldComparerDictionary.TryGetValue(fieldName, out sortComparer2))
+                    TFieldType fieldType2;
+                    if (_fieldTypeDictionary.TryGetValue(fieldName, out fieldType2))
                     {
+                        IComparer<TValue> sortComparer2 = fieldType2 as IComparer<TValue>;
                         if (null != sortComparer2)
                         {
                             sortComparer = sortComparer2;

@@ -11,7 +11,8 @@ namespace Upstream.System.Records
     /// Enumerating this collection does not necessarily return distinct objects
     /// since an IRecordAccessor is a "visitor".
     /// </summary>
-    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TValue">datatype of record field values</typeparam>
+    /// <typeparam name="TField">datatype for field (schema) meta-information</typeparam>
     public interface IRecordCollection<TValue,TField> 
     : IEnumerable<IRecordAccessor<TValue>>
     {

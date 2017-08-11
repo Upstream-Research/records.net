@@ -8,7 +8,9 @@ namespace Upstream.System.Records
     /// <summary>
     /// Defines a basic interface which RecordFieldProperties implementations should implement
     /// </summary>
-    public interface IRecordFieldProperties<TValue>
+    public interface IRecordFieldType<TValue>
+    : IComparer<TValue>
+     ,IEqualityComparer<TValue>
     {
         /// <summary>
         /// Get the datatype for all values in this field
@@ -16,14 +18,10 @@ namespace Upstream.System.Records
         Type DataType { get; }
 
         /// <summary>
-        /// Get an IComparer that can compare two field values for this field to determine their sort order
+        /// Determine if a value is a valid (in the domain) for this field
         /// </summary>
-        IComparer<TValue> ValueSortComparer { get; }
-
-        /// <summary>
-        /// Get an IEqualityComparer that can compute hash codes for field values on this field
-        /// </summary>
-        IEqualityComparer<TValue> ValueEqualityComparer { get; }
-
+        /// <param name="fieldValue"></param>
+        /// <returns></returns>
+        bool IsValid(TValue fieldValue);
     } // /interface
 } // /namespace

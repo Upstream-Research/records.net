@@ -11,12 +11,12 @@ namespace Upstream.System.Records
     /// The index cannot detect changes to the underlying list,
     /// so if the list is changed, the index must be updated separately.
     /// </summary>
-    public class RecordListIndex<TValue,TField>
+    public class RecordListIndex<TValue,TFieldType>
     : IRecordCollectionIndex<TValue>
-      where TField : IRecordFieldProperties<TValue>
+      where TFieldType : IRecordFieldType<TValue>
     {
         private readonly IList<string> _keyFieldNameList;
-        private readonly IRecordList<TValue,TField> _baseRecordList;
+        private readonly IRecordList<TValue,TFieldType> _baseRecordList;
         /// <summary>
         /// The index will store a list of record positions for each distinct key.
         /// </summary>
@@ -30,7 +30,7 @@ namespace Upstream.System.Records
         /// <param name="recordList"></param>
         /// <param name="keyFieldNameEnumeration"></param>
         public RecordListIndex(
-             IRecordList<TValue,TField> recordList
+             IRecordList<TValue,TFieldType> recordList
             ,IEnumerable<string> keyFieldNameEnumeration
             )
         {
@@ -47,11 +47,11 @@ namespace Upstream.System.Records
             _baseRecordList = recordList;
 
             IList<IEqualityComparer<TValue>> fieldComparerList = new List<IEqualityComparer<TValue>>();
-            IRecordAccessor<TField> fieldSchema = recordList.FieldSchema;
+            IRecordAccessor<TFieldType> fieldSchema = recordList.FieldSchema;
             foreach (string keyFieldName in _keyFieldNameList)
             {
-                TField fieldInfo = fieldSchema[keyFieldName];
-                IEqualityComparer<TValue> equalityComparer = fieldInfo.ValueEqualityComparer;
+                TFieldType fieldType = fieldSchema[keyFieldName];
+                IEqualityComparer<TValue> equalityComparer = fieldType;
                 fieldComparerList.Add(equalityComparer);
             }
             IEqualityComparer<TValue[]> keyComparer = new ArrayValueEqualityComparer(fieldComparerList);
@@ -76,7 +76,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the base RecordList to which this index is attached
         /// </summary>
-        public IRecordList<TValue,TField> RecordList
+        public IRecordList<TValue,TFieldType> RecordList
         {
             get
             {

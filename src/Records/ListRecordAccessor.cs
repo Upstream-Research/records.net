@@ -9,11 +9,15 @@ namespace Upstream.System.Records
     /// <summary>
     /// Provides a base record accessor implemented on basic arrays
     /// </summary>
-    public class ListRecordAccessor<TValue> : IRecordAccessor<TValue>
+    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TFieldType"></typeparam>
+    public class ListRecordAccessor<TValue, TFieldType> 
+    : IRecordAccessorAdapter<TValue,IList<TValue>>
+    where TFieldType : IRecordFieldType<TValue>
     {
         private readonly IDictionary<string,int> _fieldOrdinalDictionary;
         private readonly IList<string> _fieldNameList;
-        private readonly IList<IComparer<TValue>> _fieldComparerList;
+        private readonly IList<TFieldType> _fieldTypeList;
         private IList<TValue> _fieldValueList;
 
         /// <summary>
@@ -21,14 +25,15 @@ namespace Upstream.System.Records
         /// but that is not initially attached to any field value list.
         /// </summary>
         /// <param name="fieldNameList"></param>
+        /// <param name="fieldTypeList"></param>
         public ListRecordAccessor(
               IList<string> fieldNameList
-             ,IList<IComparer<TValue>> fieldComparerList
+             ,IList<TFieldType> fieldTypeList
             )
         {
             _fieldOrdinalDictionary = CreateFieldOrdinalDictionary(fieldNameList);
             _fieldNameList = fieldNameList;
-            _fieldComparerList = fieldComparerList;
+            _fieldTypeList = fieldTypeList;
         }
 
         /// <summary>
@@ -36,13 +41,14 @@ namespace Upstream.System.Records
         /// and will get field values from a list.
         /// </summary>
         /// <param name="fieldNameList"></param>
+        /// <param name="fieldTypeList"></param>
         /// <param name="fieldValueList"></param>
         public ListRecordAccessor(
               IList<string> fieldNameList
-             ,IList<IComparer<TValue>> fieldComparerList
+             ,IList<TFieldType> fieldTypeList
              ,IList<TValue> fieldValueList
             )
-            :this(fieldNameList, fieldComparerList)
+            :this(fieldNameList, fieldTypeList)
         {
             _fieldValueList = fieldValueList;
         }
@@ -80,10 +86,15 @@ namespace Upstream.System.Records
             {
                 return _fieldValueList;
             }
-            set
-            {
-                _fieldValueList = value;
-            }
+        }
+
+        /// <summary>
+        /// Attach the list record accessor to a list of values
+        /// </summary>
+        /// <param name="fieldValueList"></param>
+        public void AttachTo(IList<TValue> fieldValueList)
+        {
+            _fieldValueList = fieldValueList;
         }
 
         /// <summary>
@@ -124,9 +135,38 @@ namespace Upstream.System.Records
             return _fieldOrdinalDictionary;
         }
 
-        private int GetFieldOrdinal(string fieldName)
+        /// <summary>
+        /// Get the offset of a field in the record
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public int GetFieldOrdinal(string fieldName)
         {
             return GetFieldOrdinalDictionary()[fieldName];
+        }
+
+        /// <summary>
+        /// Check that a field value is valid to store in the specified field
+        /// </summary>
+        /// <param name="fieldOrdinal"></param>
+        /// <param name="fieldValue"></param>
+        /// <returns></returns>
+        public bool FieldValueIsValid(int fieldOrdinal, TValue fieldValue)
+        {
+            bool isValid = true;  // valid unless the field type disagrees
+
+            if (null != _fieldTypeList
+                && fieldOrdinal < _fieldTypeList.Count
+                )
+            {
+                TFieldType fieldType = _fieldTypeList[fieldOrdinal];
+                if (null != fieldType)
+                {
+                    isValid = fieldType.IsValid(fieldValue);
+                }
+            }
+
+            return isValid;
         }
 
         /// <summary>
@@ -145,8 +185,12 @@ namespace Upstream.System.Records
 
             set
             {
+                TValue fieldValue = value;
                 int fieldOrdinal = GetFieldOrdinal(fieldName);
-                GetFieldValueList()[fieldOrdinal] = value;
+                if (FieldValueIsValid(fieldOrdinal, fieldValue))
+                {
+                    GetFieldValueList()[fieldOrdinal] = fieldValue;
+                }
             }
         }
 
@@ -165,7 +209,11 @@ namespace Upstream.System.Records
 
             set
             {
-                GetFieldValueList()[fieldOrdinal] = value;
+                TValue fieldValue = value;
+                if (FieldValueIsValid(fieldOrdinal, fieldValue))
+                {
+                    GetFieldValueList()[fieldOrdinal] = fieldValue;
+                }
             }
         }
 
@@ -247,15 +295,15 @@ namespace Upstream.System.Records
                 && null != fieldValue2
                 )
             {
-                if (null != _fieldComparerList)
+                if (null != _fieldTypeList)
                 {
                     IComparer<TValue> sortComparer2 = null;
                     fieldOrdinal = GetFieldOrdinal(fieldName);
                     if (0 <= fieldOrdinal
-                        && _fieldComparerList.Count > fieldOrdinal
+                        && _fieldTypeList.Count > fieldOrdinal
                         )
                     {
-                        sortComparer2 = _fieldComparerList[fieldOrdinal];
+                        sortComparer2 = _fieldTypeList[fieldOrdinal];
                     }
                     if (null != sortComparer2)
                     {

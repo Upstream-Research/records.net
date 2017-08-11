@@ -5,11 +5,11 @@
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A40E07CF-8DD1-49E7-A4BF-A1FEA0F275C2}</ProjectGuid>
+    <ProjectGuid>{17210683-66DD-4027-888B-0AE2D4651F4F}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Records.AssemblyProperties</AppDesignerFolder>
-    <RootNamespace>Upstream.System</RootNamespace>
-    <AssemblyName>Upstream.System.Records</AssemblyName>
+    <AppDesignerFolder>Csv.AssemblyProperties</AppDesignerFolder>
+    <RootNamespace>Upstream.System.Csv</RootNamespace>
+    <AssemblyName>Upstream.System.Csv</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -37,28 +37,11 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Records.AssemblyProperties\AssemblyInfo.cs" />
-    <Compile Include="Records\ArrayRecordList.cs" />
-    <Compile Include="Records\BasicRecordFieldType.cs" />
-    <Compile Include="Records\DictionaryRecordAccessor.cs" />
-    <Compile Include="Records\FieldSchemaSpec.cs" />
-    <Compile Include="Records\FieldSchemaSpecFieldRecord.cs" />
-    <Compile Include="Records\IRecordAccessorAdapter.cs" />
-    <Compile Include="Records\IRecordCollectionBuilder.cs" />
-    <Compile Include="Records\IRecordCollector.cs" />
-    <Compile Include="Records\IRecordAccessor.cs" />
-    <Compile Include="Records\IRecordCollection.cs" />
-    <Compile Include="Records\IRecordCollectionIndex.cs" />
-    <Compile Include="Records\IRecordFieldType.cs" />
-    <Compile Include="Records\IRecordList.cs" />
-    <Compile Include="Records\IRecordListVisitor.cs" />
-    <Compile Include="Records\ListRecordAccessor.cs" />
-    <Compile Include="Records\IRecordEnumerator.cs" />
-    <Compile Include="Records\ParsingRecordAccessor.cs" />
-    <Compile Include="Records\PrintingRecordAccessor.cs" />
-    <Compile Include="Records\RecordEnumeratorAdapter.cs" />
-    <Compile Include="Records\RecordIO.cs" />
-    <Compile Include="Records\RecordListIndex.cs" />
+    <Compile Include="Csv.AssemblyProperties\AssemblyInfo.cs" />
+    <Compile Include="Csv\CsvEncoding.cs" />
+    <Compile Include="Csv\CsvException.cs" />
+    <Compile Include="Csv\CsvReader.cs" />
+    <Compile Include="Csv\CsvWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

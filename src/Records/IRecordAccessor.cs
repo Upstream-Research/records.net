@@ -8,7 +8,7 @@ namespace Upstream.System.Records
     /// <summary>
     /// Defines a basic field-value lookup interface for tabular data records.
     /// </summary>
-    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TValue">datatype for field values</typeparam>
     public interface IRecordAccessor<TValue>
     : IEnumerable<KeyValuePair<string,TValue>>
     {
@@ -27,9 +27,9 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get a field value by its order in the field list.
         /// </summary>
-        /// <param name="fieldOrdinal"></param>
+        /// <param name="fieldPosition"></param>
         /// <returns></returns>
-        TValue this[int fieldOrdinal] { get; set; }
+        TValue this[int fieldPosition] { get; set; }
 
         /// <summary>
         /// Try to lookup a field value, 
@@ -40,6 +40,7 @@ namespace Upstream.System.Records
         /// <returns>True if a value was found for the specified field name, False if the field was not found.</returns>
         bool TryGetValue(string fieldName, out TValue outValue);
 
+        /*
         /// <summary>
         /// Compare the value of a field in this record to some field value.
         /// Comparison is done according to the field's domain (i.e. collation rules)
@@ -48,11 +49,12 @@ namespace Upstream.System.Records
         /// <param name="fieldValue2"></param>
         /// <returns>0 if the values are equivalent,
         /// negative if this field value sorts less than the input value,
-        /// postive if this field vlaue sorts greater than the input value.
+        /// postive if this field value sorts greater than the input value.
         /// null is equivalent to null.
         /// null should compare less than non-null.
         /// </returns>
         int CompareFieldTo(string fieldName, TValue fieldValue2);
+        */
 
         /// <summary>
         /// Get the number of fields in the record

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B8D44FF1-E4C3-4B08-84AE-9C5C4423B448}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Records.DataSets.AssemblyProperties</AppDesignerFolder>
+    <RootNamespace>Upstream.System.Records.DataSets</RootNamespace>
+    <AssemblyName>Upstream.System.Records.DataSets</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <ProjectReference Include="Records.csproj">
+      <Project>{a40e07cf-8dd1-49e7-a4bf-a1fea0f275c2}</Project>
+      <Name>Records</Name>
+    </ProjectReference>
+    <ProjectReference Include="Records.Data.csproj">
+      <Project>{e7f7c4fe-4d60-4250-9e01-3c3943554853}</Project>
+      <Name>Records.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Records.DataSets.AssemblyProperties\AssemblyInfo.cs" />
+    <Compile Include="Records.DataSets\DataColumnCollectionAccessor.cs" />
+    <Compile Include="Records.DataSets\DataColumnFieldType.cs" />
+    <Compile Include="Records.DataSets\DataRowCollectionRecordListVisitor.cs" />
+    <Compile Include="Records.DataSets\DataRowRecordAccessor.cs" />
+    <Compile Include="Records.DataSets\DataRowRecordListVisitor.cs" />
+    <Compile Include="Records.DataSets\DataTableRecordCollectionBuilder.cs" />
+    <Compile Include="Records.DataSets\DataTableRecordList.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

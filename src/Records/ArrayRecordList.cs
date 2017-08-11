@@ -10,24 +10,29 @@ namespace Upstream.System.Records
     /// Implements a record list on a list of record field value arrays
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
-    public class ArrayRecordList<TValue,TField> 
-    : IRecordCollection<TValue,TField>
+    /// <typeparam name="TFieldType"></typeparam>
+    public class ArrayRecordList<TValue,TFieldType> 
+    : IRecordCollection<TValue,TFieldType>
      ,IList<IRecordAccessor<TValue>>
-    where TField : IRecordFieldProperties<TValue>
+    where TFieldType : IRecordFieldType<TValue>
     {
         private IList<string> _fieldNameList = new List<string>();
         private IList<TValue[]> _fieldValueListList = new List<TValue[]>();
-        private IList<TField> _fieldList = new List<TField>();
-        private IList<IComparer<TValue>> _fieldValueSortComparerList = new List<IComparer<TValue>>();
-        private IRecordAccessor<TField> _fieldSchema;
+        private IList<TFieldType> _fieldTypeList = new List<TFieldType>();
+        //private IList<IComparer<TValue>> _fieldValueSortComparerList = new List<IComparer<TValue>>();
+        private IRecordAccessor<TFieldType> _fieldSchema;
 
         /// <summary>
         /// Create a new record collection with no fields
         /// </summary>
         public ArrayRecordList()
         {
-            IList<IComparer<TField>> fieldSchemaComparerList = null;
-            _fieldSchema = new ListRecordAccessor<TField>(_fieldNameList, fieldSchemaComparerList, _fieldList);
+            IList<IRecordFieldType<TFieldType>> fieldSchemaTypeList = null;
+            _fieldSchema = new ListRecordAccessor<TFieldType,IRecordFieldType<TFieldType>>(
+                  _fieldNameList
+                 ,fieldSchemaTypeList
+                 ,_fieldTypeList
+                 );
         }
 
         /// <summary>
@@ -41,10 +46,11 @@ namespace Upstream.System.Records
             }
         }
 
-        private IList<IComparer<TValue>> FieldValueSortComparerList
+        private IList<TFieldType> FieldTypeList
         {
             get
-            {    return _fieldValueSortComparerList;
+            {
+                return _fieldTypeList;
             }
         }
 
@@ -92,7 +98,10 @@ namespace Upstream.System.Records
             }
         }
 
-        public IRecordAccessor<TField> FieldSchema
+        /// <summary>
+        /// Get an object that provides access to field meta-information
+        /// </summary>
+        public IRecordAccessor<TFieldType> FieldSchema
         {
             get
             {
@@ -160,10 +169,10 @@ namespace Upstream.System.Records
         /// <param name="fieldName"></param>
         /// <param name="fieldProperties"></param>
         public void 
-        AddField(string fieldName, TField fieldProperties)
+        AddField(string fieldName, TFieldType fieldProperties)
         {
             _fieldNameList.Add(fieldName);
-            _fieldList.Add(fieldProperties);
+            _fieldTypeList.Add(fieldProperties);
             IList<TValue[]> prevFieldValueListList = _fieldValueListList;
             int recordCount = prevFieldValueListList.Count;
 
@@ -297,14 +306,14 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="fieldValueList"></param>
         /// <returns></returns>
-        private ListRecordAccessor<TValue> 
+        private ListRecordAccessor<TValue,TFieldType> 
         CreateRecordAccessor(
             IList<TValue> fieldValueList
         )
         {
-            return new ListRecordAccessor<TValue>(
+            return new ListRecordAccessor<TValue,TFieldType>(
                   FieldNameList
-                , FieldValueSortComparerList
+                , FieldTypeList
                 , fieldValueList
                 );
         }
@@ -312,14 +321,13 @@ namespace Upstream.System.Records
         /// <summary>
         /// Factory method
         /// </summary>
-        /// <param name="fieldValueList"></param>
         /// <returns></returns>
-        private ListRecordAccessor<TValue> 
+        private ListRecordAccessor<TValue,TFieldType> 
         CreateRecordAccessor()
         {
-            return new ListRecordAccessor<TValue>(
+            return new ListRecordAccessor<TValue,TFieldType>(
                   FieldNameList
-                , FieldValueSortComparerList
+                , FieldTypeList
                 );
         }
 
@@ -510,13 +518,13 @@ namespace Upstream.System.Records
             }
 
             IEnumerator<string> inputFieldNameEnumerator = inputRecord.GetFieldNameEnumerator();
-            ListRecordAccessor<TValue> record = CreateRecordAccessor();
+            ListRecordAccessor<TValue, TFieldType> record = CreateRecordAccessor();
             int recordIndex = startSearchIndex;
             while (recordIndex < BaseRecordList.Count
                 && NotFoundIndex == foundIndex
                 )
             {
-                record.FieldValueList = BaseRecordList[recordIndex];
+                record.AttachTo(BaseRecordList[recordIndex]);
 
                 // assume fields are equal until we find one that isn't
                 bool fieldsAreEqual = true;
@@ -525,8 +533,13 @@ namespace Upstream.System.Records
                     )
                 {
                     string fieldName = inputFieldNameEnumerator.Current;
+                    int fieldOrdinal = record.GetFieldOrdinal(fieldName);
+                    TValue fieldValue = record[fieldOrdinal];
+                    IComparer<TValue> fieldComparer = FieldTypeList[fieldOrdinal];
                     TValue inputFieldValue = inputRecord[fieldName];
-                    fieldsAreEqual = (0 == record.CompareFieldTo(fieldName, inputFieldValue));
+                    
+                    //fieldsAreEqual = (0 == record.CompareFieldTo(fieldName, inputFieldValue));
+                    fieldsAreEqual = (0 == fieldComparer.Compare(fieldValue, inputFieldValue));
                 }
 
                 if (fieldsAreEqual)
@@ -549,11 +562,11 @@ namespace Upstream.System.Records
         private class ArrayRecordListVisitor
         : IRecordListVisitor<TValue>
         {
-            private readonly ArrayRecordList<TValue,TField> BaseList;
-            private readonly ListRecordAccessor<TValue> BaseRecordAccessor;
+            private readonly ArrayRecordList<TValue,TFieldType> BaseList;
+            private readonly ListRecordAccessor<TValue, TFieldType> BaseRecordAccessor;
             private int CurrentIndex = -1;
 
-            internal ArrayRecordListVisitor(ArrayRecordList<TValue,TField> baseList)
+            internal ArrayRecordListVisitor(ArrayRecordList<TValue,TFieldType> baseList)
             {
                 if (null == baseList)
                 {
@@ -618,7 +631,7 @@ namespace Upstream.System.Records
                     && BaseList.BaseRecordList.Count > recordPosition
                     )
                 {
-                    BaseRecordAccessor.FieldValueList = BaseList.BaseRecordList[recordPosition];
+                    BaseRecordAccessor.AttachTo(BaseList.BaseRecordList[recordPosition]);
                     CurrentIndex = recordPosition;
                     hasMoved = true;
                 }
@@ -631,7 +644,7 @@ namespace Upstream.System.Records
             /// </summary>
             public void Reset()
             {
-                BaseRecordAccessor.FieldValueList = null;
+                BaseRecordAccessor.AttachTo(null);
                 CurrentIndex = -1;
             }
 
@@ -651,11 +664,11 @@ namespace Upstream.System.Records
         private class ArrayRecordListBuilder
         : IRecordCollectionBuilder<TValue>
         {
-            private readonly ArrayRecordList<TValue,TField> BaseList;
-            private readonly ListRecordAccessor<TValue> BaseRecordAccessor;
+            private readonly ArrayRecordList<TValue,TFieldType> BaseList;
+            private readonly ListRecordAccessor<TValue, TFieldType> BaseRecordAccessor;
             private IList<TValue> BaseFieldValueList;
 
-            internal ArrayRecordListBuilder(ArrayRecordList<TValue,TField> baseList)
+            internal ArrayRecordListBuilder(ArrayRecordList<TValue,TFieldType> baseList)
             {
                 if (null == baseList)
                 {

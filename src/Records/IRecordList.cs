@@ -29,7 +29,7 @@ namespace Upstream.System.Records
         IRecordAccessor<TValue> this[int recordPosition] { get; set; }    
 
         /// <summary>
-        /// Insert a record to a position in the list
+        /// Insert a copy of record to a position in the list
         /// </summary>
         /// <param name="insertPosition"></param>
         /// <param name="record"></param>
