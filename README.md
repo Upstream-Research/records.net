@@ -1,13 +1,18 @@
 records.net
 -----------
 
-Revised: 2017-08-10 (db)
-
 .NET Tabular Data and Data Record Library
 
-(20170810 (db) Warning, this is unstable and untested code.
+*Copyright (c) 2017 Upstream Research, All Rights Reserved.*
+
+The source code for this library is made available under an "MIT" license,
+See the "LICENSE" file for details.
+
+Revised: 2017-08-11 (db)
+
+_(20170810 (db) Warning, this is unstable and untested code.
 It has been released in the interest of getting this code out into the community,
-where it may be further developed into something stable)
+where it may be further developed into something stable)_
 
 
 ## Overview
@@ -21,21 +26,24 @@ This library provides an alternative and a complement to ORM (Object/Relational 
 It is an alternative because it does not try to hide the tabular nature of relational data,
 yet it is complementary because one can build an ORM framework on this library.
 
-One of the strengths of this library is to provide a level of abstraction for tabular data,
-which allows for simpler transmission, encoding, and transformation of records
-at the expense of strongly-typed "entity" objects.
+One of the strengths intended for this library is to provide a level of abstraction for tabular data,
+which allows for simpler transmission, transformation, and encoding of records
+at the expense of strongly-typed "entity" objects 
+(although strongly-typed records are still possible with this library).
 
 
 ## Some Remarks On Existing Data Libraries and Frameworks
 
 ADO.NET provides two different groups of objects: 
-data I/O objects, such as `IDataReader`,
-and data structure objects, such as `DataTable`.
+
+1. Data I/O objects, such as `IDataReader`
+2. Data structure objects, such as `DataTable`
+
 These are mostly independent groups and should probably have been placed in separate namespaces.
 
-In .NET Core 1.0, Microsoft considered System.Data "unsupported"
+In .NET Core 1.0, Microsoft considered `System.Data` "unsupported"
 and yet provided some implementation of the data I/O objects.
-It appears that System.Data will be supported in .NET Core 2.0 and .NET Standard 2.0.
+It appears that `System.Data` will be supported in .NET Core 2.0 and .NET Standard 2.0.
 
 ORM libraries rely on on "Plain Old Objects", or "Entity" objects
 which attempt to encode record fields as strongly-typed object properties.
@@ -58,10 +66,10 @@ Record collections are exposed through an `IRecordCollection` interface,
 which gives access to an implementation of `IEnumerator<IRecordAccessor>`
 and which provides a way to navigate records within a "backend" collection.
 This "navigation" is done by making a somewhat non-standard use of an `IEnumerator` interface:
-when iterating over the enumerator, the object referenced by the `Current` property is not assumed to change,
+when moving the enumerator, the object reference returned by the `Current` property is not assumed to change,
 however, the state of the `Current` property changes and the data that it _accesses_ changes.
 The end result is to retain one instance of the `IRecordAccessor` interface
-rather than wrapping every back-end object with a new `IRecordAccessor` implementation.
+rather than wrapping every back-end object with an adapter object that implements `IRecordAccessor`.
 
 The library provides a basic implementation of `IRecordCollection` called `ArrayRecordList`.
 This class implements `IRecordCollection` using a dynamic list of static object array records;
@@ -70,7 +78,7 @@ it provides an alternative to `System.Data.DataTable` without the dependency on 
 
 ## Project Layout
 
-There are several libraries in this code base.
-They are organized by dependency.
+There are several library assembly projects in this code base.
+The libraries are organized by dependency.
 The core library, `Records`, has no significant dependencies and is built to be compatible with .NET Core 1.0.
 Derived libraries, like `Records.Data` have a dependency on `System.Data`.
