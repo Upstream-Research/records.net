@@ -8,7 +8,7 @@ records.net
 The source code for this library is made available under an "MIT" license,
 See the "LICENSE" file for details.
 
-Revised: 2017-08-11 (db)
+Revised: 2017-08-14 (db)
 
 _(20170810 (db) Warning, this is unstable and untested code.
 It has been released in the interest of getting this code out into the community,
@@ -39,7 +39,7 @@ ADO.NET provides two different groups of objects:
 1. Data I/O objects, such as `IDataReader`
 2. Data structure objects, such as `DataTable`
 
-These are mostly independent groups and should probably have been placed in separate namespaces.
+These are mostly independent groups; perhaps they should have been placed in separate namespaces.
 
 In .NET Core 1.0, Microsoft considered `System.Data` "unsupported"
 and yet provided some implementation of the data I/O objects.
@@ -69,7 +69,7 @@ This "navigation" is done by making a somewhat non-standard use of an `IEnumerat
 when moving the enumerator, the object reference returned by the `Current` property is not assumed to change,
 however, the state of the `Current` property changes and the data that it _accesses_ changes.
 The end result is to retain one instance of the `IRecordAccessor` interface
-rather than wrapping every back-end object with an adapter object that implements `IRecordAccessor`.
+rather than wrapping every back-end record object with an adapter object that implements `IRecordAccessor`.
 
 The library provides a basic implementation of `IRecordCollection` called `ArrayRecordList`.
 This class implements `IRecordCollection` using a dynamic list of static object array records;
@@ -82,3 +82,18 @@ There are several library assembly projects in this code base.
 The libraries are organized by dependency.
 The core library, `Records`, has no significant dependencies and is built to be compatible with .NET Core 1.0.
 Derived libraries, like `Records.Data` have a dependency on `System.Data`.
+
+
+## Testing
+
+Presently, this project does not use a unit testing framework.
+The approach to testing taken here is to develop light-weight console programs
+that attempt to reach a high level of "code coverage"
+without the introduction of extra dependencies.
+Testing the code involves invoking the test console program(s) repeatedly with different arguments.
+Validating the code's behavior involves comparing the output of the programs with an expected output.
+This approach is, admittedly unconventional and bound to evoke frowny faces,
+but the author believes there are several benefits to this approach that justify giving it a try.
+That said, the test code at the time of writing this isn't very good, 
+but improvements aren't difficult to imagine.
+There has been little time for finishing the library code, much less testing it.

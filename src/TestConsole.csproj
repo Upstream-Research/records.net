@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F715141F-CFA9-4B2D-AF3E-179987A41AED}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>TestConsole.AssemblyProperties</AppDesignerFolder>
+    <RootNamespace>Upstream.System</RootNamespace>
+    <AssemblyName>Upstream.System.TestConsole</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NoWin32Manifest>False</NoWin32Manifest>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Upstream.System.TestConsoleProgram</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TestConsole.Csv\CsvTranslateProgram.cs" />
+    <Compile Include="TestConsole.AssemblyProperties\AssemblyInfo.cs" />
+    <Compile Include="TestConsole.Records\FieldSchemaSpecPrintProgram.cs" />
+    <Compile Include="TestConsole\TestConsoleProgram.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Csv.csproj">
+      <Project>{17210683-66dd-4027-888b-0ae2d4651f4f}</Project>
+      <Name>Csv</Name>
+    </ProjectReference>
+    <ProjectReference Include="Records.csproj">
+      <Project>{a40e07cf-8dd1-49e7-a4bf-a1fea0f275c2}</Project>
+      <Name>Records</Name>
+    </ProjectReference>
+    <ProjectReference Include="Records.Csv.csproj">
+      <Project>{6a809a06-ccdb-44b6-9db6-fbd9dddf4cd8}</Project>
+      <Name>Records.Csv</Name>
+    </ProjectReference>
+    <ProjectReference Include="Records.Data.csproj">
+      <Project>{e7f7c4fe-4d60-4250-9e01-3c3943554853}</Project>
+      <Name>Records.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="Records.DataSets.csproj">
+      <Project>{b8d44ff1-e4c3-4b08-84ae-9c5c4423b448}</Project>
+      <Name>Records.DataSets</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestConsole.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
