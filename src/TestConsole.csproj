@@ -9,7 +9,7 @@
     <AppDesignerFolder>TestConsole.AssemblyProperties</AppDesignerFolder>
     <RootNamespace>Upstream.System</RootNamespace>
     <AssemblyName>Upstream.System.TestConsole</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NoWin32Manifest>False</NoWin32Manifest>
@@ -47,6 +47,7 @@
     <Compile Include="TestConsole.Csv\CsvTranslateProgram.cs" />
     <Compile Include="TestConsole.AssemblyProperties\AssemblyInfo.cs" />
     <Compile Include="TestConsole.Records\FieldSchemaSpecPrintProgram.cs" />
+    <Compile Include="TestConsole.Records.Csv\CsvRecordTranslateProgram.cs" />
     <Compile Include="TestConsole\TestConsoleProgram.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -26,11 +26,13 @@ namespace Upstream.System.Records.Csv
         /// Create a new record enumerator that will read records from the provided CSV stream
         /// </summary>
         /// <param name="csvReader"></param>
-        /// <param name="csvComparer"></param>
+        /// <param name="fieldValueSortComparer"></param>
+        /// <param name="fieldValueEqualityComparer"></param>
         /// <param name="fieldNameList"></param>
         public CsvRecordEnumerator(
              CsvReader csvReader
-            ,StringComparer csvComparer
+            ,IComparer fieldValueSortComparer
+            ,IEqualityComparer fieldValueEqualityComparer
             ,IList<string> fieldNameList
             )
         {
@@ -41,23 +43,21 @@ namespace Upstream.System.Records.Csv
                 fieldCount = fieldNameList.Count;
             }
             IList<IRecordFieldType<string>> fieldTypeList = new IRecordFieldType<string>[fieldCount];
-            IComparer sortComparer = csvComparer;
-            IEqualityComparer equalityComparer = csvComparer;
             int fieldPosition;
             for (fieldPosition = 0; fieldPosition < fieldCount; fieldPosition++)
             {
                 fieldTypeList[fieldPosition] = new BasicRecordFieldType<string>(
                     typeof(String)
-                    ,sortComparer
-                    ,equalityComparer
+                    ,fieldValueSortComparer
+                    ,fieldValueEqualityComparer
                     );
             }
 
             _fieldValueList = new string[fieldCount];
             _currentRecord = new ListRecordAccessor<string,IRecordFieldType<string>>(
-                 fieldNameList
+                 _fieldValueList
+                ,fieldNameList
                 ,fieldTypeList
-                ,_fieldValueList
                 );
             _csvReader = csvReader;
         }

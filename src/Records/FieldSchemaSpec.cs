@@ -21,7 +21,18 @@ namespace Upstream.System.Records
     public class FieldSchemaSpec<TValue>
     {
         readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
+
+        /// <summary>
+        /// Dictionary to lookup a Type for a type name.
+        /// There may be multiple names for a Type.
+        /// </summary>
         private readonly IDictionary<string,Type> _dataTypeDictionary;
+
+        /// <summary>
+        /// Dictionary to lookup a default name for a Type
+        /// </summary>
+        private readonly IDictionary<Type,string> _dataTypeNameDictionary;
+
         private readonly Type _defaultDataType = typeof(Object);
 
         /// <summary>
@@ -31,8 +42,9 @@ namespace Upstream.System.Records
         public FieldSchemaSpec()
         {
             _dataTypeDictionary = CreateDataTypeDictionary();
+            _dataTypeNameDictionary = CreateDataTypeNameDictionary();
 
-            AddDefaultDataTypesTo(_dataTypeDictionary);
+            AddDefaultDataTypesTo(_dataTypeDictionary, _dataTypeNameDictionary);
         }
 
         /// <summary>
@@ -45,8 +57,10 @@ namespace Upstream.System.Records
             )
         {
             _dataTypeDictionary = CreateDataTypeDictionary();
+            _dataTypeNameDictionary = CreateDataTypeNameDictionary();
 
             IDictionary<string,Type> dataTypeDictionary = _dataTypeDictionary;
+            IDictionary<Type,string> dataTypeNameDictionary = _dataTypeNameDictionary;
             if (null != dataTypeNameEnumeration)
             {
                 foreach (KeyValuePair<string,Type> dataTypeNamePair in dataTypeNameEnumeration)
@@ -55,6 +69,13 @@ namespace Upstream.System.Records
                     Type dataType = dataTypeNamePair.Value;
 
                     dataTypeDictionary[dataTypeName] = dataType;
+
+                    // set the default type name the first time we see the type,
+                    //  after this, all other names for this type will be non-default names
+                    if (!dataTypeNameDictionary.ContainsKey(dataType))
+                    {
+                        dataTypeNameDictionary[dataType] = dataTypeName;
+                    }
                 }
             }
         }
@@ -71,6 +92,15 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Centralized factory method
+        /// </summary>
+        private static IDictionary<Type,string>
+        CreateDataTypeNameDictionary()
+        {
+            return new Dictionary<Type,string>();
+        }
+
+        /// <summary>
         /// Add some common datatype names to the name-type registry
         /// </summary>
         /// <param name="dataTypeDictionary"></param>
@@ -83,49 +113,72 @@ namespace Upstream.System.Records
         /// </remarks>
         private void AddDefaultDataTypesTo(
             IDictionary<string,Type> dataTypeDictionary
+            ,IDictionary<Type,string> dataTypeNameDictionary
             )
         {
-            Type dataType;
+            IList<KeyValuePair<string,Type>> dataTypeList = new KeyValuePair<string,Type>[] {
+                // [20170322 [db] Considered calling this "string" or "text",
+                //  but settled on "varchar" to maintain parity with "varbinary" (below).]
+                new KeyValuePair<string,Type>(
+                    "varchar"
+                    ,typeof(String)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "int32"
+                    ,typeof(Int32)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "int64"
+                    ,typeof(Int64)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "float32"
+                    ,typeof(Single)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "float64"
+                    ,typeof(Double)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "decimal"
+                    ,typeof(Decimal)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "boolean"
+                    ,typeof(Boolean)
+                )
+                // [20170322 [db] Chose "varbinary" since it seemed like the most conventional
+                //  term (from sql server anyway) for this.  
+                //  Postgresql's "bytea" doesn't seem very intuitive,
+                //  "byte_array" is too clumsy, "bytes" is unconventional, 
+                //  and "blob" is probably misleading]
+                ,new KeyValuePair<string,Type>(
+                    "varbinary"
+                    ,typeof(byte[])
+                )
+                ,new KeyValuePair<string,Type>(
+                    "guid"
+                    ,typeof(Guid)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "datetime"
+                    ,typeof(DateTime)
+                )
+                ,new KeyValuePair<string,Type>(
+                    "timespan"
+                    ,typeof(TimeSpan)
+                )
+            };
 
-            // [20170322 [db] Considered calling this "string" or "text",
-            //  but settled on "varchar" to maintain parity with "varbinary" (below).]
-            dataType = typeof(String);
-            dataTypeDictionary["varchar"] = dataType;
+            foreach(KeyValuePair<string,Type> dataTypeInfo in dataTypeList)
+            {
+                string dataTypeName = dataTypeInfo.Key;
+                Type dataType = dataTypeInfo.Value;
 
-            dataType = typeof(Int32);
-            dataTypeDictionary["int32"] = dataType;
+                dataTypeDictionary[dataTypeName] = dataType;
+                dataTypeNameDictionary[dataType] = dataTypeName;
+            }
 
-            dataType = typeof(Int64);
-            dataTypeDictionary["int64"] = dataType;
-
-            dataType = typeof(Double);
-            dataTypeDictionary["float64"] = dataType;
-
-            dataType = typeof(Single);
-            dataTypeDictionary["float32"] = dataType;
-
-            dataType = typeof(Decimal);
-            dataTypeDictionary["decimal"] = dataType;
-
-            dataType = typeof(Boolean);
-            dataTypeDictionary["boolean"] = dataType;
-
-            // [20170322 [db] Chose "varbinary" since it seemed like the most conventional
-            //  term (from sql server anyway) for this.  
-            //  Postgresql's "bytea" doesn't seem very intuitive,
-            //  "byte_array" is too clumsy, "bytes" is unconventional, 
-            //  and "blob" is probably misleading]
-            dataType = typeof(byte[]);
-            dataTypeDictionary["varbinary"] = dataType;
-
-            dataType = typeof(Guid);
-            dataTypeDictionary["guid"] = dataType;
-
-            dataType = typeof(DateTime);
-            dataTypeDictionary["datetime"] = dataType;
-
-            dataType = typeof(TimeSpan);
-            dataTypeDictionary["timespan"] = dataType;
         }
 
         /// <summary>

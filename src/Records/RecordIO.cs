@@ -57,7 +57,8 @@ namespace Upstream.System.Records
         /// <param name="collector"></param>
         /// <param name="enumerator"></param>
         /// <returns>number of record read</returns>
-        public long ReadInto<TValue>(
+        public static long 
+        ReadInto<TValue>(
             IRecordCollector<TValue> collector
             ,IRecordEnumerator<TValue> enumerator
             )

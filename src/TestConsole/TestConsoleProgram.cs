@@ -13,9 +13,8 @@ namespace Upstream.System
     /// </summary>
     class TestConsoleProgram
     {
-        const string HelpText = 
-         "Upstream System Library Test tool version 20170308\n"
-        +"Copyright (c) 2017 Upstream Research, Inc.\n"
+        const string _helpText = 
+         "Upstream System Library Test tool version 20170308:20180325\n"
         +"\n"
         +"TestConsole [OPTIONS] [CommandName [CommandOptions]]\n"
         +"\n"
@@ -23,8 +22,7 @@ namespace Upstream.System
         +"    --help\n"
         +"\n"
         +"COMMANDS\n"
-        +"    csv-translate\n"
-        +"    field_schema_spec-print\n"
+        +"{COMMAND_LIST}"
         +"\n"
         +"When no command is specified, the test console will enter an interactive mode.\n"
         +"Individual commands can be executed by name in interactive mode.\n"
@@ -35,12 +33,14 @@ namespace Upstream.System
         +"    help\n"
         ;
         
-
         static int Main(string[] args)
         {
             int exitCode = 1;
+            string CommandListHelpTextToken = "{COMMAND_LIST}";
+            string CommandNameHelpTextFormatString = "    {0}\n";
             string cmdOptionPrefix = "-";
             string cmdName = null;
+            string helpText;
             bool showHelp = false;
             bool shouldInteract = true;
             string interationPrompt = "[testconsole]? ";
@@ -50,17 +50,39 @@ namespace Upstream.System
             int argPosition;
             int cmdArgPosition = -1;
             string arg;
+            StringComparer cmdOptionComparer = StringComparer.Ordinal;
+            StringComparer cmdNameComparer = StringComparer.OrdinalIgnoreCase;
             Func<string,string,bool> CmdOptionsAreEqual = 
             (string s1, string s2) =>
             {
-                return (0 == String.Compare(s1, s2, StringComparison.InvariantCulture));
+                return (0 == cmdOptionComparer.Compare(s1, s2));
             };
             Func<string,string,bool> CmdNamesAreEqual =
             (string s1, string s2) =>
             {
-                return (0 == String.Compare(s1, s2, StringComparison.InvariantCultureIgnoreCase));
+                return (0 == cmdNameComparer.Compare(s1, s2));
             };
+            IDictionary<string,Func<string[],int>> cmdDictionary = new Dictionary<string,Func<string[],int>>(cmdNameComparer);
+            
+            // register available test program commands in a dictionary
+            cmdDictionary.Add("csv-translate", Csv.CsvTranslateProgram.Main);
+            cmdDictionary.Add("rcd-csv-translate", Records.Csv.CsvRecordTranslateProgram.Main);
+            cmdDictionary.Add("field_schema_spec-print", Records.FieldSchemaSpecPrintProgram.Main);
 
+            // insert command names into the help text
+            StringBuilder cmdListBuffer = new StringBuilder();
+            foreach (string cmdKey in cmdDictionary.Keys)
+            {
+                cmdListBuffer.AppendFormat(
+                    CommandNameHelpTextFormatString
+                    ,cmdKey
+                    );
+            }
+            helpText = _helpText;
+            helpText = helpText.Replace(CommandListHelpTextToken, cmdListBuffer.ToString());
+
+
+            // parse test console options
             argPosition = 0;
             while (argPosition < args.Length
                 && null == cmdName
@@ -97,7 +119,7 @@ namespace Upstream.System
             if (showHelp)
             {
                 exitCode = 0;
-                outs.Write(HelpText);
+                outs.Write(helpText);
             }
             else
             {
@@ -105,7 +127,11 @@ namespace Upstream.System
 
                 do
                 {
-                    if (CmdNamesAreEqual("quit", cmdName)
+                    if (String.IsNullOrWhiteSpace(cmdName))
+                    {
+                        // do nothing
+                    }
+                    else if (CmdNamesAreEqual("quit", cmdName)
                         || CmdNamesAreEqual("exit", cmdName)
                         )
                     {
@@ -114,7 +140,7 @@ namespace Upstream.System
                     else if (CmdNamesAreEqual("help", cmdName))
                     {
                         // [20170308 [db] this isn't really the best help to show, but better than nothing for now]
-                        outs.Write(HelpText);
+                        outs.Write(helpText);
                     }
                     else if (CmdNamesAreEqual("pwd", cmdName))
                     {
@@ -154,25 +180,34 @@ namespace Upstream.System
                             outs.WriteLine(fsEntryName);
                         }
                     }
-                    else if (CmdNamesAreEqual("csv-translate", cmdName))
+                    else
+                    // look in the cmdDictionary for a sub-program to execute
                     {
-                        Csv.CsvTranslateProgram.Main(cmdArgs);
-                    }
-                    else if (CmdNamesAreEqual("field_schema_spec-print", cmdName))
-                    {
-                        Records.FieldSchemaSpecPrintProgram.Main(cmdArgs);
+                        Func<string[],int> cmdMainFunc = null;
+                        if (cmdDictionary.TryGetValue(cmdName, out cmdMainFunc))
+                        {
+                            cmdMainFunc.Invoke(cmdArgs);
+                        }
                     }
 
                     if (shouldInteract)
                     {
                         outs.Write(interationPrompt);
                         string commandLineString = ins.ReadLine();
-                        cmdArgs = ParseCommandline(commandLineString);
-                        if (0 < cmdArgs.Length)
+                        if (null == commandLineString)
                         {
-                            cmdArgPosition = 0;
-                            cmdName = cmdArgs[cmdArgPosition];
-                            cmdArgs = CreateShiftedArray(cmdArgs, cmdArgPosition+1);
+                            // end-of-file
+                            shouldInteract = false;
+                        }
+                        else
+                        {
+                            cmdArgs = ParseCommandline(commandLineString);
+                            if (0 < cmdArgs.Length)
+                            {
+                                cmdArgPosition = 0;
+                                cmdName = cmdArgs[cmdArgPosition];
+                                cmdArgs = CreateShiftedArray(cmdArgs, cmdArgPosition+1);
+                            }
                         }
                     }
                 } while (shouldInteract);

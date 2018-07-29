@@ -8,7 +8,7 @@ namespace Upstream.System.Records
     /// <summary>
     /// Defines a basic interface which RecordFieldProperties implementations should implement
     /// </summary>
-    public interface IRecordFieldType<TValue>
+    public interface IRecordFieldType<in TValue>
     : IComparer<TValue>
      ,IEqualityComparer<TValue>
     {

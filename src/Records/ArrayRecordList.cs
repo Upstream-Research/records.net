@@ -29,10 +29,10 @@ namespace Upstream.System.Records
         {
             IList<IRecordFieldType<TFieldType>> fieldSchemaTypeList = null;
             _fieldSchema = new ListRecordAccessor<TFieldType,IRecordFieldType<TFieldType>>(
-                  _fieldNameList
-                 ,fieldSchemaTypeList
-                 ,_fieldTypeList
-                 );
+                 _fieldTypeList
+                ,_fieldNameList
+                ,fieldSchemaTypeList
+                );
         }
 
         /// <summary>
@@ -312,9 +312,9 @@ namespace Upstream.System.Records
         )
         {
             return new ListRecordAccessor<TValue,TFieldType>(
-                  FieldNameList
+                  fieldValueList
+                , FieldNameList
                 , FieldTypeList
-                , fieldValueList
                 );
         }
 

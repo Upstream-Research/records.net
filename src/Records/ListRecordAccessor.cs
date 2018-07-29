@@ -44,9 +44,9 @@ namespace Upstream.System.Records
         /// <param name="fieldTypeList"></param>
         /// <param name="fieldValueList"></param>
         public ListRecordAccessor(
-              IList<string> fieldNameList
+              IList<TValue> fieldValueList
+             ,IList<string> fieldNameList
              ,IList<TFieldType> fieldTypeList
-             ,IList<TValue> fieldValueList
             )
             :this(fieldNameList, fieldTypeList)
         {

@@ -1,7 +1,6 @@
 ﻿/*  Copyright (c) 2015 Upstream Research, Inc.  */
 
 using System;
-using System.Globalization;
 using System.Text;
 
 namespace Upstream.System.Csv
@@ -22,8 +21,7 @@ namespace Upstream.System.Csv
         private const string DefaultUnitSeparator = ",";        
         private const string DefaultQuote = "\"";
     
-        private CultureInfo _cultureInfo;
-        private CompareOptions _codeCompareOptions;
+        private StringComparison _codeComparisonOptions;
         private string _recordSeparator;
         private string _unitSeparator;
         private string _quote;
@@ -48,8 +46,7 @@ namespace Upstream.System.Csv
             ,bool shouldQuoteEmptyStringValues = false
             )
         {
-            _cultureInfo = CultureInfo.InvariantCulture;
-            _codeCompareOptions = CompareOptions.None;
+            _codeComparisonOptions = StringComparison.Ordinal;
             _recordSeparator = recordSeparator;
             _unitSeparator = unitSeparator;
             _quote = quote;
@@ -150,35 +147,13 @@ namespace Upstream.System.Csv
         }
 
         /// <summary>
-        /// Get the text culture that the parser will use for comparing separator codes
-        /// </summary>
-        private CultureInfo CultureInfo
-        {
-            get
-            {
-                return _cultureInfo;
-            }
-        }
-
-        /// <summary>
         /// Get the StringComparison type used for comparing separator codes
         /// </summary>
-        private CompareOptions CodeCompareOptions
+        private StringComparison CodeComparisonOptions
         {
             get
             {
-                return _codeCompareOptions;
-            }
-        }
-
-        /// <summary>
-        /// Get an object used for comparing separator codes
-        /// </summary>
-        private CompareInfo CodeCompareInfo
-        {
-            get
-            {
-                return CultureInfo.CompareInfo;
+                return _codeComparisonOptions;
             }
         }
 
@@ -202,7 +177,7 @@ namespace Upstream.System.Csv
                 && 0 < codeString.Length
                 )
             {
-                foundIndex = CultureInfo.CompareInfo.IndexOf(targetString, codeString, targetStringStartIndex, CodeCompareOptions);
+                foundIndex = targetString.IndexOf(codeString, targetStringStartIndex, CodeComparisonOptions);
             }
 
             return foundIndex;
@@ -233,7 +208,7 @@ namespace Upstream.System.Csv
                 )
             {
                 string targetPrefix = targetString.Substring(targetStringStartIndex, codeString.Length);
-                if (0 == CodeCompareInfo.Compare(codeString, targetPrefix, CodeCompareOptions))
+                if (0 == String.Compare(codeString, targetPrefix, CodeComparisonOptions))
                 {
                     targetStartsWithCode = true;
                 }

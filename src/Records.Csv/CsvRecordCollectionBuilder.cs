@@ -25,11 +25,13 @@ namespace Upstream.System.Records.Csv
         /// Create a new CSV record collector that will write to a csv writer
         /// </summary>
         /// <param name="csvWriter"></param>
-        /// <param name="csvComparer"></param>
+        /// <param name="fieldValueSortComparer"></param>
+        /// <param name="fieldValueEqualityComparer"></param>
         /// <param name="fieldNameList"></param>
         public CsvRecordCollectionBuilder(
              CsvWriter csvWriter
-            ,StringComparer csvComparer
+            ,IComparer fieldValueSortComparer
+            ,IEqualityComparer fieldValueEqualityComparer
             ,IList<string> fieldNameList
             )
         {
@@ -37,24 +39,22 @@ namespace Upstream.System.Records.Csv
             
             fieldCount = fieldNameList.Count;
             IList<IRecordFieldType<string>> fieldTypeList = new IRecordFieldType<string>[fieldCount];
-            IComparer sortComparer = csvComparer;
-            IEqualityComparer equalityComparer = csvComparer;
             int fieldPosition;
             for (fieldPosition = 0; fieldPosition < fieldCount; fieldPosition++)
             {
                 fieldTypeList[fieldPosition] = new BasicRecordFieldType<string>(
                     typeof(String)
-                    ,sortComparer
-                    ,equalityComparer
+                    ,fieldValueSortComparer
+                    ,fieldValueEqualityComparer
                     );
             }
 
             _fieldNameList = fieldNameList;
             _fieldValueList = new string[fieldCount];
             _currentRecord = new ListRecordAccessor<string,IRecordFieldType<string>>(
-                 fieldNameList
+                 _fieldValueList
+                ,fieldNameList
                 ,fieldTypeList
-                ,_fieldValueList
                 );
             _csvWriter = csvWriter;
         }

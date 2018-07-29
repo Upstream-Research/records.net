@@ -25,7 +25,7 @@ namespace Upstream.System.Records
         /// </summary>
         public DictionaryRecordAccessor(
             IList<string> fieldNameList
-            ,IDictionary<string,TFieldType> fieldComparerDictionary
+            ,IDictionary<string,TFieldType> fieldComparerDictionary = null
             )
         {
             if (null == fieldNameList)
@@ -39,19 +39,28 @@ namespace Upstream.System.Records
 
         /// <summary>
         /// Create a record accessor and attach it to a dictionary of record data.
-        /// The order of field names will be determined by the order that field
-        /// name keys are returned from the input dictionary
+        /// If no (ordered) field name list is provided, 
+        /// then the order of field names will be determined by 
+        /// the order that field name keys are returned from the input dictionary
         /// </summary>
         /// <param name="baseDictionary"></param>
         public DictionaryRecordAccessor(
             IDictionary<string,TValue> baseDictionary
+            ,IList<string> fieldNameList = null
+            ,IDictionary<string,TFieldType> fieldComparerDictionary = null
             )
         {
             if (null == baseDictionary)
             {
                 throw new ArgumentNullException("baseDictionary");
             }
-            _fieldNameList = new List<string>(baseDictionary.Keys);
+            _fieldNameList = fieldNameList;
+            if (null == _fieldNameList)
+            {
+                _fieldNameList = new List<string>(baseDictionary.Keys);
+            }
+            _fieldTypeDictionary = fieldComparerDictionary;
+
             AttachTo(baseDictionary);
         }
 
