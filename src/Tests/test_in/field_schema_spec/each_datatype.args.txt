@@ -1,0 +1,1 @@
+varchar:varchar,int32:int32,int64:int64,float32:float32,float64:float64,decimal:decimal,boolean:boolean,varbinary:varbinary,guid:guid,datetime:datetime,timespan:timespan

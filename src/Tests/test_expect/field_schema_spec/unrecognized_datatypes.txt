@@ -1,0 +1,15 @@
+string,System.Object
+str,System.Object
+int,System.Object
+integer,System.Object
+float,System.Object
+real,System.Object
+bool,System.Object
+bytes,System.Object
+float8,System.Object
+float4,System.Object
+uuid,System.Object
+date,System.Object
+time,System.Object
+text,System.Object
+char,System.Object

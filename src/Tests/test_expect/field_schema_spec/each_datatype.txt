@@ -1,0 +1,11 @@
+varchar,System.String
+int32,System.Int32
+int64,System.Int64
+float32,System.Single
+float64,System.Double
+decimal,System.Decimal
+boolean,System.Boolean
+varbinary,System.Byte[]
+guid,System.Guid
+datetime,System.DateTime
+timespan,System.TimeSpan

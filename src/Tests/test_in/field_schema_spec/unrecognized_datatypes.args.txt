@@ -1,0 +1,1 @@
+string:string,str:str,int:int,integer:integer,float:float,real:real,bool:bool,bytes:bytes,float8:float8,float4:float4,uuid:uuid,date:date,time:time,text:text,char:char
