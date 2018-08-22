@@ -123,6 +123,7 @@ namespace Upstream.System.Csv
             }
 
             _baseWriter.WriteLine();
+            _baseWriter.Flush();
             _unitCount = 0;
         }
 

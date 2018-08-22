@@ -74,6 +74,50 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TestConsole.config" />
+    <None Include="Tests\ReadMe-Tests.md" />
+    <None Include="Tests\run_tests.tcl" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\one_x_three.tab" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three.tab" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_quoted_comma.tab" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_quoted_newline.tab" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_quoted_quote.tab" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_quoted_tab.tab" />
+    <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_unfinished_quote.tab" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\one_x_three.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_quoted_comma.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_quoted_newline.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_quoted_quote.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_quoted_tab.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_unfinished_quote.csv" />
+    <None Include="Tests\test_in\csv-codec\csv_to_tab\_test.exec.tcl" />
+    <None Include="Tests\test_in\field_schema_spec\_test.exec.tcl" />
+    <None Include="Tests\_tcl\pexec.tcl" />
+    <None Include="Tests\_tcl\procs.tcl" />
+    <None Include="Tests\_test.env.tcl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Tests\test_expect\field_schema_spec\each_datatype.txt" />
+    <Content Include="Tests\test_expect\field_schema_spec\empty.txt" />
+    <Content Include="Tests\test_expect\field_schema_spec\one.txt" />
+    <Content Include="Tests\test_expect\field_schema_spec\one_no_type.txt" />
+    <Content Include="Tests\test_expect\field_schema_spec\one_two.txt" />
+    <Content Include="Tests\test_expect\field_schema_spec\unrecognized_datatypes.txt" />
+    <Content Include="Tests\test_in\csv-codec\csv_to_tab\_test.cases.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\each_datatype.args.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\empty.args.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\one.args.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\one_no_type.args.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\one_two.args.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\test_subdir\_test.cases.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\unrecognized_datatypes.args.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\_test.cases.txt" />
+    <Content Include="Tests\test_in\field_schema_spec\_test.dirs.txt" />
+    <Content Include="Tests\test_in\_test.dirs.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tests\test_expect\field_schema_spec\test_subdir\" />
+    <Folder Include="Tests\test_in\csv-records\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

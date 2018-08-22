@@ -175,6 +175,8 @@ namespace Upstream.System.Csv
                     readCount = 0;
                     if (null != _currentTextLine)
                     {
+                        // insert a newline/record-separator between each new line that we decode
+                        _currentValueBuffer.Append(_csvEncoding.RecordSeparator);
                         readCount = _csvEncoding.DecodeInto(_currentValueBuffer, ref isInsideQuotation, _currentTextLine, _currentTextLineIndex);
                     }
                 }

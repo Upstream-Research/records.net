@@ -410,7 +410,7 @@ namespace Upstream.System.Csv
                         )
                     {
                         encodedValueBuffer.Append(QuoteEscape);
-                        symbolLength += QuoteEscape.Length;
+                        symbolLength += Quote.Length;
                     }
                     if (0 == symbolLength)
                     {
