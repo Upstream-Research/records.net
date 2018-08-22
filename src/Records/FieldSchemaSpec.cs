@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Upstream.System.Records
@@ -20,8 +19,6 @@ namespace Upstream.System.Records
     /// </remarks>
     public class FieldSchemaSpec<TValue>
     {
-        readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-
         /// <summary>
         /// Dictionary to lookup a Type for a type name.
         /// There may be multiple names for a Type.
@@ -303,7 +300,9 @@ namespace Upstream.System.Records
             fieldName = null;
             fieldType = null;
 
-            if (null != specString)
+            if (null != specString
+                && 0 < specString.Length
+                )
             {
                 fieldName = null;
                 fieldTypeName = null;

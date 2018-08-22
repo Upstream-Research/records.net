@@ -186,7 +186,7 @@ namespace Upstream.System
                         Func<string[],int> cmdMainFunc = null;
                         if (cmdDictionary.TryGetValue(cmdName, out cmdMainFunc))
                         {
-                            cmdMainFunc.Invoke(cmdArgs);
+                            exitCode = cmdMainFunc.Invoke(cmdArgs);
                         }
                     }
 

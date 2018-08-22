@@ -266,46 +266,43 @@ namespace Upstream.System.Csv
 
         private bool ArgIsOption(string arg)
         {
-            CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-            bool IgnoreCase = true;
-
             if (null == arg)
             {
                 return false;
             }
 
-            return arg.StartsWith("-", !IgnoreCase, InvariantCulture);
+            return arg.StartsWith("-", StringComparison.Ordinal);
         }
 
         private bool ArgOptionEquals(string arg, string arg2)
         {
-            CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-            bool IgnoreCase = true;
-
-            return (0 == String.Compare(arg, arg2, !IgnoreCase, InvariantCulture));
+            return (0 == String.Compare(arg, arg2, StringComparison.Ordinal));
         }
 
         private string ParseCsvSeparatorArg(string arg)
         {
-            CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-            bool IgnoreCase = true;
             string unitSeparator = arg;
+            Func<string,string,bool> SeparatorSymbolEquals = 
+            (string s1, string s2) =>
+            {
+                return (0 == String.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
+            };
 
             if (null == arg)
             {
             }
-            else if (0 == String.Compare("tab", arg, IgnoreCase, InvariantCulture)
-                || 0 == String.Compare("\\t", arg, IgnoreCase, InvariantCulture)
+            else if (SeparatorSymbolEquals("tab", arg)
+                || SeparatorSymbolEquals("\\t", arg)
                 )
             {
                 unitSeparator = "\t";
             }
-            else if (0 == String.Compare("pipe", arg, IgnoreCase, InvariantCulture))
+            else if (SeparatorSymbolEquals("pipe", arg))
             {
                 unitSeparator = "|";
             }
-            else if (0 == String.Compare("space", arg, IgnoreCase, InvariantCulture)
-                || 0 == String.Compare("sp", arg, IgnoreCase, InvariantCulture)
+            else if (SeparatorSymbolEquals("space", arg)
+                || SeparatorSymbolEquals("sp", arg)
                 )
             {
                 unitSeparator = " ";

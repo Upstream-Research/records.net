@@ -12,10 +12,11 @@ namespace Upstream.System.Records
     public class FieldSchemaSpecPrintProgram
     {
         const string HelpText = 
-         "field_schema_spec-print tool version 20170308\n"
+         "field_schema_spec-print tool version 20170308:20180811\n"
         +"Copyright (c) 2017 Upstream Research, Inc.\n"
         +"\n"
         +"field_schema_spec-print FieldSchemaSpec\n"
+        +"    -s <S>   name/datatype delimiter for output (default=',')\n"
         +"\n"
         ;
         
@@ -39,20 +40,50 @@ namespace Upstream.System.Records
             )
         {
             int exitCode = 0;
+            string dataTypeSeparator = ",";
             TextWriter outs = stdout;
             TextWriter errs = stderr;
+            string arg;
+            bool showHelp = false;
             FieldSchemaSpec<object> specParser = new FieldSchemaSpec<object>();
             IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldRecord<object>>> fieldEnumeration;
             string fieldSpecString = null;
             IEnumerator<string> argsEnum = args.GetEnumerator();
 
-            if (argsEnum.MoveNext())
+            while (argsEnum.MoveNext())
             {
-                fieldSpecString = argsEnum.Current;
+                arg = argsEnum.Current;
+                if (ArgOptionEquals("--help", arg))
+                {
+                    showHelp = true;
+                }
+                else if (ArgOptionEquals("--separator", arg)
+                    || ArgOptionEquals("-s", arg)
+                    )
+                {
+                    if (argsEnum.MoveNext())
+                    {
+                        arg = argsEnum.Current;
+                        dataTypeSeparator = ParseCsvSeparatorArg(arg);
+                    }
+                }
+                else if (ArgOptionEquals("--empty", arg))
+                {
+                    fieldSpecString = String.Empty;
+                }
+                else if (ArgOptionEquals("--null", arg))
+                {
+                    fieldSpecString = null;
+                }
+                else if (
+                    !ArgIsOption(arg)
+                    && (null == fieldSpecString)
+                    )
+                {
+                    fieldSpecString = argsEnum.Current;
+                }
             }
-            if (null == fieldSpecString
-                || 0 == String.Compare(fieldSpecString, "--help", StringComparison.InvariantCulture)
-                )
+            if (showHelp)
             {
                 errs.Write(HelpText);
             }
@@ -66,7 +97,8 @@ namespace Upstream.System.Records
                     Type dataType = fieldType.DataType;
                     string dataTypeName = dataType.ToString();
 
-                    outs.WriteLine(String.Format("{0}  {1}"
+                    outs.WriteLine(String.Format("{1}{0}{2}"
+                        ,dataTypeSeparator
                         ,fieldName
                         ,dataTypeName)
                         );
@@ -74,6 +106,56 @@ namespace Upstream.System.Records
             }
             
             return exitCode;
+        }
+
+        private static bool 
+        ArgIsOption(string arg)
+        {
+            if (null == arg)
+            {
+                return false;
+            }
+
+            return arg.StartsWith("-", StringComparison.Ordinal);
+        }
+
+        private static bool 
+        ArgOptionEquals(string arg, string arg2)
+        {
+            return (0 == String.Compare(arg, arg2, StringComparison.Ordinal));
+        }
+
+        private static string 
+        ParseCsvSeparatorArg(string arg)
+        {
+            string unitSeparator = arg;
+            Func<string,string,bool> SeparatorSymbolEquals = 
+            (string s1, string s2) =>
+            {
+                return (0 == String.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
+            };
+
+            if (null == arg)
+            {
+            }
+            else if (SeparatorSymbolEquals("tab", arg)
+                || SeparatorSymbolEquals("\\t", arg)
+                )
+            {
+                unitSeparator = "\t";
+            }
+            else if (SeparatorSymbolEquals("pipe", arg))
+            {
+                unitSeparator = "|";
+            }
+            else if (SeparatorSymbolEquals("space", arg)
+                || SeparatorSymbolEquals("sp", arg)
+                )
+            {
+                unitSeparator = " ";
+            }
+
+            return unitSeparator;
         }
 
     } // /class
