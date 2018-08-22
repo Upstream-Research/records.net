@@ -40,9 +40,9 @@ namespace Upstream.System.Records
         /// Create a record accessor that will use field names found in a field name record
         /// and will get field values from a list.
         /// </summary>
+        /// <param name="fieldValueList"></param>
         /// <param name="fieldNameList"></param>
         /// <param name="fieldTypeList"></param>
-        /// <param name="fieldValueList"></param>
         public ListRecordAccessor(
               IList<TValue> fieldValueList
              ,IList<string> fieldNameList
@@ -232,6 +232,7 @@ namespace Upstream.System.Records
             if (GetFieldOrdinalDictionary().TryGetValue(fieldName, out fieldOrdinal))
             {
                 outFieldValue = GetFieldValueList()[fieldOrdinal];
+                wasFound = true;
             }
 
             return wasFound;

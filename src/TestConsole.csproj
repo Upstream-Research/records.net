@@ -83,6 +83,15 @@
     <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_quoted_quote.tab" />
     <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_quoted_tab.tab" />
     <None Include="Tests\test_expect\csv-codec\csv_to_tab\three_x_three_unfinished_quote.tab" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\copy_values\three_x_one.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\copy_values\three_x_one_w_options.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\copy_values\three_x_one_w_unknown.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\copy_values\three_x_one_w_unspecified.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\copy_values\three_x_three.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\copy_values\three_x_three_w_invalids.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\parse_values\three_x_one.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\parse_values\three_x_three.csv" />
+    <None Include="Tests\test_expect\csv-records\csv_to_csv\parse_values\three_x_three_w_invalids.csv" />
     <None Include="Tests\test_in\csv-codec\csv_to_tab\one_x_three.csv" />
     <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three.csv" />
     <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_quoted_comma.csv" />
@@ -91,6 +100,19 @@
     <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_quoted_tab.csv" />
     <None Include="Tests\test_in\csv-codec\csv_to_tab\three_x_three_unfinished_quote.csv" />
     <None Include="Tests\test_in\csv-codec\csv_to_tab\_test.exec.tcl" />
+    <None Include="Tests\test_in\csv-codec\_test.exec.tcl" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\three_x_one.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\three_x_one_w_options.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\three_x_one_w_unknown.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\three_x_one_w_unspecified.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\three_x_three.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\three_x_three_w_invalids.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\copy_values\_test.exec.tcl" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\parse_values\three_x_one.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\parse_values\three_x_three.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\parse_values\three_x_three_w_invalids.csv" />
+    <None Include="Tests\test_in\csv-records\csv_to_csv\parse_values\_test.exec.tcl" />
+    <None Include="Tests\test_in\csv-records\_test.exec.tcl" />
     <None Include="Tests\test_in\field_schema_spec\_test.exec.tcl" />
     <None Include="Tests\_tcl\pexec.tcl" />
     <None Include="Tests\_tcl\procs.tcl" />
@@ -104,6 +126,11 @@
     <Content Include="Tests\test_expect\field_schema_spec\one_two.txt" />
     <Content Include="Tests\test_expect\field_schema_spec\unrecognized_datatypes.txt" />
     <Content Include="Tests\test_in\csv-codec\csv_to_tab\_test.cases.txt" />
+    <Content Include="Tests\test_in\csv-codec\_test.dirs.txt" />
+    <Content Include="Tests\test_in\csv-records\csv_to_csv\copy_values\_test.cases.txt" />
+    <Content Include="Tests\test_in\csv-records\csv_to_csv\parse_values\_test.cases.txt" />
+    <Content Include="Tests\test_in\csv-records\csv_to_csv\_test.dirs.txt" />
+    <Content Include="Tests\test_in\csv-records\_test.dirs.txt" />
     <Content Include="Tests\test_in\field_schema_spec\each_datatype.args.txt" />
     <Content Include="Tests\test_in\field_schema_spec\empty.args.txt" />
     <Content Include="Tests\test_in\field_schema_spec\one.args.txt" />
@@ -117,7 +144,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tests\test_expect\field_schema_spec\test_subdir\" />
-    <Folder Include="Tests\test_in\csv-records\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

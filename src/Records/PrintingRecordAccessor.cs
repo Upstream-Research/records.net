@@ -173,15 +173,7 @@ namespace Upstream.System.Records
                 && null == stringValue
                 )
             {
-                if (null != fieldType)
-                {
-                    Type dataType = fieldType.DataType;
-                    stringValue = (string)Convert.ChangeType(fieldValue, dataType, StringCulture);
-                }
-                else
-                {
-                    stringValue = Convert.ToString(fieldValue, StringCulture);
-                }
+                stringValue = Convert.ToString(fieldValue, StringCulture);
             }
 
             return stringValue;

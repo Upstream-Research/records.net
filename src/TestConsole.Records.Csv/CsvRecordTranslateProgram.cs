@@ -188,7 +188,6 @@ namespace Upstream.System.Records.Csv
             {
                 outs.Write(HelpText);
                 outs.Flush();
-                exitCode = -1;
             }
             else if (null != errorMessage)
             {
@@ -237,8 +236,8 @@ namespace Upstream.System.Records.Csv
                         }
                     }
                     CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-                    CultureInfo cultureInfoIn = InvariantCulture;
-                    CultureInfo cultureInfoOut = InvariantCulture;
+                    CultureInfo inCultureInfo = InvariantCulture;
+                    CultureInfo outCultureInfo = InvariantCulture;
                     CsvReader csvIn = new CsvReader(ins, csvEncodingIn);
                     CsvWriter csvOut = new CsvWriter(outs, csvEncodingOut);
                     StringComparer csvFieldValueComparer = StringComparer.Ordinal;
@@ -271,10 +270,14 @@ namespace Upstream.System.Records.Csv
                             string fieldName = fieldNameList[i];
                             FieldSchemaSpecFieldRecord<object> fieldType = (FieldSchemaSpecFieldRecord<object>)fieldTypeList[i];
                             string fieldTypeName = fieldType.FieldTypeName;
-                            string fieldSpecString = String.Format("{0}:{1}",
-                                fieldName
-                                ,fieldTypeName
-                            );
+                            string fieldSpecString = fieldName;
+                            if (!String.IsNullOrEmpty(fieldTypeName))
+                            {
+                                fieldSpecString = String.Format("{0}:{1}",
+                                    fieldName
+                                    ,fieldTypeName
+                                );
+                            }
                             csvOut.WriteValue(fieldSpecString);
                         }
                         csvOut.WriteEndRecord();
@@ -302,14 +305,15 @@ namespace Upstream.System.Records.Csv
                     }
                     else
                     {
+                        IList<IRecordFieldType<IRecordFieldType<object>>> fieldSchemaTypeList = null;
                         IRecordAccessor<IRecordFieldType<object>> fieldSchema = new ListRecordAccessor<IRecordFieldType<object>,IRecordFieldType<IRecordFieldType<object>>>(
                             fieldTypeList
                             ,fieldNameList
-                            ,null
+                            ,fieldSchemaTypeList
                             );
                         IRecordAccessorAdapter<object,IRecordAccessor<string>> inRecordAdapter = new ParsingRecordAccessor<IRecordFieldType<object>>(
                             fieldSchema
-                            ,cultureInfoIn
+                            ,inCultureInfo
                         );
                         IRecordEnumerator<object> inRecordEnumerator = new RecordEnumeratorAdapter<object,IRecordAccessor<string>>(
                             inRecordAdapter
@@ -317,7 +321,7 @@ namespace Upstream.System.Records.Csv
                         );
                         IRecordAccessorAdapter<string,IRecordAccessor<object>> outRecordAdapter = new PrintingRecordAccessor<object,IRecordFieldType<object>>(
                             fieldSchema
-                            ,cultureInfoOut
+                            ,outCultureInfo
                         );
                         IRecordEnumerator<string> outRecordEnumerator = new RecordEnumeratorAdapter<string,IRecordAccessor<object>>(
                             outRecordAdapter

@@ -178,7 +178,6 @@ namespace Upstream.System.Csv
             {
                 outs.Write(HelpText);
                 outs.Flush();
-                exitCode = -1;
             }
             else if (null != errorMessage)
             {
