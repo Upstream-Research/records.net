@@ -16,7 +16,7 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<object, IRecordAccessor<string>>
     where TFieldType : IRecordFieldType<object>
     {
-        private readonly IRecordAccessor<TFieldType> _fieldSchema;
+        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
         private readonly CultureInfo _stringCulture;
         private IRecordAccessor<string> _baseRecord;
 
@@ -24,31 +24,31 @@ namespace Upstream.System.Records
         /// Create a record accessor that will parse strings
         /// according to the field types provided.
         /// </summary>
-        /// <param name="fieldSchema"></param>
+        /// <param name="recordSchema"></param>
         /// <param name="stringCulture">culture associated with the base record string representation</param>
         public ParsingRecordAccessor(
-            IRecordAccessor<TFieldType> fieldSchema
+            IRecordSchemaAccessor<TFieldType> recordSchema
             ,CultureInfo stringCulture
             )
         {
-            if (null == fieldSchema)
+            if (null == recordSchema)
             {
-                throw new ArgumentNullException("fieldSchema");
+                throw new ArgumentNullException("recordSchema");
             }
             if (null == stringCulture)
             {
                 throw new ArgumentNullException("stringCulture");
             }
 
-            _fieldSchema = fieldSchema;
+            _recordSchema = recordSchema;
             _stringCulture = stringCulture;
         }
 
-        private IRecordAccessor<TFieldType> FieldSchema
+        private IRecordSchemaAccessor<TFieldType> RecordSchema
         {
             get
             {
-                return _fieldSchema;
+                return _recordSchema;
             }
         }
 
@@ -71,18 +71,18 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get/Set a field value by its field position
         /// </summary>
-        /// <param name="fieldOrdinal"></param>
+        /// <param name="fieldPosition"></param>
         /// <returns></returns>
-        public object this[int fieldOrdinal]
+        public object this[int fieldPosition]
         {
             get
             {
-                TFieldType fieldType = FieldSchema[fieldOrdinal];
+                TFieldType fieldType = RecordSchema[fieldPosition];
                 string stringValue = null;
 
                 if (null != BaseRecord)
                 {
-                    stringValue = BaseRecord[fieldOrdinal];
+                    stringValue = BaseRecord[fieldPosition];
                 }
                 
                 return ParseFieldValue(stringValue, fieldType);
@@ -90,12 +90,12 @@ namespace Upstream.System.Records
 
             set
             {
-                TFieldType fieldType = FieldSchema[fieldOrdinal];
+                TFieldType fieldType = RecordSchema[fieldPosition];
                 object fieldValue = value;
                 if (null != BaseRecord)
                 {
                     string stringValue = PrintFieldValue(fieldValue, fieldType);
-                    BaseRecord[fieldOrdinal] = stringValue;
+                    BaseRecord[fieldPosition] = stringValue;
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace Upstream.System.Records
         {
             get
             {
-                TFieldType fieldType = FieldSchema[fieldName];
+                TFieldType fieldType = RecordSchema[fieldName];
                 string stringValue = null;
 
                 if (null != BaseRecord)
@@ -122,7 +122,7 @@ namespace Upstream.System.Records
 
             set
             {
-                TFieldType fieldType = FieldSchema[fieldName];
+                TFieldType fieldType = RecordSchema[fieldName];
                 object fieldValue = value;
 
                 if (null != BaseRecord)
@@ -150,7 +150,7 @@ namespace Upstream.System.Records
                 && BaseRecord.TryGetValue(fieldName, out stringValue)
                 )
             {
-                FieldSchema.TryGetValue(fieldName, out fieldType);
+                RecordSchema.TryGetValue(fieldName, out fieldType);
                 try
                 {
                     fieldValue = ParseFieldValue(stringValue, fieldType);
@@ -281,7 +281,7 @@ namespace Upstream.System.Records
                 {
                     string fieldName = baseEnumerator.Current.Key;
                     string stringValue = baseEnumerator.Current.Value;
-                    TFieldType fieldType = FieldSchema[fieldName];
+                    TFieldType fieldType = RecordSchema[fieldName];
                     object fieldValue = ParseFieldValue(stringValue, fieldType);
 
                     yield return new KeyValuePair<string,object>(fieldName, fieldValue);

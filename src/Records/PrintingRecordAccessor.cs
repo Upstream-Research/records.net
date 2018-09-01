@@ -17,7 +17,7 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<string, IRecordAccessor<TValue>>
     where TFieldType: IRecordFieldType<TValue>
     {
-        private readonly IRecordAccessor<TFieldType> _fieldSchema;
+        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
         private readonly CultureInfo _stringCulture;
         private IRecordAccessor<TValue> _baseRecord;
 
@@ -25,27 +25,27 @@ namespace Upstream.System.Records
         /// Create a new record accessor that will expose the values
         /// of an underlying record as strings
         /// </summary>
-        /// <param name="fieldSchema">field schema of the underlying record type</param>
+        /// <param name="recordSchema">field schema of the underlying record type</param>
         /// <param name="stringCulture">culture associated with the string representation</param>
         public PrintingRecordAccessor(
-             IRecordAccessor<TFieldType> fieldSchema
+             IRecordSchemaAccessor<TFieldType> recordSchema
             ,CultureInfo stringCulture
             )
         {
-            if (null == fieldSchema)
+            if (null == recordSchema)
             {
-                throw new ArgumentNullException("fieldSchema");
+                throw new ArgumentNullException("recordSchema");
             }
 
-            _fieldSchema = fieldSchema;
+            _recordSchema = recordSchema;
             _stringCulture = stringCulture;
         }
 
-        private IRecordAccessor<TFieldType> FieldSchema
+        private IRecordSchemaAccessor<TFieldType> RecordSchema
         {
             get
             {
-                return _fieldSchema;
+                return _recordSchema;
             }
         }
 
@@ -79,7 +79,7 @@ namespace Upstream.System.Records
                 if (null != BaseRecord)
                 {
                     object fieldValue = BaseRecord[fieldOrdinal];
-                    TFieldType fieldType = FieldSchema[fieldOrdinal];
+                    TFieldType fieldType = RecordSchema[fieldOrdinal];
                     stringValue = PrintFieldValue(fieldValue, fieldType);
                 }
 
@@ -92,7 +92,7 @@ namespace Upstream.System.Records
 
                 if (null != BaseRecord)
                 {
-                    TFieldType fieldType = FieldSchema[fieldOrdinal];
+                    TFieldType fieldType = RecordSchema[fieldOrdinal];
                     TValue fieldValue = ParseFieldValue(stringValue, fieldType);
                     BaseRecord[fieldOrdinal] = fieldValue;
                 }
@@ -113,7 +113,7 @@ namespace Upstream.System.Records
                 if (null != BaseRecord)
                 {
                     object fieldValue = BaseRecord[fieldName];
-                    TFieldType fieldType = FieldSchema[fieldName];
+                    TFieldType fieldType = RecordSchema[fieldName];
                     stringValue = PrintFieldValue(fieldValue, fieldType);
                 }
 
@@ -126,7 +126,7 @@ namespace Upstream.System.Records
 
                 if (null != BaseRecord)
                 {
-                    TFieldType fieldType = FieldSchema[fieldName];
+                    TFieldType fieldType = RecordSchema[fieldName];
                     TValue fieldValue = ParseFieldValue(stringValue, fieldType);
                     BaseRecord[fieldName] = fieldValue;
                 }
@@ -150,7 +150,7 @@ namespace Upstream.System.Records
                 && BaseRecord.TryGetValue(fieldName, out fieldValue)
                 )
             {
-                FieldSchema.TryGetValue(fieldName, out fieldType);
+                RecordSchema.TryGetValue(fieldName, out fieldType);
                 stringValue = PrintFieldValue(fieldValue, fieldType);
                 hasValue = true;
             }
@@ -265,7 +265,7 @@ namespace Upstream.System.Records
                 {
                     string fieldName = baseEnumerator.Current.Key;
                     TValue fieldValue = baseEnumerator.Current.Value;
-                    TFieldType fieldType = FieldSchema[fieldName];
+                    TFieldType fieldType = RecordSchema[fieldName];
                     string stringValue = PrintFieldValue(fieldValue, fieldType);
 
                     yield return new KeyValuePair<string,string>(fieldName, stringValue);

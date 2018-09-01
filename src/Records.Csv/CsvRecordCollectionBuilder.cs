@@ -38,23 +38,25 @@ namespace Upstream.System.Records.Csv
             int fieldCount = 0;
             
             fieldCount = fieldNameList.Count;
-            IList<IRecordFieldType<string>> fieldTypeList = new IRecordFieldType<string>[fieldCount];
-            int fieldPosition;
-            for (fieldPosition = 0; fieldPosition < fieldCount; fieldPosition++)
+            BasicRecordSchema<IRecordFieldType<string>> recordSchema = new BasicRecordSchema<IRecordFieldType<string>>();
+            foreach (string fieldName in fieldNameList)
             {
-                fieldTypeList[fieldPosition] = new BasicRecordFieldType<string>(
+                IRecordFieldType<string> fieldType = new BasicRecordFieldType<string>(
                     typeof(String)
                     ,fieldValueSortComparer
                     ,fieldValueEqualityComparer
+                    );
+                recordSchema.AddField(
+                    fieldName
+                    ,fieldType
                     );
             }
 
             _fieldNameList = fieldNameList;
             _fieldValueList = new string[fieldCount];
             _currentRecord = new ListRecordAccessor<string,IRecordFieldType<string>>(
-                 _fieldValueList
-                ,fieldNameList
-                ,fieldTypeList
+                 recordSchema
+                ,_fieldValueList
                 );
             _csvWriter = csvWriter;
         }

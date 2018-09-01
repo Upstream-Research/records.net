@@ -59,6 +59,11 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the number of fields in the record
         /// </summary>
+        /// <remarks>
+        /// This was defined as a method and not as a property
+        /// so that types that derive from this, and which represent "strongly-typed" records
+        /// can use properties exclusively for field values.
+        /// </remarks>
         int GetFieldCount();
 
         /// <summary>

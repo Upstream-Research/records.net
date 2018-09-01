@@ -11,10 +11,11 @@ using Upstream.System.Records;
 namespace Upstream.System.Records.DataSets
 {
     /// <summary>
-    /// Implements IRecordAccessor on a DataColumn
+    /// Implements IRecordAccessor on a DataColumnCollection
     /// </summary>
     public class DataColumnCollectionAccessor
     : IRecordAccessorAdapter<DataColumnFieldType, DataColumnCollection>
+     ,IRecordSchemaAccessor<DataColumnFieldType>
     {
         private DataColumnCollection _columnCollection;
         private IList<DataColumnFieldType> _columnFieldTypeList = new List<DataColumnFieldType>();
@@ -171,6 +172,46 @@ namespace Upstream.System.Records.DataSets
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)GetEnumerator();
+        }
+
+        /// <summary>
+        /// Find the position of a field in the column collection by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public int IndexOfField(string fieldName)
+        {
+            int fieldPosition = -1;
+
+            if (null != _columnCollection)
+            {
+                fieldPosition = _columnCollection.IndexOf(fieldName);
+            }
+            
+            return fieldPosition;
+        }
+
+        /// <summary>
+        /// Find the name of a field at a specific location
+        /// </summary>
+        /// <param name="fieldPosition"></param>
+        /// <returns></returns>
+        public string FieldNameAt(int fieldPosition)
+        {
+            string fieldName = null;
+
+            if (null == _columnCollection)
+            {
+                throw new InvalidOperationException("DataColumnCollectionAccessor is not attached to a DataColumnCollection");
+            }
+
+            DataColumn column = _columnCollection[fieldPosition];
+            if (null != column)
+            {
+                fieldName = column.ColumnName;
+            }
+
+            return fieldName;
         }
     } // /class
 

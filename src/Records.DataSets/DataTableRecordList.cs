@@ -18,7 +18,7 @@ namespace Upstream.System.Records.DataSets
      ,IDbDataSink
     {
         private DataTable _table;
-        private DataColumnCollectionAccessor _fieldSchema = new DataColumnCollectionAccessor();
+        private DataColumnCollectionAccessor _recordSchema = new DataColumnCollectionAccessor();
 
         /// <summary>
         /// Create a new RecordList that is attached to a specific DataTable
@@ -38,11 +38,11 @@ namespace Upstream.System.Records.DataSets
             _table = table;
             if (null == _table)
             {
-                _fieldSchema.AttachTo(null);
+                _recordSchema.AttachTo(null);
             }
             else
             {
-                _fieldSchema.AttachTo(table.Columns);
+                _recordSchema.AttachTo(table.Columns);
             }
         }
 
@@ -91,7 +91,7 @@ namespace Upstream.System.Records.DataSets
         {
             get
             {
-                return FieldSchema.GetFieldCount();
+                return RecordSchema.GetFieldCount();
             }
         }
 
@@ -111,11 +111,11 @@ namespace Upstream.System.Records.DataSets
         /// <summary>
         /// Get an object that describes the fields in this record collection
         /// </summary>
-        public IRecordAccessor<DataColumnFieldType> FieldSchema
+        public IRecordSchemaAccessor<DataColumnFieldType> RecordSchema
         {
             get
             {
-                return _fieldSchema;
+                return _recordSchema;
             }
         }
 

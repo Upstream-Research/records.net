@@ -40,6 +40,7 @@
     <Compile Include="Records.AssemblyProperties\AssemblyInfo.cs" />
     <Compile Include="Records\ArrayRecordList.cs" />
     <Compile Include="Records\BasicRecordFieldType.cs" />
+    <Compile Include="Records\BasicRecordSchema.cs" />
     <Compile Include="Records\DictionaryRecordAccessor.cs" />
     <Compile Include="Records\FieldSchemaSpec.cs" />
     <Compile Include="Records\FieldSchemaSpecFieldRecord.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="Records\IRecordFieldType.cs" />
     <Compile Include="Records\IRecordList.cs" />
     <Compile Include="Records\IRecordListVisitor.cs" />
+    <Compile Include="Records\IRecordSchemaAccessor.cs" />
     <Compile Include="Records\ListRecordAccessor.cs" />
     <Compile Include="Records\IRecordEnumerator.cs" />
     <Compile Include="Records\ParsingRecordAccessor.cs" />

@@ -47,10 +47,10 @@ namespace Upstream.System.Records
             _baseRecordList = recordList;
 
             IList<IEqualityComparer<TValue>> fieldComparerList = new List<IEqualityComparer<TValue>>();
-            IRecordAccessor<TFieldType> fieldSchema = recordList.FieldSchema;
+            IRecordSchemaAccessor<TFieldType> recordSchema = recordList.RecordSchema;
             foreach (string keyFieldName in _keyFieldNameList)
             {
-                TFieldType fieldType = fieldSchema[keyFieldName];
+                TFieldType fieldType = recordSchema[keyFieldName];
                 IEqualityComparer<TValue> equalityComparer = fieldType;
                 fieldComparerList.Add(equalityComparer);
             }

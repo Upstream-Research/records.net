@@ -246,6 +246,7 @@ namespace Upstream.System.Records.Csv
                     FieldSchemaSpec<object> specParser = new FieldSchemaSpec<object>();
                     StringBuilder specParserBuffer = new StringBuilder();
                     int startPosition = 0;
+                    BasicRecordSchema<IRecordFieldType<object>> recordSchema = new BasicRecordSchema<IRecordFieldType<object>>();
                     IList<string> fieldNameList = new List<string>();
                     IList<IRecordFieldType<object>> fieldTypeList = new List<IRecordFieldType<object>>();
 
@@ -261,14 +262,15 @@ namespace Upstream.System.Records.Csv
                             FieldSchemaSpecFieldRecord<object> fieldType = fieldInfo.Value;
                             fieldNameList.Add(fieldName);
                             fieldTypeList.Add(fieldType);
+                            recordSchema.AddField(fieldName, fieldType);
                         }
 
                         // write header row to output CSV
                         csvOut.WriteStartRecord();
-                        for (int i = 0; i < fieldNameList.Count && i < fieldTypeList.Count; i++)
+                        foreach (KeyValuePair<string,IRecordFieldType<object>> fieldInfo in recordSchema)
                         {
-                            string fieldName = fieldNameList[i];
-                            FieldSchemaSpecFieldRecord<object> fieldType = (FieldSchemaSpecFieldRecord<object>)fieldTypeList[i];
+                            string fieldName = fieldInfo.Key;
+                            FieldSchemaSpecFieldRecord<object> fieldType = (FieldSchemaSpecFieldRecord<object>)fieldInfo.Value;
                             string fieldTypeName = fieldType.FieldTypeName;
                             string fieldSpecString = fieldName;
                             if (!String.IsNullOrEmpty(fieldTypeName))
@@ -305,14 +307,8 @@ namespace Upstream.System.Records.Csv
                     }
                     else
                     {
-                        IList<IRecordFieldType<IRecordFieldType<object>>> fieldSchemaTypeList = null;
-                        IRecordAccessor<IRecordFieldType<object>> fieldSchema = new ListRecordAccessor<IRecordFieldType<object>,IRecordFieldType<IRecordFieldType<object>>>(
-                            fieldTypeList
-                            ,fieldNameList
-                            ,fieldSchemaTypeList
-                            );
                         IRecordAccessorAdapter<object,IRecordAccessor<string>> inRecordAdapter = new ParsingRecordAccessor<IRecordFieldType<object>>(
-                            fieldSchema
+                             recordSchema
                             ,inCultureInfo
                         );
                         IRecordEnumerator<object> inRecordEnumerator = new RecordEnumeratorAdapter<object,IRecordAccessor<string>>(
@@ -320,7 +316,7 @@ namespace Upstream.System.Records.Csv
                             ,csvInRecordEnumerator
                         );
                         IRecordAccessorAdapter<string,IRecordAccessor<object>> outRecordAdapter = new PrintingRecordAccessor<object,IRecordFieldType<object>>(
-                            fieldSchema
+                            recordSchema
                             ,outCultureInfo
                         );
                         IRecordEnumerator<string> outRecordEnumerator = new RecordEnumeratorAdapter<string,IRecordAccessor<object>>(

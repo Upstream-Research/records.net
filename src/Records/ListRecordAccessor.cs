@@ -15,66 +15,51 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<TValue,IList<TValue>>
     where TFieldType : IRecordFieldType<TValue>
     {
-        private readonly IDictionary<string,int> _fieldOrdinalDictionary;
-        private readonly IList<string> _fieldNameList;
-        private readonly IList<TFieldType> _fieldTypeList;
+        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
         private IList<TValue> _fieldValueList;
 
         /// <summary>
-        /// Create a record accessor that will use field names in the order they are found in a field name list,
-        /// but that is not initially attached to any field value list.
+        /// Create a record accessor that will use an underlying list to access field values
+        /// corresponding to a field schema.
+        /// The underlying list must be "attached" using the AttachTo() method.
         /// </summary>
-        /// <param name="fieldNameList"></param>
-        /// <param name="fieldTypeList"></param>
+        /// <param name="recordSchema"></param>
         public ListRecordAccessor(
-              IList<string> fieldNameList
-             ,IList<TFieldType> fieldTypeList
+              IRecordSchemaAccessor<TFieldType> recordSchema
             )
         {
-            _fieldOrdinalDictionary = CreateFieldOrdinalDictionary(fieldNameList);
-            _fieldNameList = fieldNameList;
-            _fieldTypeList = fieldTypeList;
+            if (null == recordSchema)
+            {
+                throw new ArgumentNullException("recordSchema");
+            }
+
+            _recordSchema = recordSchema;
         }
 
         /// <summary>
-        /// Create a record accessor that will use field names found in a field name record
-        /// and will get field values from a list.
+        /// Create a record accessor that will use an underlying list to access field values
+        /// corresponding to a field schema.
         /// </summary>
+        /// <param name="recordSchema"></param>
         /// <param name="fieldValueList"></param>
-        /// <param name="fieldNameList"></param>
-        /// <param name="fieldTypeList"></param>
         public ListRecordAccessor(
-              IList<TValue> fieldValueList
-             ,IList<string> fieldNameList
-             ,IList<TFieldType> fieldTypeList
+              IRecordSchemaAccessor<TFieldType> recordSchema
+             ,IList<TValue> fieldValueList
             )
-            :this(fieldNameList, fieldTypeList)
+            :this(recordSchema)
         {
-            _fieldValueList = fieldValueList;
+            AttachTo(fieldValueList);
         }
 
         /// <summary>
-        /// Create a dictionary that can lookup field positions based on an ordered list of field names
+        /// Get the record schema associated with this record
         /// </summary>
-        /// <param name="fieldNameList"></param>
-        /// <returns></returns>
-        private IDictionary<string,int> CreateFieldOrdinalDictionary(IList<string> fieldNameList)
+        private IRecordSchemaAccessor<TFieldType> RecordSchema
         {
-            if (null == fieldNameList)
+            get
             {
-                throw new ArgumentNullException("fieldNameList");
+                return _recordSchema;
             }
-            int fieldCount = fieldNameList.Count;
-            IDictionary<string,int> fieldOrdinalDictionary = new Dictionary<string,int>(fieldCount);
-            int fieldOrdinal;
-            string fieldName;
-            for (fieldOrdinal = 0; fieldOrdinal < fieldCount; fieldOrdinal++)
-            {
-                fieldName = fieldNameList[fieldOrdinal];
-                fieldOrdinalDictionary[fieldName] = fieldOrdinal;
-            }
-
-            return fieldOrdinalDictionary;
         }
 
         /// <summary>
@@ -112,54 +97,28 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Get a list of field names for the underlying dictionary
-        /// </summary>
-        /// <returns></returns>
-        private IList<string> GetFieldNameList()
-        {
-            if (null == _fieldNameList)
-            {
-                throw new InvalidOperationException("Base Field Name List is not assigned");
-            }
-
-            return _fieldNameList;
-        }
-
-        private IDictionary<string,int> GetFieldOrdinalDictionary()
-        {
-            if (null == _fieldOrdinalDictionary)
-            {
-                throw new InvalidOperationException("Base Field Ordinal Dictionary is not assigned");
-            }
-
-            return _fieldOrdinalDictionary;
-        }
-
-        /// <summary>
         /// Get the offset of a field in the record
         /// </summary>
         /// <param name="fieldName"></param>
         /// <returns></returns>
-        public int GetFieldOrdinal(string fieldName)
+        public int IndexOfField(string fieldName)
         {
-            return GetFieldOrdinalDictionary()[fieldName];
+            return RecordSchema.IndexOfField(fieldName);
         }
 
         /// <summary>
         /// Check that a field value is valid to store in the specified field
         /// </summary>
-        /// <param name="fieldOrdinal"></param>
+        /// <param name="fieldPosition"></param>
         /// <param name="fieldValue"></param>
         /// <returns></returns>
-        public bool FieldValueIsValid(int fieldOrdinal, TValue fieldValue)
+        public bool FieldValueIsValid(int fieldPosition, TValue fieldValue)
         {
             bool isValid = true;  // valid unless the field type disagrees
 
-            if (null != _fieldTypeList
-                && fieldOrdinal < _fieldTypeList.Count
-                )
+            if (fieldPosition < RecordSchema.GetFieldCount())
             {
-                TFieldType fieldType = _fieldTypeList[fieldOrdinal];
+                TFieldType fieldType = RecordSchema[fieldPosition];
                 if (null != fieldType)
                 {
                     isValid = fieldType.IsValid(fieldValue);
@@ -179,17 +138,17 @@ namespace Upstream.System.Records
         {
             get
             {
-                int fieldOrdinal = GetFieldOrdinal(fieldName);
-                return GetFieldValueList()[fieldOrdinal];
+                int fieldPosition = IndexOfField(fieldName);
+                return GetFieldValueList()[fieldPosition];
             }
 
             set
             {
                 TValue fieldValue = value;
-                int fieldOrdinal = GetFieldOrdinal(fieldName);
-                if (FieldValueIsValid(fieldOrdinal, fieldValue))
+                int fieldPosition = IndexOfField(fieldName);
+                if (FieldValueIsValid(fieldPosition, fieldValue))
                 {
-                    GetFieldValueList()[fieldOrdinal] = fieldValue;
+                    GetFieldValueList()[fieldPosition] = fieldValue;
                 }
             }
         }
@@ -198,21 +157,21 @@ namespace Upstream.System.Records
         /// Get/Set a field value by its position in the record.
         /// This is much more efficient than accessing the value by name.
         /// </summary>
-        /// <param name="fieldOrdinal"></param>
+        /// <param name="fieldPosition"></param>
         /// <returns></returns>
-        public TValue this[int fieldOrdinal]
+        public TValue this[int fieldPosition]
         {
             get
             {
-                return GetFieldValueList()[fieldOrdinal];
+                return GetFieldValueList()[fieldPosition];
             }
 
             set
             {
                 TValue fieldValue = value;
-                if (FieldValueIsValid(fieldOrdinal, fieldValue))
+                if (FieldValueIsValid(fieldPosition, fieldValue))
                 {
-                    GetFieldValueList()[fieldOrdinal] = fieldValue;
+                    GetFieldValueList()[fieldPosition] = fieldValue;
                 }
             }
         }
@@ -225,13 +184,14 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public bool TryGetValue(string fieldName, out TValue outFieldValue)
         {
-            int fieldOrdinal;
+            int fieldPosition;
             bool wasFound = false;
 
             outFieldValue = default(TValue);
-            if (GetFieldOrdinalDictionary().TryGetValue(fieldName, out fieldOrdinal))
+            fieldPosition = IndexOfField(fieldName);
+            if (0 <= fieldPosition)
             {
-                outFieldValue = GetFieldValueList()[fieldOrdinal];
+                outFieldValue = GetFieldValueList()[fieldPosition];
                 wasFound = true;
             }
 
@@ -243,7 +203,7 @@ namespace Upstream.System.Records
         /// </summary>
         public int GetFieldCount()
         {
-            int fieldNameCount = GetFieldOrdinalDictionary().Count;
+            int fieldNameCount = RecordSchema.GetFieldCount();
             int fieldValueCount = 0;
             int fieldCount = 0;
                 
@@ -270,7 +230,7 @@ namespace Upstream.System.Records
         {
             IComparer<TValue> sortComparer = Comparer<TValue>.Default;
             TValue fieldValue = this[fieldName];
-            int fieldOrdinal;
+            int fieldPosition;
             int resultNum = 0;
             
 
@@ -296,20 +256,17 @@ namespace Upstream.System.Records
                 && null != fieldValue2
                 )
             {
-                if (null != _fieldTypeList)
+                IComparer<TValue> sortComparer2 = null;
+                fieldPosition = IndexOfField(fieldName);
+                if (0 <= fieldPosition
+                    && RecordSchema.GetFieldCount() > fieldPosition
+                    )
                 {
-                    IComparer<TValue> sortComparer2 = null;
-                    fieldOrdinal = GetFieldOrdinal(fieldName);
-                    if (0 <= fieldOrdinal
-                        && _fieldTypeList.Count > fieldOrdinal
-                        )
-                    {
-                        sortComparer2 = _fieldTypeList[fieldOrdinal];
-                    }
-                    if (null != sortComparer2)
-                    {
-                        sortComparer = sortComparer2;
-                    }
+                    sortComparer2 = RecordSchema[fieldPosition];
+                }
+                if (null != sortComparer2)
+                {
+                    sortComparer = sortComparer2;
                 }
 
                 resultNum = sortComparer.Compare(fieldValue, fieldValue2);
@@ -324,7 +281,7 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public IEnumerator<string> GetFieldNameEnumerator()
         {
-            return GetFieldNameList().GetEnumerator();
+            return RecordSchema.GetFieldNameEnumerator();
         }
 
 
@@ -335,9 +292,8 @@ namespace Upstream.System.Records
         public IEnumerator<KeyValuePair<string, TValue>> GetEnumerator()
         {
             IList<TValue> fieldValueList = GetFieldValueList();
-            IList<string> fieldNameList = GetFieldNameList();
             IEnumerator<TValue> fieldValueEnumerator = fieldValueList.GetEnumerator();
-            IEnumerator<string> fieldNameEnumerator = fieldNameList.GetEnumerator();
+            IEnumerator<string> fieldNameEnumerator = GetFieldNameEnumerator();
 
             while (fieldValueEnumerator.MoveNext()
                 && fieldNameEnumerator.MoveNext()

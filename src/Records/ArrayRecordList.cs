@@ -16,44 +16,16 @@ namespace Upstream.System.Records
      ,IList<IRecordAccessor<TValue>>
     where TFieldType : IRecordFieldType<TValue>
     {
-        private IList<string> _fieldNameList = new List<string>();
+        private BasicRecordSchema<TFieldType> _recordSchema = new BasicRecordSchema<TFieldType>();
         private IList<TValue[]> _fieldValueListList = new List<TValue[]>();
-        private IList<TFieldType> _fieldTypeList = new List<TFieldType>();
-        //private IList<IComparer<TValue>> _fieldValueSortComparerList = new List<IComparer<TValue>>();
-        private IRecordAccessor<TFieldType> _fieldSchema;
 
         /// <summary>
         /// Create a new record collection with no fields
         /// </summary>
         public ArrayRecordList()
         {
-            IList<IRecordFieldType<TFieldType>> fieldSchemaTypeList = null;
-            _fieldSchema = new ListRecordAccessor<TFieldType,IRecordFieldType<TFieldType>>(
-                 _fieldTypeList
-                ,_fieldNameList
-                ,fieldSchemaTypeList
-                );
         }
-
-        /// <summary>
-        /// List of ordered field names for records in this record list
-        /// </summary>
-        private IList<string> FieldNameList
-        {
-            get
-            {
-                return _fieldNameList;
-            }
-        }
-
-        private IList<TFieldType> FieldTypeList
-        {
-            get
-            {
-                return _fieldTypeList;
-            }
-        }
-
+        
         /// <summary>
         /// Base record list, which is a list of field value arrays
         /// </summary>
@@ -62,6 +34,17 @@ namespace Upstream.System.Records
             get
             {
                 return _fieldValueListList;
+            }
+        }
+
+        /// <summary>
+        /// Get an object that manages the schema for records in this collection
+        /// </summary>
+        private BasicRecordSchema<TFieldType> MutableRecordSchema
+        {
+            get
+            {
+                return _recordSchema;
             }
         }
 
@@ -83,29 +66,29 @@ namespace Upstream.System.Records
         {
             get
             {
-                return FieldNameList.Count;
+                return GetFieldCount();
             }
         }
 
         /// <summary>
-        /// Get an enumeration of field names for records in this collection
+        /// Get an enumerable collection of the field names for records in this collection
         /// </summary>
-        public IEnumerable<String> FieldNames
+        public IEnumerable<string> FieldNames
         {
             get
             {
-                return (IEnumerable<string>)FieldNameList;
+                return MutableRecordSchema.FieldNames;
             }
         }
 
         /// <summary>
         /// Get an object that provides access to field meta-information
         /// </summary>
-        public IRecordAccessor<TFieldType> FieldSchema
+        public IRecordSchemaAccessor<TFieldType> RecordSchema
         {
             get
             {
-                return _fieldSchema;
+                return _recordSchema;
             }
         }
 
@@ -162,6 +145,15 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Get the number of fields in the records of this collection
+        /// </summary>
+        /// <returns></returns>
+        private int GetFieldCount()
+        {
+            return RecordSchema.GetFieldCount();
+        }
+
+        /// <summary>
         /// Append a new field to the records in the collection.
         /// This is an inefficient operation if there are records already in the collection;
         /// it is best to call it before putting any records in the collection.
@@ -171,8 +163,7 @@ namespace Upstream.System.Records
         public void 
         AddField(string fieldName, TFieldType fieldProperties)
         {
-            _fieldNameList.Add(fieldName);
-            _fieldTypeList.Add(fieldProperties);
+            MutableRecordSchema.AddField(fieldName, fieldProperties);
             IList<TValue[]> prevFieldValueListList = _fieldValueListList;
             int recordCount = prevFieldValueListList.Count;
 
@@ -181,7 +172,7 @@ namespace Upstream.System.Records
             if (0 < recordCount)
             {
                 IList<TValue[]> newFieldValueListList = new List<TValue[]>(recordCount);
-                int newFieldCount = _fieldNameList.Count;
+                int newFieldCount = MutableRecordSchema.GetFieldCount();
                 const int startFieldOrdinal = 0;
                 foreach (TValue[] prevFieldValueArray in prevFieldValueListList)
                 {
@@ -242,7 +233,7 @@ namespace Upstream.System.Records
         private TValue[] 
         CreateRecordFieldValueArray(IRecordAccessor<TValue> inputRecord)
         {
-            int fieldCount = FieldNameList.Count;
+            int fieldCount = GetFieldCount();
             TValue[] fieldValueArray = new TValue[fieldCount];
 
             CopyRecordFieldValuesInto(fieldValueArray, inputRecord);
@@ -262,21 +253,25 @@ namespace Upstream.System.Records
             ,IRecordAccessor<TValue> inputRecord
             )
         {
-            int fieldCount = FieldNameList.Count;
-            int fieldOrdinal;
+            int fieldCount = GetFieldCount();
+            int fieldPosition;
 
             if (null != inputRecord
                 && null != fieldValueArray
                 )
             {
-                for (fieldOrdinal = 0; fieldOrdinal < fieldCount; fieldOrdinal++)
+                IEnumerator<string> fieldNameEnumerator = RecordSchema.GetFieldNameEnumerator();
+                fieldPosition = 0;
+                while (fieldNameEnumerator.MoveNext())
                 {
-                    string fieldName = FieldNameList[fieldOrdinal];
+                    string fieldName = fieldNameEnumerator.Current;
                     TValue fieldValue;
                     if (inputRecord.TryGetValue(fieldName, out fieldValue))
                     {
-                        fieldValueArray[fieldOrdinal] = fieldValue;
+                        fieldValueArray[fieldPosition] = fieldValue;
                     }
+
+                    fieldPosition += 1;
                 }
             }
         }
@@ -312,9 +307,8 @@ namespace Upstream.System.Records
         )
         {
             return new ListRecordAccessor<TValue,TFieldType>(
-                  fieldValueList
-                , FieldNameList
-                , FieldTypeList
+                 RecordSchema
+                ,fieldValueList
                 );
         }
 
@@ -326,8 +320,7 @@ namespace Upstream.System.Records
         CreateRecordAccessor()
         {
             return new ListRecordAccessor<TValue,TFieldType>(
-                  FieldNameList
-                , FieldTypeList
+                 RecordSchema
                 );
         }
 
@@ -533,9 +526,9 @@ namespace Upstream.System.Records
                     )
                 {
                     string fieldName = inputFieldNameEnumerator.Current;
-                    int fieldOrdinal = record.GetFieldOrdinal(fieldName);
-                    TValue fieldValue = record[fieldOrdinal];
-                    IComparer<TValue> fieldComparer = FieldTypeList[fieldOrdinal];
+                    int fieldPosition = record.IndexOfField(fieldName);
+                    TValue fieldValue = record[fieldPosition];
+                    IComparer<TValue> fieldComparer = RecordSchema[fieldPosition];
                     TValue inputFieldValue = inputRecord[fieldName];
                     
                     //fieldsAreEqual = (0 == record.CompareFieldTo(fieldName, inputFieldValue));
