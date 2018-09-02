@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="480c8397-bd1f-4af8-a6bf-fd9f72a1cda7" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <introduction>
+            <para>
+            Records.net is an object library for manipulating record-based data.
+            It provides a set of data record interfaces that can be used as a basis 
+            for record I/O streams and for record-based data models.
+            </para>
+            <para>
+            This library provides an alternative to some of the data structures and interfaces in Microsoft's ADO.Net (Aka. System.Data).
+            It does not provide any means to communicate with a database.
+            </para>
+            <para>
+            This library is not an Object/Relational Mapper.
+            The fundamental point of view taken here is that records are themselves a data structure 
+            that should not be mapped onto "plain old" objects.
+            There are inconvenient consequences to this approach,
+            but this library is provided for those who are willing to accept the consequences,
+            perhaps for the promise of other efficiencies.
+            </para>
+        </introduction>
+    <!--
+		<introduction>
+			<para>This is a sample conceptual topic.  You can use this as a starting point for adding more conceptual
+content to your help project.</para>
+		</introduction>
+
+		<section>
+			<title>Getting Started</title>
+			<content>
+				<para>To get started, add a documentation source to the project (a Visual Studio solution, project, or
+assembly and XML comments file).  See the <legacyBold>Getting Started</legacyBold> topics in the Sandcastle Help
+File Builder's help file for more information.  The following default items are included in this project:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para><localUri>ContentLayout.content</localUri> - Use the content layout file to manage the
+conceptual content in the project and define its layout in the table of contents.</para>
+					</listItem>
+
+					<listItem>
+						<para>The <localUri>.\media</localUri> folder - Place images in this folder that you will reference
+from conceptual content using <codeInline>medialLink</codeInline> or <codeInline>mediaLinkInline</codeInline>
+elements.  If you will not have any images in the file, you may remove this folder.</para>
+					</listItem>
+
+					<listItem>
+						<para>The <localUri>.\icons</localUri> folder - This contains a default logo for the help file.  You
+may replace it or remove it and the folder if not wanted.  If removed or if you change the file name, update
+the <ui>Transform Args</ui> project properties page by removing or changing the filename in the
+<codeInline>logoFile</codeInline> transform argument.  Note that unlike images referenced from conceptual topics,
+the logo file should have its <legacyBold>BuildAction</legacyBold> property set to <codeInline>Content</codeInline>.</para>
+					</listItem>
+
+					<listItem>
+						<para>The <localUri>.\Content</localUri> folder - Use this to store your conceptual topics.  You may
+name the files and organize them however you like.  One suggestion is to lay the files out on disk as you have
+them in the content layout file as shown in this project but the choice is yours.  Files can be added via the
+Solution Explorer or from within the content layout file editor.  Files must appear in the content layout file
+in order to be compiled into the help file.</para>
+					</listItem>
+				</list>
+
+				<para>See the <legacyBold>Conceptual Content</legacyBold> topics in the Sandcastle Help File Builder's
+help file for more information.  See the <legacyBold> Sandcastle MAML Guide</legacyBold> for details on Microsoft
+Assistance Markup Language (MAML) which is used to create these topics.</para>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="9dd2a943-57a1-4b6b-829d-08b84ac999fc" />
+		</relatedTopics>
+    -->
+	</developerConceptualDocument>
+</topic>
