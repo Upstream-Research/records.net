@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Upstream.System.Records
 {
     /// <summary>
-    /// Defines a basic interface which RecordFieldProperties implementations should implement
+    /// Defines a basic interface which Record Schema Field Type implementations should implement
     /// </summary>
     public interface IRecordFieldType<in TValue>
     : IComparer<TValue>

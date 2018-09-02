@@ -25,8 +25,8 @@ namespace Upstream.System.Csv
         /// Create a CSV Writer that will wrap a TextWriter
         /// and that will use a particular CSV encoding (format)
         /// </summary>
-        /// <param name="textWriter"></param>
-        /// <param name="csvEncoding"></param>
+        /// <param name="textWriter">TextWriter that will receive CSV encoded data written by the CSV writer</param>
+        /// <param name="csvEncoding">CSV Encoding object that will be used to encode CSV data</param>
         public CsvWriter(
              TextWriter textWriter
             ,CsvEncoding csvEncoding
@@ -51,7 +51,7 @@ namespace Upstream.System.Csv
         /// Create a CSV Writer that will wrap a TextWriter
         /// and will use a default CSV encoding
         /// </summary>
-        /// <param name="textWriter"></param>
+        /// <param name="textWriter">TextWriter object that will receive CSV record data encoded by the CSV writer</param>
         public CsvWriter(
             TextWriter textWriter
             )
@@ -131,6 +131,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Write a unit value for the current record
         /// </summary>
+        /// <param name="valueString">string value to write</param>
         public void WriteValue(string valueString)
         {
             if (null == _baseWriter)

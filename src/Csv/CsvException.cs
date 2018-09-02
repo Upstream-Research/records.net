@@ -23,7 +23,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Create a new CSV exception with an error message
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">error message</param>
         public CsvException(string message)
             : base(message)
         {
@@ -32,8 +32,8 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Create a new CSV exception that will wrap another exception
         /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
+        /// <param name="message">error message</param>
+        /// <param name="innerException">exception to wrap</param>
         public CsvException(string message, Exception innerException)
             : base(message, innerException)
         {

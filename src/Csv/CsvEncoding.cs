@@ -32,10 +32,10 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Create a CSV Encoding object which can be used for encoding and decoding CSV data
         /// </summary>
-        /// <param name="unitSeparator"></param>
-        /// <param name="quote"></param>
-        /// <param name="quoteEscape"></param>
-        /// <param name="recordSeparator"></param>
+        /// <param name="unitSeparator">separator code used between value units, defaults to a comma (',')</param>
+        /// <param name="quote">quotation symbol used to escape the separator codes, defaults to a double-quote ('"')</param>
+        /// <param name="quoteEscape">quotation escape symbol, defaults to a double quote symbol (e.g. '""')</param>
+        /// <param name="recordSeparator">separator between records, defaults to the local platform's newline character</param>
         /// <param name="shouldQuoteEmptyStringValues">True if empty strings should be encoded by quoting them
         /// (an null string will not be quoted when it is encoded)</param>
         public 
@@ -84,6 +84,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Get the value separator character string
         /// </summary>
+        /// <returns>unit/value separator code string</returns>
         public string UnitSeparator
         {
             get
@@ -95,6 +96,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Get the quote character which can be used to escape the unit and record separators
         /// </summary>
+        /// <returns>unit/value quotation code</returns>
         public string Quote
         {
             get
@@ -107,6 +109,7 @@ namespace Upstream.System.Csv
         /// Get the quote character escape string that can be used to escape the quote sequence 
         /// inside of a quoted unit
         /// </summary>
+        /// <returns>unit/value quotation code escape code</returns>
         public string QuoteEscape
         {
             get
@@ -118,6 +121,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Get the symbol used for separating records
         /// </summary>
+        /// <returns>record separator code string</returns>
         public string RecordSeparator
         {
             get
@@ -161,24 +165,24 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Find the first occurrence of a code within a search string
         /// </summary>
-        /// <param name="targetString"></param>
-        /// <param name="codeString"></param>
-        /// <param name="targetStringStartIndex"></param>
+        /// <param name="sourceString">string to search</param>
+        /// <param name="codeString">string "code" to search for</param>
+        /// <param name="sourceStringStartIndex">position in the source string where searching will begin</param>
         /// <returns>-1 if the code was not found</returns>
         private int
         IndexOfCode(
-             string targetString
+             string sourceString
             ,string codeString
-            ,int targetStringStartIndex = 0
+            ,int sourceStringStartIndex = 0
             )
         {
             int foundIndex = -1;
-            if (null != targetString
+            if (null != sourceString
                 && null != codeString
                 && 0 < codeString.Length
                 )
             {
-                foundIndex = targetString.IndexOf(codeString, targetStringStartIndex, CodeComparisonOptions);
+                foundIndex = sourceString.IndexOf(codeString, sourceStringStartIndex, CodeComparisonOptions);
             }
 
             return foundIndex;
@@ -187,71 +191,71 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Check if a code exists at a position within a target string
         /// </summary>
-        /// <param name="targetString"></param>
+        /// <param name="sourceString"></param>
         /// <param name="codeString"></param>
-        /// <param name="targetStringStartIndex"></param>
+        /// <param name="sourceStringStartIndex"></param>
         /// <returns></returns>
         private bool
         EqualsCode(
-             string targetString
+             string sourceString
             ,string codeString
-            ,int targetStringStartIndex = 0
+            ,int sourceStringStartIndex = 0
             )
         {
-            bool targetStartsWithCode = false;
+            bool sourceStartsWithCode = false;
 
-            if (null != targetString
+            if (null != sourceString
                 && null != codeString
                 && 0 < codeString.Length
-                && 0 <= targetStringStartIndex 
-                && targetString.Length > targetStringStartIndex
-                && codeString.Length <= (targetString.Length - targetStringStartIndex)
+                && 0 <= sourceStringStartIndex 
+                && sourceString.Length > sourceStringStartIndex
+                && codeString.Length <= (sourceString.Length - sourceStringStartIndex)
                 )
             {
-                string targetPrefix = targetString.Substring(targetStringStartIndex, codeString.Length);
+                string targetPrefix = sourceString.Substring(sourceStringStartIndex, codeString.Length);
                 if (0 == String.Compare(codeString, targetPrefix, CodeComparisonOptions))
                 {
-                    targetStartsWithCode = true;
+                    sourceStartsWithCode = true;
                 }
             }
 
-            return targetStartsWithCode;
+            return sourceStartsWithCode;
         }
 
         /// <summary>
-        /// Check if the record separator appears in the target string
+        /// Check if the record separator appears in a string
         /// </summary>
-        /// <param name="targetString"></param>
-        /// <param name="targetStringStartIndex"></param>
+        /// <param name="sourceString">string to search</param>
+        /// <param name="sourceStringStartIndex">position in the string to start searching</param>
         /// <returns></returns>
         public bool
         EqualsRecordSeparator(
-             string targetString
-            ,int targetStringStartIndex
+             string sourceString
+            ,int sourceStringStartIndex
             )
         {
-            return EqualsCode(targetString, RecordSeparator, targetStringStartIndex);
+            return EqualsCode(sourceString, RecordSeparator, sourceStringStartIndex);
         }
 
         /// <summary>
         /// Check if the unit separator appears in the target string
         /// </summary>
-        /// <param name="targetString"></param>
-        /// <param name="targetStringStartIndex"></param>
+        /// <param name="sourceString">string to search</param>
+        /// <param name="sourceStringStartIndex">position in the string to start searching</param>
         /// <returns></returns>
         public bool
         EqualsUnitSeparator(
-            string targetString
-            ,int targetStringStartIndex
+            string sourceString
+            ,int sourceStringStartIndex
             )
         {
-            return EqualsCode(targetString, UnitSeparator, targetStringStartIndex);
+            return EqualsCode(sourceString, UnitSeparator, sourceStringStartIndex);
         }
 
         /// <summary>
         /// Decode a single unit value from an encoded record
         /// </summary>
-        /// <param name="decodedValueBuffer"></param>
+        /// <param name="decodedValueBuffer">target buffer to receive the decoded value</param>
         /// <param name="isInsideQuotation">
         /// Should be initially set to False.
         /// Stores the state of the decoder;
@@ -345,8 +349,8 @@ namespace Upstream.System.Csv
         /// Append a unit value onto a string buffer.
         /// The value will be quoted if necessary
         /// </summary>
-        /// <param name="encodedValueBuffer"></param>
-        /// <param name="valueString"></param>
+        /// <param name="encodedValueBuffer">target buffer to receive the encoded value</param>
+        /// <param name="valueString">string value to encode</param>
         /// <returns>The number of characters written to the buffer.
         /// This will be zero if the value string is null (or the equivalent)
         /// </returns>

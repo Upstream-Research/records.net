@@ -48,6 +48,13 @@
       <DocumentationSource sourceFile="..\Records.csproj" />
       <DocumentationSource sourceFile="..\Records.Csv.csproj" />
     </DocumentationSources>
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="(global)" isDocumented="False" />
+<NamespaceSummaryItem name="Upstream.System.Csv" isDocumented="True">Provides basic objects for reading and writing general "Code Separated Value" format - which includes the familiar "Comma Separated Value" and Tab delimited formats as a specific cases.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="Upstream.System.Records" isDocumented="True">Provides core interfaces with some basic implemention classes for objects that manipulate data records consisting of named fields.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="Upstream.System.Records.Csv" isDocumented="True">Implements some basic record interfaces using CSV reader/writer objects.</NamespaceSummaryItem></NamespaceSummaries>
+    <ProjectSummary>Records.net is an object library for manipulating record-based data.
+It provides a set of data record interfaces that can be used as a basis for record I/O streams and for record-based data models.</ProjectSummary>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->

@@ -26,8 +26,8 @@ namespace Upstream.System.Csv
         /// and will use a specific CSV encoding for parsing the stream.
         /// The CSV record separator will be determined by the base reader's NewLine symbol
         /// </summary>
-        /// <param name="baseReader"></param>
-        /// <param name="csvEncoding"></param>
+        /// <param name="baseReader">TextReader object which will be used as the stream source</param>
+        /// <param name="csvEncoding">CSV Encoding object used to parse CSV units from the source stream</param>
         public CsvReader(
              TextReader baseReader
             , CsvEncoding csvEncoding
@@ -55,7 +55,7 @@ namespace Upstream.System.Csv
         /// will use the default CSV encoding.
         /// The CSV record separator will be determined by the base reader's NewLine symbol.
         /// </summary>
-        /// <param name="baseReader"></param>
+        /// <param name="baseReader">TextReader to be wrapped by the CSV reader</param>
         public CsvReader(
             TextReader baseReader
             )
@@ -69,7 +69,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Dispose of resources held by the reader
         /// </summary>
-        /// <param name="disposing"></param>
+        /// <param name="disposing">True if managed resources should also be disposed</param>
         protected virtual void Dispose(bool disposing)
         {
             if (null != _baseReader)
@@ -120,7 +120,7 @@ namespace Upstream.System.Csv
         /// Read the beginning of the next record.
         /// Unit values must be read by calling ReadValue() until it returns false.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if a new record has been read</returns>
         public bool ReadRecord()
         {
             bool hasReadRecord = false;
@@ -150,7 +150,7 @@ namespace Upstream.System.Csv
         /// <summary>
         /// Read the next value from the current record
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if a new value (unit) has been read</returns>
         public bool ReadValue()
         {
             bool hasReadValue = false;
