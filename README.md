@@ -3,12 +3,12 @@ records.net
 
 .NET Tabular Data and Data Record Library
 
-*Copyright (c) 2017 Upstream Research, All Rights Reserved.*
+*Copyright (c) 2018 Upstream Research, All Rights Reserved.*
 
 The source code for this library is made available under an "MIT" license,
 See the "LICENSE" file for details.
 
-Revised: 2017-08-22 (db)
+Revised: 2018-09-02 (db)
 
 _(20170810 (db) Warning, this is unstable and untested code.
 It has been released in the interest of getting this code out into the community,
@@ -31,6 +31,7 @@ which allows for simpler transmission, transformation, and encoding of records
 at the expense of strongly-typed "entity" objects 
 (although strongly-typed records are still possible with this library).
 
+[Library API documentation](https://upstream-research.github.io/projects/records.net/helpdocs)
 
 ## Some Remarks On Existing Data Libraries and Frameworks
 
