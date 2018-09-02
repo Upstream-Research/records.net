@@ -1,4 +1,5 @@
-
+##  Copyright (c) 2018 Upstream Research, Inc.  All Rights Reserved.  ##
+##  Subject to the MIT License. See LICENSE file in top-level directory. ##
 
 
 # execute one test for the field_schema_spec

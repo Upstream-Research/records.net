@@ -1,3 +1,7 @@
+##  Copyright (c) 2018 Upstream Research, Inc.  All Rights Reserved.  ##
+##  Subject to the MIT License. See LICENSE file in top-level directory. ##
+
+
 source _test.env.tcl
 
 # delete contents of test output directory before running all tests

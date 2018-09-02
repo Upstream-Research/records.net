@@ -1,3 +1,6 @@
+##  Copyright (c) 2018 Upstream Research, Inc.  All Rights Reserved.  ##
+##  Subject to the MIT License. See LICENSE file in top-level directory. ##
+
 ## Helper functions for executing console-based tests via TCL
 
 # read each line of a file into a list

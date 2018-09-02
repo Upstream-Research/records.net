@@ -1,3 +1,6 @@
+##  Copyright (c) 2018 Upstream Research, Inc.  All Rights Reserved.  ##
+##  Subject to the MIT License. See LICENSE file in top-level directory. ##
+
 # like the exec command: execute a process
 # unlike the exec command: the process exit code is returned and without generating a TCL error
 proc pexec args {
