@@ -13,7 +13,7 @@
     <RootNamespace>Upstream</RootNamespace>
     <Name>HelpDocs.SHFB.Records.Portable</Name>
     <!-- SHFB properties -->
-    <FrameworkVersion>.NET Framework 4.5.2</FrameworkVersion>
+    <FrameworkVersion>.NET Portable Library 4.5</FrameworkVersion>
     <OutputPath>..\bin\Help\</OutputPath>
     <HtmlHelpName>HelpDocs.SHFB.Records.Portable</HtmlHelpName>
     <Language>en-US</Language>

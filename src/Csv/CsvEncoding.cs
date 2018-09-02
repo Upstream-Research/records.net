@@ -1,4 +1,5 @@
 ﻿/*  Copyright (c) 2015 Upstream Research, Inc.  */
+/*  Subject to the MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Text;

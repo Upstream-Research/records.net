@@ -1,4 +1,5 @@
 ﻿/*  Copyright (c) Upstream Research, Inc.  All Rights Reserved.  */
+/*  Subject to the MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections;

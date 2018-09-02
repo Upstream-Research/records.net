@@ -1,4 +1,5 @@
 ﻿/*  Copyright (c) 2017 Upstream Research, Inc.  All Rights Reserved.  */
+/*  Subject to the MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections;
@@ -101,6 +102,7 @@ namespace Upstream.System.Records
         /// Add some common datatype names to the name-type registry
         /// </summary>
         /// <param name="dataTypeDictionary"></param>
+        /// <param name="dataTypeNameDictionary"></param>
         /// <remarks>
         /// The recognized datatypes here are meant to be quite minimal.
         /// It is tempting to support a lot of alternate names 

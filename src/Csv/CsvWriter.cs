@@ -1,7 +1,8 @@
 ﻿/*  Copyright (c) 2017 Upstream Research, Inc.  */
+/*  Subject to the MIT License. See LICENSE file in top-level directory. */
 
 using System;
-using System.Collections.Generic;
+//using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
