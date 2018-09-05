@@ -45,7 +45,7 @@ namespace Upstream.System.Records.Csv
         +"    quit\n"
         +"        get out of here.\n"
         +"    print\n"
-        +"        print the current list to the console\n"
+        +"        print the record to the console\n"
         +"    header\n"
         +"        print the field schema header\n"
         +"    up\n"
@@ -579,7 +579,7 @@ namespace Upstream.System.Records.Csv
                 return (0 == String.Compare(c1,c2, StringComparison.Ordinal));
             }
             ;
-            Action<CsvWriter,IRecordAccessor<string>> PrintRecord
+            Action<CsvWriter,IRecordAccessor<string>> PrintRecordInRow
             = (CsvWriter csvWriter, IRecordAccessor<string> strRecord)
             =>
             {
@@ -589,6 +589,19 @@ namespace Upstream.System.Records.Csv
                     csvWriter.WriteValue(field.Value);
                 }
                 csvWriter.WriteEndRecord();
+            }
+            ;
+            Action<CsvWriter,IRecordAccessor<string>> PrintRecordInColumn
+            = (CsvWriter csvWriter, IRecordAccessor<string> strRecord)
+            =>
+            {
+                foreach(KeyValuePair<string,string> field in strRecord)
+                {
+                    csvWriter.WriteStartRecord();
+                    csvWriter.WriteValue(field.Key);
+                    csvWriter.WriteValue(field.Value);
+                    csvWriter.WriteEndRecord();
+                }
             }
             ;
             
@@ -647,7 +660,7 @@ namespace Upstream.System.Records.Csv
                             currentRecordPosition = newPosition;
                             currentRecord = recordVisitor.Current;
                             printingRecordAccessor.AttachTo(currentRecord);
-                            PrintRecord(csvOut, printingRecordAccessor);
+                            PrintRecordInRow(csvOut, printingRecordAccessor);
                         }
                     }
                 }
@@ -664,7 +677,7 @@ namespace Upstream.System.Records.Csv
                             currentRecordPosition = newPosition;
                             currentRecord = recordVisitor.Current;
                             printingRecordAccessor.AttachTo(currentRecord);
-                            PrintRecord(csvOut, printingRecordAccessor);
+                            PrintRecordInRow(csvOut, printingRecordAccessor);
                         }
                     }
                 }
@@ -692,20 +705,8 @@ namespace Upstream.System.Records.Csv
                     || CmdNamesAreEqual("print", cmdName)
                     )
                 {
-                    // TODO 20180905: print header
-                    IRecordEnumerator<object> recordEnumerator = recordList.GetRecordEnumerator();
-                    IRecordEnumerator<string> outRecordEnumerator = new RecordEnumeratorAdapter<string,IRecordAccessor<object>>(
-                         printingRecordAccessor
-                        ,recordEnumerator
-                    );
-                    IRecordCollectionBuilder<string> csvOutRecordCollectionBuilder = new CsvRecordCollectionBuilder(
-                        csvOut
-                        ,recordSchema.FieldNames
-                    );
-                    RecordIO.ReadInto(
-                         csvOutRecordCollectionBuilder
-                        ,outRecordEnumerator
-                    );
+                    printingRecordAccessor.AttachTo(currentRecord);
+                    PrintRecordInColumn(csvOut, printingRecordAccessor);
                 }
                 else if (CmdNamesAreEqual("H", cmdName)
                     || CmdNamesAreEqual("header", cmdName)
