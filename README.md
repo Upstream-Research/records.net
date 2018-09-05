@@ -8,9 +8,9 @@ records.net
 The source code for this library is made available under an "MIT" license,
 See the "LICENSE" file for details.
 
-Revised: 2018-09-02 (db)
+Revised: 2018-09-05 (db)
 
-_(20170810 (db) Warning, this is unstable and untested code.
+_(20180905 (db) Warning, this is unstable and somewhat untested code.
 It has been released in the interest of getting this code out into the community,
 where it may be further developed into something stable)_
 
@@ -87,14 +87,14 @@ Derived libraries, like `Records.Data` have a dependency on `System.Data`.
 
 ## Testing
 
-Presently, this project does not use a unit testing framework.
+Presently, this project does not use a conventional unit testing framework.
 The approach to testing taken here is to develop light-weight console programs
 that attempt to reach a high level of "code coverage"
 without the introduction of extra dependencies.
 Testing the code involves invoking the test console program(s) repeatedly with different arguments.
 Validating the code's behavior involves comparing the output of the programs with an expected output.
-A test harness can be implemented as a shell script 
-using a file comparison tool to compare expected to actual program outputs.
+A very simple test harness has been implemented in TCL 
+that uses a file comparison _DIFF_ tool to compare expected to actual program outputs.
 This is, admittedly unconventional and bound to evoke disagreement,
 but the author believes there are several benefits to this approach that justify giving it a try.
 That said, the test code at the time of writing this isn't very good, 
