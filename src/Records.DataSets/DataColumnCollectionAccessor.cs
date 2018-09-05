@@ -19,6 +19,7 @@ namespace Upstream.System.Records.DataSets
      ,IRecordSchemaAccessor<DataColumnFieldType>
     {
         private DataColumnCollection _columnCollection;
+        private DataColumnNameEnumeration _columnNameEnumeration;
         private IList<DataColumnFieldType> _columnFieldTypeList = new List<DataColumnFieldType>();
         private IDictionary<string,DataColumnFieldType> _columnFieldTypeDictionary = new Dictionary<string,DataColumnFieldType>();
 
@@ -38,6 +39,14 @@ namespace Upstream.System.Records.DataSets
             AttachTo(baseColumnCollection);
         }
 
+        public IEnumerable<string> FieldNames
+        {
+            get
+            {
+                return _columnNameEnumeration;
+            }
+        }
+
         /// <summary>
         /// Attach to a base DataColumnCollection
         /// </summary>
@@ -48,6 +57,7 @@ namespace Upstream.System.Records.DataSets
             {
                 _columnCollection.CollectionChanged -= _columnCollection_CollectionChanged;
                 _columnCollection = null;
+                _columnNameEnumeration = null;
                 _columnFieldTypeList.Clear();
                 _columnFieldTypeDictionary.Clear();
             }
@@ -58,6 +68,7 @@ namespace Upstream.System.Records.DataSets
             {
                 AddDataColumn(column);
             }
+            _columnNameEnumeration = new DataColumnNameEnumeration(_columnCollection);
         }
 
         private void AddDataColumn(DataColumn column)
@@ -214,6 +225,90 @@ namespace Upstream.System.Records.DataSets
 
             return fieldName;
         }
+
+        /// <summary>
+        /// Implements an IEnumerator of DataColumn ColumnName values
+        /// </summary>
+        private class DataColumnNameEnumerator
+        : IEnumerator<string>
+        {
+            private readonly IEnumerator _dataColumnEnumerator;
+
+            public DataColumnNameEnumerator(
+                IEnumerator dataColumnEnumerator
+                )
+            {
+                _dataColumnEnumerator = dataColumnEnumerator;
+            }
+
+            public string Current
+            {
+                get
+                {
+                    DataColumn column = (DataColumn)_dataColumnEnumerator.Current;
+                    string columnName = null;
+
+                    if (null != column)
+                    {
+                        columnName = column.ColumnName;
+                    }
+
+                    return columnName;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return Current;
+                }
+            }
+
+            public void Dispose()
+            {
+                // do nothing;
+            }
+
+            public bool MoveNext()
+            {
+                return _dataColumnEnumerator.MoveNext();
+            }
+
+            public void Reset()
+            {
+                _dataColumnEnumerator.Reset();
+            }
+
+        } // /class
+
+        /// <summary>
+        /// Implements an IEnumerable of DataColumn ColumnName values
+        /// </summary>
+        private class DataColumnNameEnumeration
+        : IEnumerable<string>
+        {
+            private readonly IEnumerable _dataColumnEnumeration;
+
+            public DataColumnNameEnumeration(
+                DataColumnCollection dataColumnCollection
+                )
+            {
+                _dataColumnEnumeration = dataColumnCollection;
+            }
+
+            public IEnumerator<string> GetEnumerator()
+            {
+                return new DataColumnNameEnumerator(_dataColumnEnumeration.GetEnumerator());
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+        } // /class
+
     } // /class
 
 } // /namespace

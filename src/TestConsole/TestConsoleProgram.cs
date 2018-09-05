@@ -69,6 +69,7 @@ namespace Upstream.System
             cmdDictionary.Add("csv-translate", Csv.CsvTranslateProgram.Main);
             cmdDictionary.Add("rcd-csv-translate", Records.Csv.CsvRecordTranslateProgram.Main);
             cmdDictionary.Add("field_schema_spec-print", Records.FieldSchemaSpecPrintProgram.Main);
+            cmdDictionary.Add("rcd-editor", Records.Csv.RecordCollectionEditorProgram.Main);
 
             // insert command names into the help text
             StringBuilder cmdListBuffer = new StringBuilder();

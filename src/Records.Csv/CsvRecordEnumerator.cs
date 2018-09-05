@@ -24,25 +24,26 @@ namespace Upstream.System.Records.Csv
         /// <summary>
         /// Create a new record enumerator that will read records from the provided CSV stream
         /// </summary>
-        /// <param name="csvReader"></param>
+        /// <param name="csvReader">Base CSV reader</param>
+        /// <param name="fieldNameEnumeration">Names of fields that will be exposed by this record reader</param>
         /// <param name="fieldValueSortComparer"></param>
         /// <param name="fieldValueEqualityComparer"></param>
-        /// <param name="fieldNameList"></param>
         public CsvRecordEnumerator(
              CsvReader csvReader
+            ,IEnumerable<string> fieldNameEnumeration
             ,IComparer fieldValueSortComparer
             ,IEqualityComparer fieldValueEqualityComparer
-            ,IList<string> fieldNameList
             )
         {
             int fieldCount = 0;
             
-            if (null != fieldNameList)
+            if (null == fieldNameEnumeration)
             {
-                fieldCount = fieldNameList.Count;
+                throw new ArgumentNullException("fieldNameEnumeration");
             }
+
             BasicRecordSchema<IRecordFieldType<string>> recordSchema = new BasicRecordSchema<IRecordFieldType<string>>();
-            foreach (string fieldName in fieldNameList)
+            foreach (string fieldName in fieldNameEnumeration)
             {
                 IRecordFieldType<string> fieldType = new BasicRecordFieldType<string>(
                     typeof(String)
@@ -53,6 +54,7 @@ namespace Upstream.System.Records.Csv
                     fieldName
                     ,fieldType
                     );
+                fieldCount += 1;
             }
 
             _fieldValueList = new string[fieldCount];
@@ -61,6 +63,24 @@ namespace Upstream.System.Records.Csv
                 ,_fieldValueList
                 );
             _csvReader = csvReader;
+        }
+
+        /// <summary>
+        /// Create a new record enumerator that will read records from the provided CSV stream
+        /// </summary>
+        /// <param name="csvReader">Base CSV reader</param>
+        /// <param name="fieldNameEnumeration">Names of fields that will be exposed by this record reader</param>
+        public CsvRecordEnumerator(
+             CsvReader csvReader
+            ,IEnumerable<string> fieldNameEnumeration
+            )
+            : this(
+                csvReader
+                ,fieldNameEnumeration
+                ,StringComparer.Ordinal
+                ,StringComparer.Ordinal
+                )
+        {
         }
 
         /// <summary>

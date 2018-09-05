@@ -10,7 +10,7 @@ namespace Upstream.System.Records
     /// <summary>
     /// Provides access to meta-fields for a field parsed from a Field Schema Spec string.
     /// </summary>
-    public class FieldSchemaSpecFieldRecord<TValue>
+    public class FieldSchemaSpecFieldType<TValue>
     : IRecordAccessor<object>
      , IRecordFieldType<TValue>
     {
@@ -38,7 +38,7 @@ namespace Upstream.System.Records
         /// <param name="fieldName"></param>
         /// <param name="fieldTypeName"></param>
         /// <param name="dataType"></param>
-        internal FieldSchemaSpecFieldRecord(
+        internal FieldSchemaSpecFieldType(
              string fieldName
             ,string fieldTypeName
             ,Type dataType

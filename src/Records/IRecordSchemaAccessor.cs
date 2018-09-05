@@ -2,6 +2,7 @@
 /*  Subject to the MIT License. See LICENSE file in top-level directory. */
 
 using System;
+using System.Collections.Generic;
 
 namespace Upstream.System.Records
 {
@@ -12,6 +13,12 @@ namespace Upstream.System.Records
     public interface IRecordSchemaAccessor<TFieldType>
     : IRecordAccessor<TFieldType>
     {
+        
+        /// <summary>
+        /// Get an enumerable collection of the field names associated with records in this schema
+        /// </summary>
+        IEnumerable<string> FieldNames { get; }
+
         /// <summary>
         /// Get the field position of a field by its name
         /// </summary>

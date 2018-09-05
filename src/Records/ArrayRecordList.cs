@@ -13,7 +13,7 @@ namespace Upstream.System.Records
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TFieldType"></typeparam>
     public class ArrayRecordList<TValue,TFieldType> 
-    : IRecordCollection<TValue,TFieldType>
+    : IRecordList<TValue,TFieldType>
      ,IList<IRecordAccessor<TValue>>
     where TFieldType : IRecordFieldType<TValue>
     {

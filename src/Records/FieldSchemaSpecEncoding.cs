@@ -18,7 +18,7 @@ namespace Upstream.System.Records
     /// For example: "id:varchar,name:varchar,age:int32".
     /// Recognized datatype names can be customized.
     /// </remarks>
-    public class FieldSchemaSpec<TValue>
+    public class FieldSchemaSpecEncoding<TValue>
     {
         /// <summary>
         /// Dictionary to lookup a Type for a type name.
@@ -34,10 +34,10 @@ namespace Upstream.System.Records
         private readonly Type _defaultDataType = typeof(Object);
 
         /// <summary>
-        /// Create a new field schema spec parser that will recognize a very basic set of datatypes 
+        /// Create a new field schema spec encoding that will recognize a very basic set of datatypes 
         /// (varchar, int32, int64, float32, float64, decimal, boolean, varbinary, guid, datetime, timespan)
         /// </summary>
-        public FieldSchemaSpec()
+        public FieldSchemaSpecEncoding()
         {
             _dataTypeDictionary = CreateDataTypeDictionary();
             _dataTypeNameDictionary = CreateDataTypeNameDictionary();
@@ -46,11 +46,13 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Create a new field schema spec parser that will recognize
+        /// Create a new field schema spec encoding that will recognize
         /// a specific set of field data types
         /// </summary>
-        /// <param name="dataTypeNameEnumeration"></param>
-        public FieldSchemaSpec(
+        /// <param name="dataTypeNameEnumeration">an enumerable collection of key-value pairs
+        /// which associate a field name (in the field spec) to a .NET datatype
+        /// </param>
+        public FieldSchemaSpecEncoding(
             IEnumerable<KeyValuePair<string,Type>> dataTypeNameEnumeration
             )
         {
@@ -181,10 +183,43 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Try to find the type name used for this field schema
+        /// that corresponds to some .NET datatype
+        /// </summary>
+        /// <param name="dataType">.NET datatype search criterion</param>
+        /// <param name="defaultFieldTypeName">field type name to use if no field type name is found</param>
+        /// <returns>a field type name, if the .net datatype was found, then 
+        /// this will be the primary name assigned to that type by this field spec,
+        /// if the .net datatype was not found, then this will be the same as the <c>defaultFieldTypeName</c> parameter.
+        /// </returns>
+        public string
+        GetFieldTypeName(
+            Type dataType
+            ,string defaultFieldTypeName
+            )
+        {
+            bool wasFound = false;
+            string fieldTypeName = null;
+
+            if (null != dataType)
+            {
+                wasFound = _dataTypeNameDictionary.TryGetValue(dataType, out fieldTypeName);
+            }
+            if (!wasFound)
+            {
+                fieldTypeName = defaultFieldTypeName;
+            }
+
+            return fieldTypeName;
+        }
+
+        /// <summary>
         /// Centralized function to lookup a datatype from its name
         /// </summary>
-        /// <param name="fieldTypeName"></param>
-        /// <param name="defaultDataType"></param>
+        /// <param name="fieldTypeName">a type name used by the field spec</param>
+        /// <param name="defaultDataType">a .NET datatype that will be used as a default if
+        /// no corresponding .NET datatype could be found for the field type name
+        /// </param>
         /// <returns></returns>
         private Type
         GetDataTypeForFieldTypeName(
@@ -204,11 +239,50 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Format a field spec from a field name and a field type
+        /// </summary>
+        /// <param name="fieldName">name of the record field to encode</param>
+        /// <param name="fieldType">name of the field type</param>
+        /// <returns>a "field spec" which encodes a field name and its type into a string</returns>
+        public string
+        EncodeField(
+            string fieldName
+            ,IRecordFieldType<TValue> fieldType
+            )
+        {
+            string fieldSpecString = fieldName;
+            string fieldTypeName = null;
+
+            FieldSchemaSpecFieldType<TValue> fieldSchemaSpecType = fieldType as FieldSchemaSpecFieldType<TValue>;
+            if (null != fieldSchemaSpecType)
+            {
+                fieldTypeName = fieldSchemaSpecType.FieldTypeName;
+            }
+            else if (null != fieldType)
+            {
+                string unknownFieldTypeName = null;
+                fieldTypeName = GetFieldTypeName(fieldType.DataType, unknownFieldTypeName);
+            }
+
+            if (!String.IsNullOrEmpty(fieldName)
+                && null != fieldTypeName
+                )
+            {
+                fieldSpecString = String.Format("{0}:{1}"
+                        ,fieldName
+                        ,fieldTypeName
+                        );
+            }
+
+            return fieldSpecString;
+        }
+
+        /// <summary>
         /// Parse a field schema spec into an enumeration of record field type objects
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldRecord<TValue>>> 
-        ParseEnumerable(
+        public IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>> 
+        DecodeEnumerable(
             string fieldSchemaSpecString
         )
         {
@@ -223,8 +297,8 @@ namespace Upstream.System.Records
         /// <param name="internalBuffer">a buffer to use during parsing,
         /// if a buffer is not provided, then a new buffer will be allocated</param>
         /// <returns></returns>
-        public KeyValuePair<string,FieldSchemaSpecFieldRecord<TValue>>
-        ParseField(
+        public KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>
+        DecodeField(
             string fieldSchemaSpecString
             ,int startPosition = 0
             ,StringBuilder internalBuffer = null
@@ -232,7 +306,7 @@ namespace Upstream.System.Records
         {
             StringBuilder buffer = internalBuffer;
             string fieldName;
-            FieldSchemaSpecFieldRecord<TValue> fieldType;
+            FieldSchemaSpecFieldType<TValue> fieldType;
             
             if (null == buffer)
             {
@@ -243,7 +317,7 @@ namespace Upstream.System.Records
                 internalBuffer.Clear();
             }
 
-            ParseField(
+            DecodeField(
                 fieldSchemaSpecString
                 ,startPosition
                 ,out fieldName
@@ -251,7 +325,7 @@ namespace Upstream.System.Records
                 ,buffer
                 );
             
-            return new KeyValuePair<string,FieldSchemaSpecFieldRecord<TValue>>(fieldName,fieldType);
+            return new KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>(fieldName,fieldType);
         }
 
         /// <summary>
@@ -264,11 +338,11 @@ namespace Upstream.System.Records
         /// <param name="buffer">A string builder that will be used for internal buffering</param>
         /// <returns>number of characters read, including any terminating field delimiter</returns>
         private int 
-        ParseField(
+        DecodeField(
              string fieldSchemaSpecString
             ,int startPosition
             ,out string fieldName
-            ,out FieldSchemaSpecFieldRecord<TValue> fieldType
+            ,out FieldSchemaSpecFieldType<TValue> fieldType
             ,StringBuilder buffer
             )
         {
@@ -421,7 +495,7 @@ namespace Upstream.System.Records
                         Type dataType = GetDataTypeForFieldTypeName(fieldTypeName, defaultDataType);
 
                         fieldName = fieldName.Trim();
-                        fieldType = new FieldSchemaSpecFieldRecord<TValue>(
+                        fieldType = new FieldSchemaSpecFieldType<TValue>(
                              fieldName
                             ,fieldTypeName
                             ,dataType
@@ -438,21 +512,21 @@ namespace Upstream.System.Records
         /// Implements an IEnumerable interface that parses a field schema spec string
         /// </summary>
         private class FieldSchemaSpecEnumeration
-        : IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldRecord<TValue>>>
+        : IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>>
         {
-            private readonly FieldSchemaSpec<TValue> _parser;
+            private readonly FieldSchemaSpecEncoding<TValue> _encoding;
             private string _fieldSchemaSpecString;
 
             internal FieldSchemaSpecEnumeration(
-                 FieldSchemaSpec<TValue> parser
+                 FieldSchemaSpecEncoding<TValue> encoding
                 ,string fieldSchemaSpecString
                 )
             {
-                _parser = parser;
+                _encoding = encoding;
                 _fieldSchemaSpecString = fieldSchemaSpecString;
             }
 
-            public IEnumerator<KeyValuePair<string,FieldSchemaSpecFieldRecord<TValue>>>
+            public IEnumerator<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>>
             GetEnumerator()
             {
                 string specString = _fieldSchemaSpecString;
@@ -467,9 +541,9 @@ namespace Upstream.System.Records
                     while (charPosition < specString.Length)
                     {
                         string fieldName;
-                        FieldSchemaSpecFieldRecord<TValue> fieldType;
+                        FieldSchemaSpecFieldType<TValue> fieldType;
 
-                        charCount = _parser.ParseField(
+                        charCount = _encoding.DecodeField(
                              specString
                             ,charPosition
                             ,out fieldName
@@ -489,7 +563,7 @@ namespace Upstream.System.Records
                             && null != fieldType
                             )
                         {
-                            yield return new KeyValuePair<string,FieldSchemaSpecFieldRecord<TValue>>(fieldName, fieldType);
+                            yield return new KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>(fieldName, fieldType);
                         }
 
                     }

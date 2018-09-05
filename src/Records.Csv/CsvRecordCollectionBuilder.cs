@@ -18,27 +18,36 @@ namespace Upstream.System.Records.Csv
         private CsvWriter _csvWriter;
         IList<string> _fieldValueList;
         IList<string> _fieldNameList;
+        //IRecordSchemaAccessor<IRecordFieldType<string>> _recordSchema;
         IRecordAccessor<string> _currentRecord;
 
         /// <summary>
         /// Create a new CSV record collector that will write to a csv writer
         /// </summary>
-        /// <param name="csvWriter"></param>
+        /// <param name="csvWriter">Base CSV writer</param>
+        /// <param name="fieldNameEnumeration">field names that will be written by this writer</param>
         /// <param name="fieldValueSortComparer"></param>
         /// <param name="fieldValueEqualityComparer"></param>
-        /// <param name="fieldNameList"></param>
         public CsvRecordCollectionBuilder(
              CsvWriter csvWriter
+            ,IEnumerable<string> fieldNameEnumeration
             ,IComparer fieldValueSortComparer
             ,IEqualityComparer fieldValueEqualityComparer
-            ,IList<string> fieldNameList
             )
         {
             int fieldCount = 0;
+
+            if (null == fieldNameEnumeration)
+            {
+                throw new ArgumentNullException("fieldNameCollection");
+            }
             
-            fieldCount = fieldNameList.Count;
+            // we have to make a record schema in order to use the ListRecordAccessor later below
             BasicRecordSchema<IRecordFieldType<string>> recordSchema = new BasicRecordSchema<IRecordFieldType<string>>();
-            foreach (string fieldName in fieldNameList)
+            // copy the field names into a list that we control.
+            // TODO 20180905: use record schema that we are creating instead of making yet another copy of the field name list
+            IList<string> fieldNameList2 = new List<string>();
+            foreach (string fieldName in fieldNameEnumeration)
             {
                 IRecordFieldType<string> fieldType = new BasicRecordFieldType<string>(
                     typeof(String)
@@ -49,15 +58,36 @@ namespace Upstream.System.Records.Csv
                     fieldName
                     ,fieldType
                     );
+                fieldNameList2.Add(fieldName);
             }
 
-            _fieldNameList = fieldNameList;
+            _fieldNameList = fieldNameList2;
+            fieldCount = fieldNameList2.Count;
+            //_recordSchema = recordSchema;
             _fieldValueList = new string[fieldCount];
             _currentRecord = new ListRecordAccessor<string,IRecordFieldType<string>>(
                  recordSchema
                 ,_fieldValueList
                 );
             _csvWriter = csvWriter;
+        }
+
+        /// <summary>
+        /// Create a new CSV record collector that will write to a csv writer
+        /// </summary>
+        /// <param name="csvWriter">Base CSV writer</param>
+        /// <param name="fieldNameEnumeration">field names that will be written by this writer</param>
+        public CsvRecordCollectionBuilder(
+             CsvWriter csvWriter
+            ,IEnumerable<string> fieldNameEnumeration
+            )
+            : this(
+                csvWriter
+                ,fieldNameEnumeration
+                ,StringComparer.Ordinal
+                ,StringComparer.Ordinal
+                )
+        {
         }
 
         /// <summary>

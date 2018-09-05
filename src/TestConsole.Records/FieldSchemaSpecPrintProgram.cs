@@ -46,8 +46,8 @@ namespace Upstream.System.Records
             TextWriter errs = stderr;
             string arg;
             bool showHelp = false;
-            FieldSchemaSpec<object> specParser = new FieldSchemaSpec<object>();
-            IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldRecord<object>>> fieldEnumeration;
+            FieldSchemaSpecEncoding<object> specParser = new FieldSchemaSpecEncoding<object>();
+            IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<object>>> fieldEnumeration;
             string fieldSpecString = null;
             IEnumerator<string> argsEnum = args.GetEnumerator();
 
@@ -90,11 +90,11 @@ namespace Upstream.System.Records
             }
             else
             {
-                fieldEnumeration = specParser.ParseEnumerable(fieldSpecString);
-                foreach (KeyValuePair<string,FieldSchemaSpecFieldRecord<object>> fieldPair in fieldEnumeration)
+                fieldEnumeration = specParser.DecodeEnumerable(fieldSpecString);
+                foreach (KeyValuePair<string,FieldSchemaSpecFieldType<object>> fieldPair in fieldEnumeration)
                 {
                     string fieldName = fieldPair.Key;
-                    FieldSchemaSpecFieldRecord<object> fieldType = fieldPair.Value;
+                    FieldSchemaSpecFieldType<object> fieldType = fieldPair.Value;
                     Type dataType = fieldType.DataType;
                     string dataTypeName = dataType.ToString();
 

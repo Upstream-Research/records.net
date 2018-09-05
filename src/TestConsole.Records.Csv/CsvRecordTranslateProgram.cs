@@ -286,7 +286,7 @@ namespace Upstream.System.Records.Csv
                     StringComparer csvFieldValueComparer = StringComparer.Ordinal;
                     IComparer csvFieldValueSortComparer = csvFieldValueComparer;
                     IEqualityComparer csvFieldValueEqualityComparer = csvFieldValueComparer;
-                    FieldSchemaSpec<object> specParser = new FieldSchemaSpec<object>();
+                    FieldSchemaSpecEncoding<object> fieldSpecEncoding = new FieldSchemaSpecEncoding<object>();
                     StringBuilder specParserBuffer = new StringBuilder();
                     int startPosition = 0;
                     BasicRecordSchema<IRecordFieldType<object>> recordSchema = new BasicRecordSchema<IRecordFieldType<object>>();
@@ -299,10 +299,10 @@ namespace Upstream.System.Records.Csv
                         while (csvIn.ReadValue())
                         {
                             string fieldSpec = csvIn.ValueText;
-                            KeyValuePair<string,FieldSchemaSpecFieldRecord<object>> fieldInfo
-                                = specParser.ParseField(fieldSpec, startPosition, specParserBuffer);
+                            KeyValuePair<string,FieldSchemaSpecFieldType<object>> fieldInfo
+                                = fieldSpecEncoding.DecodeField(fieldSpec, startPosition, specParserBuffer);
                             string fieldName = fieldInfo.Key;
-                            FieldSchemaSpecFieldRecord<object> fieldType = fieldInfo.Value;
+                            FieldSchemaSpecFieldType<object> fieldType = fieldInfo.Value;
                             fieldNameList.Add(fieldName);
                             fieldTypeList.Add(fieldType);
                             recordSchema.AddField(fieldName, fieldType);
@@ -313,16 +313,8 @@ namespace Upstream.System.Records.Csv
                         foreach (KeyValuePair<string,IRecordFieldType<object>> fieldInfo in recordSchema)
                         {
                             string fieldName = fieldInfo.Key;
-                            FieldSchemaSpecFieldRecord<object> fieldType = (FieldSchemaSpecFieldRecord<object>)fieldInfo.Value;
-                            string fieldTypeName = fieldType.FieldTypeName;
-                            string fieldSpecString = fieldName;
-                            if (!String.IsNullOrEmpty(fieldTypeName))
-                            {
-                                fieldSpecString = String.Format("{0}:{1}",
-                                    fieldName
-                                    ,fieldTypeName
-                                );
-                            }
+                            IRecordFieldType<object> fieldType = fieldInfo.Value;
+                            string fieldSpecString = fieldSpecEncoding.EncodeField(fieldName, fieldType);
                             csvOut.WriteValue(fieldSpecString);
                         }
                         csvOut.WriteEndRecord();
@@ -330,15 +322,15 @@ namespace Upstream.System.Records.Csv
 
                     IRecordEnumerator<string> csvInRecordEnumerator = new CsvRecordEnumerator(
                         csvIn
-                        ,csvFieldValueComparer
-                        ,csvFieldValueComparer
                         ,fieldNameList
+                        ,csvFieldValueSortComparer
+                        ,csvFieldValueEqualityComparer
                     );
                     IRecordCollectionBuilder<string> csvOutRecordCollectionBuilder = new CsvRecordCollectionBuilder(
                         csvOut
-                        ,csvFieldValueComparer
-                        ,csvFieldValueComparer
                         ,fieldNameList
+                        ,csvFieldValueSortComparer
+                        ,csvFieldValueEqualityComparer
                     );
 
                     if (!shouldParseFieldValues)
