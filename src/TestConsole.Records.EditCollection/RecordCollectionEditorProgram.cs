@@ -46,6 +46,12 @@ namespace Upstream.System.Records.Csv
         +"        get out of here.\n"
         +"    print\n"
         +"        print the current list to the console\n"
+        +"    header\n"
+        +"        print the field schema header\n"
+        +"    up\n"
+        +"        move 'up' to previous record\n"
+        +"    down\n"
+        +"        move 'down' to next record\n"
         +"\n"
         ;
 
@@ -457,6 +463,7 @@ namespace Upstream.System.Records.Csv
                         ,scriptCultureInfoOut
                         ,csvScriptIn
                         ,scriptCultureInfoIn
+                        ,fieldSpecEncoding
                         );
 
                     // Write the records from the list to the output stream:
@@ -549,17 +556,22 @@ namespace Upstream.System.Records.Csv
             ,CultureInfo cultureInfoOut
             ,CsvReader csvIn
             ,CultureInfo cultureInfoIn
+            ,FieldSchemaSpecEncoding<object> fieldSpecEncoding
             )
         {
             string bannerText = EditorBannerText;
             string helpText = EditorHelpText;
             string promptText = ">> ";
             string cmdName;
+            int currentRecordPosition = 0;
+            int currentFieldPosition = 0;
             IRecordSchemaAccessor<IRecordFieldType<object>> recordSchema = recordList.RecordSchema;
             PrintingRecordAccessor<object,IRecordFieldType<object>> printingRecordAccessor = new PrintingRecordAccessor<object,IRecordFieldType<object>>(
                 recordSchema
                 ,cultureInfoOut
                 );
+            IRecordListVisitor<object> recordVisitor;
+            IRecordAccessor<object> currentRecord = null;
             bool shouldQuit = false;
             Func<string,string,bool> CmdNamesAreEqual 
             = (string c1, string c2) =>
@@ -567,7 +579,26 @@ namespace Upstream.System.Records.Csv
                 return (0 == String.Compare(c1,c2, StringComparison.Ordinal));
             }
             ;
+            Action<CsvWriter,IRecordAccessor<string>> PrintRecord
+            = (CsvWriter csvWriter, IRecordAccessor<string> strRecord)
+            =>
+            {
+                csvWriter.WriteStartRecord();
+                foreach(KeyValuePair<string,string> field in strRecord)
+                {
+                    csvWriter.WriteValue(field.Value);
+                }
+                csvWriter.WriteEndRecord();
+            }
+            ;
             
+            recordVisitor = recordList.GetRecordListVisitor();
+            if (recordVisitor.MoveNext())
+            {
+                currentRecord = recordVisitor.Current;
+                printingRecordAccessor.AttachTo(currentRecord);
+            }
+
             if (null != promptOut)
             {
                 promptOut.Write(bannerText);
@@ -603,6 +634,60 @@ namespace Upstream.System.Records.Csv
                         promptOut.Write(helpText);
                     }
                 }
+                else if (CmdNamesAreEqual("j", cmdName)
+                    || CmdNamesAreEqual("down", cmdName)
+                    )
+                {
+                    int offset = 1;
+                    int newPosition = currentRecordPosition + offset;
+                    if (newPosition < recordList.Count)
+                    {
+                        if (recordVisitor.MoveTo(newPosition))
+                        {
+                            currentRecordPosition = newPosition;
+                            currentRecord = recordVisitor.Current;
+                            printingRecordAccessor.AttachTo(currentRecord);
+                            PrintRecord(csvOut, printingRecordAccessor);
+                        }
+                    }
+                }
+                else if (CmdNamesAreEqual("k", cmdName)
+                    || CmdNamesAreEqual("up", cmdName)
+                    )
+                {
+                    int offset = 1;
+                    if (offset <= currentRecordPosition)
+                    {
+                        int newPosition = currentRecordPosition - offset;
+                        if (recordVisitor.MoveTo(newPosition))
+                        {
+                            currentRecordPosition = newPosition;
+                            currentRecord = recordVisitor.Current;
+                            printingRecordAccessor.AttachTo(currentRecord);
+                            PrintRecord(csvOut, printingRecordAccessor);
+                        }
+                    }
+                }
+                else if (CmdNamesAreEqual("h", cmdName)
+                    || CmdNamesAreEqual("left", cmdName)
+                    )
+                {
+                    int offset = 1;
+                    if (offset <= currentFieldPosition)
+                    {
+                        currentFieldPosition -= offset;
+                    }
+                }
+                else if (CmdNamesAreEqual("l", cmdName)
+                    || CmdNamesAreEqual("right", cmdName)
+                    )
+                {
+                    int offset = 1;
+                    if (currentFieldPosition + offset < recordList.FieldCount)
+                    {
+                        currentFieldPosition += offset;
+                    }
+                }
                 else if (CmdNamesAreEqual("p", cmdName)
                     || CmdNamesAreEqual("print", cmdName)
                     )
@@ -621,6 +706,20 @@ namespace Upstream.System.Records.Csv
                          csvOutRecordCollectionBuilder
                         ,outRecordEnumerator
                     );
+                }
+                else if (CmdNamesAreEqual("H", cmdName)
+                    || CmdNamesAreEqual("header", cmdName)
+                    )
+                {
+                    csvOut.WriteStartRecord();
+                    foreach (KeyValuePair<string,IRecordFieldType<object>> fieldInfo in recordList.RecordSchema)
+                    {
+                        string fieldName = fieldInfo.Key;
+                        IRecordFieldType<object> fieldType = fieldInfo.Value;
+                        string fieldSpecString = fieldSpecEncoding.EncodeField(fieldName, fieldType);
+                        csvOut.WriteValue(fieldSpecString);
+                    }
+                    csvOut.WriteEndRecord();
                 }
                 else if (!String.IsNullOrWhiteSpace(cmdName))
                 {
