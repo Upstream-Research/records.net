@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="TestConsole.Csv\CsvTranslateProgram.cs" />
     <Compile Include="TestConsole.AssemblyProperties\AssemblyInfo.cs" />
+    <Compile Include="TestConsole.Records.EditCollection\RecordCollectionEditorProgram.cs" />
     <Compile Include="TestConsole.Records\FieldSchemaSpecPrintProgram.cs" />
     <Compile Include="TestConsole.Records.Csv\CsvRecordTranslateProgram.cs" />
     <Compile Include="TestConsole\TestConsoleProgram.cs" />

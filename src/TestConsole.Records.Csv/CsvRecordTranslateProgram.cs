@@ -20,13 +20,15 @@ namespace Upstream.System.Records.Csv
     class CsvRecordTranslateProgram
     {
         const string HelpText = 
-         "RCD-CSV-TRANSLATE tool version 20180324\n"
+         "RCD-CSV-TRANSLATE tool version 20180324:20180905\n"
         +"\n"
         +"rcd-csv-translate [OPTIONS] [InputFile]\n"
         +"\n"
         +"OPTIONS\n"
         +"    -E {E}  Input file text encoding (e.g. 'utf-8', 'windows-1252')\n"
         +"    -e {E}  Output file text encoding (e.g. 'utf-8', 'windows-1252')\n"
+        +"    -L {L}  Input file culture (language/locale) (e.g. 'en-US', 'fr-FR')\n"
+        +"    -l {L}  Output file culture (language/locale) (e.g. 'en-US', 'fr-FR')\n"
         +"    -o {F}  Output file name\n"
         +"    -S {S}  Input file field delimiter\n"
         +"    -s {S}  Output file field delimiter\n"
@@ -62,6 +64,11 @@ namespace Upstream.System.Records.Csv
             Encoding textEncodingOut = null;
             CsvEncoding csvEncodingIn = null;
             CsvEncoding csvEncodingOut = null;
+            string cultureNameIn = null;
+            string cultureNameOut = null;
+            CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
+            CultureInfo cultureInfoIn = InvariantCulture;
+            CultureInfo cultureInfoOut = InvariantCulture;
             bool shouldParseFieldValues = false;
             TextReader ins = Console.In;
             TextWriter outs = Console.Out;
@@ -86,6 +93,28 @@ namespace Upstream.System.Records.Csv
                 )
                 {
                     shouldParseFieldValues = true;
+                }
+                else if (ArgOptionEquals("-L", arg)
+                    || ArgOptionEquals("--locale-in", arg)
+                    || ArgOptionEquals("--from-locale", arg)
+                    )
+                {
+                    if (argEnumerator.MoveNext())
+                    {
+                        arg = argEnumerator.Current;
+                        cultureNameIn = arg;
+                    }
+                }
+                else if (ArgOptionEquals("-l", arg)
+                    || ArgOptionEquals("--locale-out", arg)
+                    || ArgOptionEquals("--to-locale", arg)
+                    )
+                {
+                    if (argEnumerator.MoveNext())
+                    {
+                        arg = argEnumerator.Current;
+                        cultureNameOut = arg;
+                    }
                 }
                 else if (ArgOptionEquals("-E", arg)
                     || ArgOptionEquals("--encoding-in", arg)
@@ -150,6 +179,22 @@ namespace Upstream.System.Records.Csv
                 }
             }
 
+            if (!String.IsNullOrEmpty(cultureNameIn))
+            {
+                cultureInfoIn = FindCultureInfo(cultureNameIn);
+                if (null == cultureInfoIn)
+                {
+                    errorMessage = String.Format("Unknown culture name: '{0}'", cultureNameIn);
+                }
+            }
+            if (!String.IsNullOrEmpty(cultureNameOut))
+            {
+                cultureInfoOut = FindCultureInfo(cultureNameOut);
+                if (null == cultureInfoOut)
+                {
+                    errorMessage = String.Format("Unknown culture name: '{0}'", cultureNameOut);
+                }
+            }
             if (null != textEncodingNameIn)
             {
                 textEncodingIn = FindTextEncoding(textEncodingNameIn);
@@ -236,9 +281,6 @@ namespace Upstream.System.Records.Csv
                             outs = new StreamWriter(fileStreamOut, textEncodingOut);
                         }
                     }
-                    CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-                    CultureInfo inCultureInfo = InvariantCulture;
-                    CultureInfo outCultureInfo = InvariantCulture;
                     CsvReader csvIn = new CsvReader(ins, csvEncodingIn);
                     CsvWriter csvOut = new CsvWriter(outs, csvEncodingOut);
                     StringComparer csvFieldValueComparer = StringComparer.Ordinal;
@@ -310,7 +352,7 @@ namespace Upstream.System.Records.Csv
                     {
                         IRecordAccessorAdapter<object,IRecordAccessor<string>> inRecordAdapter = new ParsingRecordAccessor<IRecordFieldType<object>>(
                              recordSchema
-                            ,inCultureInfo
+                            ,cultureInfoIn
                         );
                         IRecordEnumerator<object> inRecordEnumerator = new RecordEnumeratorAdapter<object,IRecordAccessor<string>>(
                             inRecordAdapter
@@ -318,7 +360,7 @@ namespace Upstream.System.Records.Csv
                         );
                         IRecordAccessorAdapter<string,IRecordAccessor<object>> outRecordAdapter = new PrintingRecordAccessor<object,IRecordFieldType<object>>(
                             recordSchema
-                            ,outCultureInfo
+                            ,cultureInfoOut
                         );
                         IRecordEnumerator<string> outRecordEnumerator = new RecordEnumeratorAdapter<string,IRecordAccessor<object>>(
                             outRecordAdapter
@@ -400,6 +442,25 @@ namespace Upstream.System.Records.Csv
             }
 
             return unitSeparator;
+        }
+
+        private CultureInfo FindCultureInfo(string cultureName)
+        {
+            CultureInfo cultureInfo = null;
+
+            try
+            {
+                // User settings to locale will be ignored when using CultureInfo.GetCultureInfo()
+                cultureInfo = CultureInfo.GetCultureInfo(cultureName);
+            }
+            catch (CultureNotFoundException) // .NET 4.0 and later
+            {
+            }
+            catch (ArgumentException) // .NET 3.5 and earlier
+            {
+            }
+
+            return cultureInfo;
         }
 
         private Encoding FindTextEncoding(string encodingName)

@@ -8,6 +8,10 @@
             for record I/O streams and for record-based data models.
             </para>
             <para>
+            NOTE: This documentation is under development,
+            please excuse the presence of place-holders and "TODO" items.
+            </para>
+            <para>
             This library provides an alternative to some of the data structures and interfaces in Microsoft's ADO.Net (Aka. System.Data).
             It does not provide any means to communicate with a database.
             </para>
