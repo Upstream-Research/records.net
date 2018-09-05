@@ -1,2 +1,3 @@
 copy_values
 parse_values
+locale_translation

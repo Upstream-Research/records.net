@@ -1,0 +1,4 @@
+three_x_three+default+to+default
+three_x_three+default+to+fr-FR
+three_x_three+fr-FR+to+default
+three_x_three+en-US+to+fr-FR
