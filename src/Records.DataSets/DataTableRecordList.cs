@@ -148,6 +148,22 @@ namespace Upstream.System.Records.DataSets
         }
 
         /// <summary>
+        /// Add a new column to the underlying DataTable
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="fieldDataType"></param>
+        public void
+        AddField(
+             string fieldName
+            ,Type fieldDataType
+            )
+        {
+            DataTable table = GetDataTable();
+
+            table.Columns.Add(fieldName, fieldDataType);
+        }
+
+        /// <summary>
         /// Factory method
         /// </summary>
         /// <param name="row"></param>

@@ -160,11 +160,11 @@ namespace Upstream.System.Records
         /// it is best to call it before putting any records in the collection.
         /// </summary>
         /// <param name="fieldName"></param>
-        /// <param name="fieldProperties"></param>
+        /// <param name="fieldType"></param>
         public void 
-        AddField(string fieldName, TFieldType fieldProperties)
+        AddField(string fieldName, TFieldType fieldType)
         {
-            MutableRecordSchema.AddField(fieldName, fieldProperties);
+            MutableRecordSchema.AddField(fieldName, fieldType);
             IList<TValue[]> prevFieldValueListList = _fieldValueListList;
             int recordCount = prevFieldValueListList.Count;
 

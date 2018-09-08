@@ -22,16 +22,21 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the field position of a field by its name
         /// </summary>
-        /// <param name="fieldName"></param>
+        /// <param name="fieldName">Name of field to lookup.</param>
         /// <returns>-1 if field name is not found</returns>
         int IndexOfField(string fieldName);
 
         /// <summary>
         /// Get the name of a field at a position.
         /// Note, it is generally more efficient to enumerate the fields whenever possible.
+        /// If the field position is out of range, then an ArgumentOutOfRangeException should be raised.
         /// </summary>
-        /// <param name="fieldPosition"></param>
-        /// <returns></returns>
+        /// <param name="fieldPosition">
+        /// Position of field
+        /// </param>
+        /// <returns>
+        /// String name of field.  Should not return a null reference.
+        /// </returns>
         string FieldNameAt(int fieldPosition);
 
     } // /interface

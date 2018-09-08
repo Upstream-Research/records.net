@@ -31,16 +31,25 @@ namespace Upstream.System.Records
         /// </summary>
         private readonly IDictionary<Type,string> _dataTypeNameDictionary;
 
-        private readonly Type _defaultDataType = typeof(Object);
+        private readonly string _defaultFieldTypeName;
+        //private readonly Type _defaultDataType = typeof(Object);
 
         /// <summary>
         /// Create a new field schema spec encoding that will recognize a very basic set of datatypes 
         /// (varchar, int32, int64, float32, float64, decimal, boolean, varbinary, guid, datetime, timespan)
         /// </summary>
-        public FieldSchemaSpecEncoding()
+        /// <param name="defaultFieldTypeName">
+        /// Field type name which will be used as the default during decode operations.
+        /// Can be a null reference (although it is recommended to avoid this).
+        /// Defaults to "varchar".
+        /// </param>
+        public FieldSchemaSpecEncoding(
+            string defaultFieldTypeName = "varchar"
+            )
         {
             _dataTypeDictionary = CreateDataTypeDictionary();
             _dataTypeNameDictionary = CreateDataTypeNameDictionary();
+            _defaultFieldTypeName = defaultFieldTypeName;
 
             AddDefaultDataTypesTo(_dataTypeDictionary, _dataTypeNameDictionary);
         }
@@ -52,12 +61,18 @@ namespace Upstream.System.Records
         /// <param name="dataTypeNameEnumeration">an enumerable collection of key-value pairs
         /// which associate a field name (in the field spec) to a .NET datatype
         /// </param>
+        /// <param name="defaultFieldTypeName">
+        /// Field type name which will be used as the default during decode operations.
+        /// Can be a null reference (but it is recommended to avoid doing this).
+        /// </param>
         public FieldSchemaSpecEncoding(
             IEnumerable<KeyValuePair<string,Type>> dataTypeNameEnumeration
+            ,string defaultFieldTypeName
             )
         {
             _dataTypeDictionary = CreateDataTypeDictionary();
             _dataTypeNameDictionary = CreateDataTypeNameDictionary();
+            _defaultFieldTypeName = defaultFieldTypeName;
 
             IDictionary<string,Type> dataTypeDictionary = _dataTypeDictionary;
             IDictionary<Type,string> dataTypeNameDictionary = _dataTypeNameDictionary;
@@ -71,7 +86,7 @@ namespace Upstream.System.Records
                     dataTypeDictionary[dataTypeName] = dataType;
 
                     // set the default type name the first time we see the type,
-                    //  after this, all other names for this type will be non-default names
+                    //  after this, all other names for this type will be "alias" names
                     if (!dataTypeNameDictionary.ContainsKey(dataType))
                     {
                         dataTypeNameDictionary[dataType] = dataTypeName;
@@ -217,17 +232,17 @@ namespace Upstream.System.Records
         /// Centralized function to lookup a datatype from its name
         /// </summary>
         /// <param name="fieldTypeName">a type name used by the field spec</param>
-        /// <param name="defaultDataType">a .NET datatype that will be used as a default if
-        /// no corresponding .NET datatype could be found for the field type name
-        /// </param>
-        /// <returns></returns>
+        /// <returns>
+        /// .NET Data type corresponding to the field type name.
+        /// Null reference if the field type name cannot be found.
+        /// </returns>
         private Type
-        GetDataTypeForFieldTypeName(
+        FindDataTypeForFieldTypeName(
             string fieldTypeName
-            ,Type defaultDataType
             )
         {
             IDictionary<string,Type> dataTypeDictionary = _dataTypeDictionary;
+            Type defaultDataType = null;
             Type dataType;
             
             if (!dataTypeDictionary.TryGetValue(fieldTypeName, out dataType))
@@ -280,7 +295,10 @@ namespace Upstream.System.Records
         /// <summary>
         /// Parse a field schema spec into an enumeration of record field type objects
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// An enumerable collection of KeyValuePairs each containing a field name and field type
+        /// for the fields parsed from a field spec string.
+        /// </returns>
         public IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>> 
         DecodeEnumerable(
             string fieldSchemaSpecString
@@ -292,14 +310,21 @@ namespace Upstream.System.Records
         /// <summary>
         /// Parse a single field description
         /// </summary>
-        /// <param name="fieldSchemaSpecString"></param>
-        /// <param name="startPosition"></param>
+        /// <param name="fieldSchemaSpecString">field schema spec string which will be decoded</param>
+        /// <param name="startPosition">position in the field spec string where decoding will begin</param>
         /// <param name="internalBuffer">a buffer to use during parsing,
-        /// if a buffer is not provided, then a new buffer will be allocated</param>
-        /// <returns></returns>
+        /// if a buffer is not provided, then a new buffer will be allocated.
+        /// This parameter should be used if this function is being called in a loop;
+        /// this way, the internal parse buffer will not need to be reallocated each time.
+        /// </param>
+        /// <returns>
+        /// A KeyValuePair containing the name and type of the field parsed from the field spec.
+        /// If no field is decoded, then the field name and field type will be set to a null reference.
+        /// If no field type is parsed then the field type object will be set to a default (which may be a null reference).
+        /// </returns>
         public KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>
         DecodeField(
-            string fieldSchemaSpecString
+             string fieldSchemaSpecString
             ,int startPosition = 0
             ,StringBuilder internalBuffer = null
             )
@@ -329,12 +354,15 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Parse a field out of a field spec string
+        /// Core function to parse (i.e. decode) a field out of a field spec string
         /// </summary>
-        /// <param name="fieldSchemaSpecString"></param>
-        /// <param name="startPosition"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="fieldType"></param>
+        /// <param name="fieldSchemaSpecString">field spec string to parse</param>
+        /// <param name="startPosition">position to start decoding in the input field spec string</param>
+        /// <param name="fieldName">On exit, contains the name of the field that was parsed from the spec</param>
+        /// <param name="fieldType">On exit, contains an object that describes the field type.
+        /// If no field type is parsed from the field spec, then a default type will be returned.
+        /// May return null if the field spec does not actually specify a field.
+        /// </param>
         /// <param name="buffer">A string builder that will be used for internal buffering</param>
         /// <returns>number of characters read, including any terminating field delimiter</returns>
         private int 
@@ -347,12 +375,12 @@ namespace Upstream.System.Records
             )
         {
             string specString = fieldSchemaSpecString;
-            Type defaultDataType = _defaultDataType;
+            string defaultFieldTypeName = _defaultFieldTypeName;
             string fieldDelimiter = ",";
             string typeDelimiter =  ":";
             string optionStartDelimiter = "(";
             string optionEndDelimiter = ")";
-            string unspecifiedFieldTypeName = "";
+            //string unspecifiedFieldTypeName = "";
             string unspecifiedFieldOptionSpec = "";
             int charPosition;
             int charCount = 0;
@@ -484,7 +512,7 @@ namespace Upstream.System.Records
                     {
                         if (null == fieldTypeName)
                         {
-                            fieldTypeName = unspecifiedFieldTypeName;
+                            fieldTypeName = defaultFieldTypeName;
                         }
                         if (null == fieldOptionSpec)
                         {
@@ -492,14 +520,17 @@ namespace Upstream.System.Records
                         }
 
                         fieldTypeName = fieldTypeName.Trim();
-                        Type dataType = GetDataTypeForFieldTypeName(fieldTypeName, defaultDataType);
+                        Type dataType = FindDataTypeForFieldTypeName(fieldTypeName);
 
                         fieldName = fieldName.Trim();
-                        fieldType = new FieldSchemaSpecFieldType<TValue>(
-                             fieldName
-                            ,fieldTypeName
-                            ,dataType
-                            );
+                        if (null != dataType)
+                        {
+                            fieldType = new FieldSchemaSpecFieldType<TValue>(
+                                 fieldName
+                                ,fieldTypeName
+                                ,dataType
+                                );
+                        }
                     }
                 }
             }
@@ -515,7 +546,7 @@ namespace Upstream.System.Records
         : IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>>
         {
             private readonly FieldSchemaSpecEncoding<TValue> _encoding;
-            private string _fieldSchemaSpecString;
+            private readonly string _fieldSchemaSpecString;
 
             internal FieldSchemaSpecEnumeration(
                  FieldSchemaSpecEncoding<TValue> encoding

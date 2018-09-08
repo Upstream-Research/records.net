@@ -1,5 +1,5 @@
 ﻿/*  Copyright (c) 2018 Upstream Research, Inc.  All Rights Reserved.  */
-/*  Subject to the MIT License. See LICENSE file in top-level directory. */
+/*  Subject to an MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections;
@@ -29,7 +29,6 @@ namespace Upstream.System.Records
             _fieldTypeDictionary = new Dictionary<string,TFieldType>(fieldCountEstimate);
             _fieldPositionDictionary = new Dictionary<string,int>(fieldCountEstimate);
         }
-
 
         private IList<string> FieldNameList
         {
@@ -67,25 +66,19 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Get the position associated with the given field name
-        /// </summary>
-        /// <param name="fieldOrdinal"></param>
-        /// <returns></returns>
-        private string GetFieldName(int fieldOrdinal)
-        {
-            return FieldNameList[fieldOrdinal];
-        }
-
-        /// <summary>
         /// Get a Field Type object for a field by the field position
         /// </summary>
-        /// <param name="fieldPosition"></param>
-        /// <returns></returns>
+        /// <param name="fieldPosition">
+        /// Position of a field.
+        /// </param>
+        /// <returns>
+        /// Field type for the specified field.
+        /// </returns>
         public TFieldType this[int fieldPosition]
         {
             get
             {
-                string fieldName = GetFieldName(fieldPosition);
+                string fieldName = FieldNameAt(fieldPosition);
                 return FieldTypeDictionary[fieldName];
             }
             set
@@ -97,8 +90,12 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get a Field Type object for a field by the field name
         /// </summary>
-        /// <param name="fieldName"></param>
-        /// <returns></returns>
+        /// <param name="fieldName">
+        /// Name of a field
+        /// </param>
+        /// <returns>
+        /// Field type associated with the field name
+        /// </returns>
         public TFieldType this[string fieldName]
         {
             get
@@ -123,8 +120,12 @@ namespace Upstream.System.Records
         /// <summary>
         /// Lookup a field's position by its name
         /// </summary>
-        /// <param name="fieldName"></param>
-        /// <returns></returns>
+        /// <param name="fieldName">
+        /// Name of field to lookup.
+        /// </param>
+        /// <returns>
+        /// -1 if the field name is out of range.
+        /// </returns>
         public int IndexOfField(string fieldName)
         {
             int fieldPosition = -1;
@@ -136,16 +137,22 @@ namespace Upstream.System.Records
 
         /// <summary>
         /// Get the name of a field by its position in the field list.
+        /// Throws <see cref="ArgumentOutOfRangeException"/>  if the field position is invalid.
         /// </summary>
-        /// <param name="fieldPosition"></param>
-        /// <returns></returns>
-        public string FieldNameAt(int fieldPosition)
+        /// <param name="fieldPosition">
+        /// Position of a field.
+        /// </param>
+        /// <returns>
+        /// Name of the field found.
+        /// </returns>
+        public string 
+        FieldNameAt(int fieldPosition)
         {
             if (0 > fieldPosition)
             {
                 throw new ArgumentOutOfRangeException("fieldPosition");
             }
-            else if (fieldPosition < FieldNameList.Count)
+            else if (FieldNameList.Count <= fieldPosition)
             {
                 throw new ArgumentOutOfRangeException("fieldPosition");
             }
@@ -156,8 +163,9 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get an enumerator of the field names
         /// </summary>
-        /// <returns></returns>
-        public IEnumerator<string> GetFieldNameEnumerator()
+        /// <returns>Enumerator of field name strings</returns>
+        public IEnumerator<string> 
+        GetFieldNameEnumerator()
         {
             return FieldNameList.GetEnumerator();
         }
@@ -165,9 +173,12 @@ namespace Upstream.System.Records
         /// <summary>
         /// Try to get a Field Type object by its field name
         /// </summary>
-        /// <param name="fieldName"></param>
-        /// <param name="outValue"></param>
-        /// <returns></returns>
+        /// <param name="fieldName">Name of the field to lookup</param>
+        /// <param name="outValue">Field type information for the field</param>
+        /// <returns>
+        /// True if the field type information was found for the named field.
+        /// False otherwise.
+        /// </returns>
         public bool TryGetValue(string fieldName, out TFieldType outValue)
         {
             return FieldTypeDictionary.TryGetValue(fieldName, out outValue);
@@ -176,8 +187,12 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get an dictionary enumerator of the field names and their types
         /// </summary>
-        /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, TFieldType>> GetEnumerator()
+        /// <returns>
+        /// Enumerator of fields in the schema, 
+        /// each field is encoded in a KeyValuePair containing the field name and its type information
+        /// </returns>
+        public IEnumerator<KeyValuePair<string, TFieldType>> 
+        GetEnumerator()
         {
             for(int fieldPosition = 0; fieldPosition < FieldNameList.Count; fieldPosition++)
             {
@@ -197,8 +212,8 @@ namespace Upstream.System.Records
         /// Add a new field to the record schema.
         /// If the field name is already in the schema, an exception will be raised.
         /// </summary>
-        /// <param name="fieldName"></param>
-        /// <param name="fieldType"></param>
+        /// <param name="fieldName">Name of field to be added</param>
+        /// <param name="fieldType">Type information for field to be added</param>
         public void AddField(string fieldName, TFieldType fieldType)
         {
             if (null == fieldName)
@@ -222,7 +237,9 @@ namespace Upstream.System.Records
         /// Add a new field to the record schema.
         /// If the field name is already in the schema, an exception will be raised.
         /// </summary>
-        /// <param name="fieldInfo"></param>
+        /// <param name="fieldInfo">
+        /// KeyValuePair containing name of field and field type for the field to be added to the schema
+        /// </param>
         public void AddField(KeyValuePair<string,TFieldType> fieldInfo)
         {
             AddField(fieldInfo.Key, fieldInfo.Value);

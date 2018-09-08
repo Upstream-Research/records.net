@@ -1,5 +1,5 @@
 ﻿/*  Copyright (c) 2017 Upstream Research, Inc.  */
-/*  Subject to the MIT License. See LICENSE file in top-level directory. */
+/*  Subject to an MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections.Generic;
@@ -7,8 +7,12 @@ using System.Collections.Generic;
 namespace Upstream.System.Records
 {
     /// <summary>
-    /// Defines a basic interface which Record Schema Field Type implementations should implement
+    /// Defines a basic interface which Record Schema Field Type implementations should implement.
     /// </summary>
+    /// <remarks>
+    /// Notice that this interface inherits <see cref="IComparer{TValue}"/> and <see cref="IEqualityComparer{TValue}"/>,
+    /// these interfaces provide for sorting and hashing of field values.
+    /// </remarks>
     public interface IRecordFieldType<in TValue>
     : IComparer<TValue>
      ,IEqualityComparer<TValue>
@@ -19,7 +23,7 @@ namespace Upstream.System.Records
         Type DataType { get; }
 
         /// <summary>
-        /// Determine if a value is a valid (in the domain) for this field
+        /// Determine if a value is valid (i.e. in the domain) for this field
         /// </summary>
         /// <param name="fieldValue"></param>
         /// <returns></returns>

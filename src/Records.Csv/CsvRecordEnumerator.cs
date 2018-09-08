@@ -26,8 +26,8 @@ namespace Upstream.System.Records.Csv
         /// </summary>
         /// <param name="csvReader">Base CSV reader</param>
         /// <param name="fieldNameEnumeration">Names of fields that will be exposed by this record reader</param>
-        /// <param name="fieldValueSortComparer"></param>
-        /// <param name="fieldValueEqualityComparer"></param>
+        /// <param name="fieldValueSortComparer">The sort comparer to be associated with field types in the record enumerator's record schema</param>
+        /// <param name="fieldValueEqualityComparer">The equality comparer to be associated with field types in the record enumerator's record schema</param>
         public CsvRecordEnumerator(
              CsvReader csvReader
             ,IEnumerable<string> fieldNameEnumeration

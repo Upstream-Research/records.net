@@ -41,11 +41,13 @@
   <ItemGroup>
     <Compile Include="Records.AssemblyProperties\AssemblyInfo.cs" />
     <Compile Include="Records\ArrayRecordList.cs" />
+    <Compile Include="Records\BasicFieldValueStringRepresentation.cs" />
     <Compile Include="Records\BasicRecordFieldType.cs" />
     <Compile Include="Records\BasicRecordSchema.cs" />
     <Compile Include="Records\DictionaryRecordAccessor.cs" />
     <Compile Include="Records\FieldSchemaSpecEncoding.cs" />
     <Compile Include="Records\FieldSchemaSpecFieldType.cs" />
+    <Compile Include="Records\IFieldValueStringRepresentation.cs" />
     <Compile Include="Records\IRecordAccessorAdapter.cs" />
     <Compile Include="Records\IRecordCollectionBuilder.cs" />
     <Compile Include="Records\IRecordCollector.cs" />
