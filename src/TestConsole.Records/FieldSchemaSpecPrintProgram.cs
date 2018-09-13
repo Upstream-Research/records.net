@@ -47,7 +47,7 @@ namespace Upstream.System.Records
             string arg;
             bool showHelp = false;
             FieldSchemaSpecEncoding<object> specParser = new FieldSchemaSpecEncoding<object>();
-            IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<object>>> fieldEnumeration;
+            IEnumerable<IFieldNameValuePair<FieldSchemaSpecFieldType<object>>> fieldEnumeration;
             string fieldSpecString = null;
             IEnumerator<string> argsEnum = args.GetEnumerator();
 
@@ -91,12 +91,16 @@ namespace Upstream.System.Records
             else
             {
                 fieldEnumeration = specParser.DecodeEnumerable(fieldSpecString);
-                foreach (KeyValuePair<string,FieldSchemaSpecFieldType<object>> fieldPair in fieldEnumeration)
+                foreach (IFieldNameValuePair<IRecordFieldType<object>> fieldPair in fieldEnumeration)
                 {
-                    string fieldName = fieldPair.Key;
-                    FieldSchemaSpecFieldType<object> fieldType = fieldPair.Value;
+                    string fieldName = fieldPair.Name;
+                    IRecordFieldType<object> fieldType = fieldPair.Value;
                     Type dataType = fieldType.DataType;
-                    string dataTypeName = dataType.ToString();
+                    string dataTypeName = "<unknown>";
+                    if (null != dataType)
+                    {
+                        dataTypeName = dataType.ToString();
+                    }
 
                     outs.WriteLine(String.Format("{1}{0}{2}"
                         ,dataTypeSeparator

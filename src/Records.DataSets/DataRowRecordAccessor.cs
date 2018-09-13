@@ -190,6 +190,47 @@ namespace Upstream.System.Records.DataSets
         }
 
         /// <summary>
+        /// Try to get a field and its value by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field was not found</returns>
+        private IFieldNameValuePair<object> FindField(string fieldName)
+        {
+            IFieldNameValuePair<object> fieldItem = null;
+            object fieldValue;
+
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<object>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
+        /// Find the position of a named field/column in the record/row
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>-1 if the field/column was not found</returns>
+        public int IndexOfField(string fieldName)
+        {
+            int fieldPosition = -1;
+            DataRow row = DataRow;
+
+            if (null != row)
+            {
+                DataTable table = row.Table;
+                DataColumn column = table.Columns[fieldName];
+                if (null != column)
+                {
+                    fieldPosition = column.Ordinal;
+                }
+            }
+
+            return fieldPosition;
+        }
+
+        /// <summary>
         /// Get an enumerator of field names for this record
         /// </summary>
         /// <returns></returns>
@@ -210,7 +251,7 @@ namespace Upstream.System.Records.DataSets
         /// Get an enumerator of field names and values for this record
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<object>> GetEnumerator()
         {
             DataRow row = GetDataRow();
             DataTable table = row.Table;
@@ -220,7 +261,7 @@ namespace Upstream.System.Records.DataSets
                 string fieldName = column.ColumnName;
                 object fieldValue = GetFieldValue(row, column);
 
-                yield return new KeyValuePair<string,object>(fieldName,fieldValue);
+                yield return new FieldNameValuePair<object>(fieldName,fieldValue);
             }            
         }
 

@@ -36,7 +36,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get an object that provides access to the field schema
         /// </summary>
-        IRecordSchemaAccessor<TField> RecordSchema { get; }
+        IRecordSchemaViewer<TField> RecordSchema { get; }
 
         /// <summary>
         /// Delete all records in this collection

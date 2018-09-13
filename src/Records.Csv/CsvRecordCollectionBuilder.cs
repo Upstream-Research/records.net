@@ -171,7 +171,7 @@ namespace Upstream.System.Records.Csv
         /// </summary>
         /// <param name="recordItem"></param>
         /// <returns></returns>
-        public bool Add(IRecordAccessor<string> recordItem)
+        public bool Add(IRecordViewer<string> recordItem)
         {
             if (null == recordItem)
             {
@@ -189,8 +189,12 @@ namespace Upstream.System.Records.Csv
             )
             {
                 string fieldName = fieldNameList[fieldPosition];
-                string fieldValue;
-                recordItem.TryGetValue(fieldName, out fieldValue);
+                string fieldValue = null;
+                int inFieldPosition = recordItem.IndexOfField(fieldName);
+                if (0 <= inFieldPosition)
+                {
+                    fieldValue = recordItem[inFieldPosition];
+                }
                 fieldValueList[fieldPosition] = fieldValue;
             }
 

@@ -85,7 +85,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get an object that provides access to field meta-information
         /// </summary>
-        public IRecordSchemaAccessor<TFieldType> RecordSchema
+        public IRecordSchemaViewer<TFieldType> RecordSchema
         {
             get
             {
@@ -215,7 +215,16 @@ namespace Upstream.System.Records
         /// Add a copy of the data in a record to this collection
         /// </summary>
         /// <param name="inputRecord"></param>
-        public void Add(IRecordAccessor<TValue> inputRecord)
+        void ICollection<IRecordAccessor<TValue>>.Add(IRecordAccessor<TValue> inputRecord)
+        {
+            Add(inputRecord);
+        }
+
+        /// <summary>
+        /// Add a copy of the data in a record to this collection
+        /// </summary>
+        /// <param name="inputRecord"></param>
+        public void Add(IRecordViewer<TValue> inputRecord)
         {
             if (null == inputRecord)
             {
@@ -232,7 +241,7 @@ namespace Upstream.System.Records
         /// <param name="inputRecord"></param>
         /// <returns></returns>
         private TValue[] 
-        CreateRecordFieldValueArray(IRecordAccessor<TValue> inputRecord)
+        CreateRecordFieldValueArray(IRecordViewer<TValue> inputRecord)
         {
             int fieldCount = GetFieldCount();
             TValue[] fieldValueArray = new TValue[fieldCount];
@@ -251,7 +260,7 @@ namespace Upstream.System.Records
         private void
         CopyRecordFieldValuesInto(
              TValue[] fieldValueArray
-            ,IRecordAccessor<TValue> inputRecord
+            ,IRecordViewer<TValue> inputRecord
             )
         {
             int fieldCount = GetFieldCount();
@@ -261,14 +270,15 @@ namespace Upstream.System.Records
                 && null != fieldValueArray
                 )
             {
-                IEnumerator<string> fieldNameEnumerator = RecordSchema.GetFieldNameEnumerator();
+                IEnumerator<string> fieldNameEnumerator = RecordSchema.FieldNames.GetEnumerator();
                 fieldPosition = 0;
                 while (fieldNameEnumerator.MoveNext())
                 {
                     string fieldName = fieldNameEnumerator.Current;
-                    TValue fieldValue;
-                    if (inputRecord.TryGetValue(fieldName, out fieldValue))
+                    int inputFieldPosition = inputRecord.IndexOfField(fieldName);
+                    if (0 <= inputFieldPosition)
                     {
+                        TValue fieldValue = inputRecord[inputFieldPosition];
                         fieldValueArray[fieldPosition] = fieldValue;
                     }
 
@@ -511,7 +521,8 @@ namespace Upstream.System.Records
                 return NotFoundIndex;
             }
 
-            IEnumerator<string> inputFieldNameEnumerator = inputRecord.GetFieldNameEnumerator();
+            //IEnumerator<string> inputFieldNameEnumerator = inputRecord.GetFieldNameEnumerator();
+            IEnumerator<IFieldNameValuePair<TValue>> inputFieldEnumerator = inputRecord.GetEnumerator();
             ListRecordAccessor<TValue, TFieldType> record = CreateRecordAccessor();
             int recordIndex = startSearchIndex;
             while (recordIndex < BaseRecordList.Count
@@ -523,14 +534,15 @@ namespace Upstream.System.Records
                 // assume fields are equal until we find one that isn't
                 bool fieldsAreEqual = true;
                 while (fieldsAreEqual
-                    && inputFieldNameEnumerator.MoveNext()
+                    && inputFieldEnumerator.MoveNext()
                     )
                 {
-                    string fieldName = inputFieldNameEnumerator.Current;
+                    IFieldNameValuePair<TValue> inputFieldItem = inputFieldEnumerator.Current;
+                    string fieldName = inputFieldItem.Name;                        
+                    TValue inputFieldValue = inputFieldItem.Value;
                     int fieldPosition = record.IndexOfField(fieldName);
                     TValue fieldValue = record[fieldPosition];
                     IComparer<TValue> fieldComparer = RecordSchema[fieldPosition];
-                    TValue inputFieldValue = inputRecord[fieldName];
                     
                     //fieldsAreEqual = (0 == record.CompareFieldTo(fieldName, inputFieldValue));
                     fieldsAreEqual = (0 == fieldComparer.Compare(fieldValue, inputFieldValue));
@@ -542,7 +554,7 @@ namespace Upstream.System.Records
                 }
                 else
                 {
-                    inputFieldNameEnumerator.Reset();
+                    inputFieldEnumerator.Reset();
                     recordIndex++;
                 }
             }
@@ -709,7 +721,7 @@ namespace Upstream.System.Records
 
 
             public bool 
-            Add(IRecordAccessor<TValue> record)
+            Add(IRecordViewer<TValue> record)
             {
                 bool recordWasAdded = false;
 

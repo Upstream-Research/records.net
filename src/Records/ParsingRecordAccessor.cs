@@ -17,7 +17,7 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<object, IRecordAccessor<string>>
     where TFieldType : IRecordFieldType<object>
     {
-        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
+        private readonly IRecordSchemaViewer<TFieldType> _recordSchema;
         private readonly CultureInfo _stringCulture;
         private IRecordAccessor<string> _baseRecord;
 
@@ -28,7 +28,7 @@ namespace Upstream.System.Records
         /// <param name="recordSchema"></param>
         /// <param name="stringCulture">culture associated with the base record string representation</param>
         public ParsingRecordAccessor(
-            IRecordSchemaAccessor<TFieldType> recordSchema
+            IRecordSchemaViewer<TFieldType> recordSchema
             ,CultureInfo stringCulture
             )
         {
@@ -45,7 +45,7 @@ namespace Upstream.System.Records
             _stringCulture = stringCulture;
         }
 
-        private IRecordSchemaAccessor<TFieldType> RecordSchema
+        private IRecordSchemaViewer<TFieldType> RecordSchema
         {
             get
             {
@@ -144,36 +144,53 @@ namespace Upstream.System.Records
         {
             bool hasValue = false;
             string stringValue;
-            TFieldType fieldType;
+            TFieldType fieldType = default(TFieldType);
 
             fieldValue = null;
             if (null != BaseRecord
                 && BaseRecord.TryGetValue(fieldName, out stringValue)
                 )
             {
-                RecordSchema.TryGetValue(fieldName, out fieldType);
-                try
+                int fieldPosition = RecordSchema.IndexOfField(fieldName);
+                if (0 <= fieldPosition)
                 {
-                    fieldValue = ParseFieldValue(stringValue, fieldType);
-                    hasValue = true;
+                    fieldType = RecordSchema[fieldPosition];
                 }
-                // These are all exceptions raised by Convert.ChangeType(),
-                //  which is used by ParseFieldValue()
-                catch (InvalidCastException)
-                {
-                    // continue;
-                }
-                catch (FormatException)
-                {
-                    // continue;
-                }
-                catch (OverflowException)
-                {
-                    // continue;
-                }
+                fieldValue = ParseFieldValue(stringValue, fieldType);
+                hasValue = true;
             }
 
             return hasValue;
+        }
+
+        /// <summary>
+        /// Try to find a field and its value by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>
+        /// null reference if the field is not found.
+        /// </returns>
+        public IFieldNameValuePair<object> FindField(string fieldName)
+        {
+            IFieldNameValuePair<object> fieldItem = null;
+            object fieldValue;
+            
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<object>(fieldName, fieldValue); 
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
+        /// Try to get a field's position by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>negative if field name was not found</returns>
+        public int IndexOfField(string fieldName)
+        {
+            return RecordSchema.IndexOfField(fieldName);
         }
 
         /// <summary>
@@ -211,7 +228,22 @@ namespace Upstream.System.Records
                 if (null != fieldType)
                 {
                     Type dataType = fieldType.DataType;
-                    fieldValue = Convert.ChangeType(stringValue, dataType, StringCulture);
+                    try
+                    {
+                        fieldValue = Convert.ChangeType(stringValue, dataType, StringCulture);
+                    }
+                    catch (InvalidCastException)
+                    {
+                        // continue;
+                    }
+                    catch (FormatException)
+                    {
+                        // continue;
+                    }
+                    catch (OverflowException)
+                    {
+                        // continue;
+                    }
                 }
                 else
                 {
@@ -249,43 +281,22 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Get an enumerator of field names from the underlying record
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerator<string> GetFieldNameEnumerator()
-        {
-            IEnumerator<string> fieldNameEnumerator;
-
-            if (null == BaseRecord)
-            {
-                IEnumerable<string> emptyEnumeration = new string[0];
-                fieldNameEnumerator = emptyEnumeration.GetEnumerator();
-            }
-            else
-            {
-                fieldNameEnumerator = BaseRecord.GetFieldNameEnumerator();
-            }
-
-            return fieldNameEnumerator;
-        }
-
-        /// <summary>
         /// Get an enumerator of field names and field values
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<object>> GetEnumerator()
         {
             if (null != BaseRecord)
             {
-                IEnumerator<KeyValuePair<string,string>> baseEnumerator = BaseRecord.GetEnumerator();
+                IEnumerator<IFieldNameValuePair<string>> baseEnumerator = BaseRecord.GetEnumerator();
                 while (baseEnumerator.MoveNext())
                 {
-                    string fieldName = baseEnumerator.Current.Key;
+                    string fieldName = baseEnumerator.Current.Name;
                     string stringValue = baseEnumerator.Current.Value;
                     TFieldType fieldType = RecordSchema[fieldName];
                     object fieldValue = ParseFieldValue(stringValue, fieldType);
 
-                    yield return new KeyValuePair<string,object>(fieldName, fieldValue);
+                    yield return new FieldNameValuePair<object>(fieldName, fieldValue);
                 }
             }
         }

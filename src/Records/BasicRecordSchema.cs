@@ -11,7 +11,7 @@ namespace Upstream.System.Records
     /// Implements IRecordSchemaAccessor in a very basic way.
     /// </summary>
     public class BasicRecordSchema<TFieldType>
-    : IRecordSchemaAccessor<TFieldType>
+    : IRecordSchemaViewer<TFieldType>
     {
         private IList<string> _fieldNameList;
         private IDictionary<string,TFieldType> _fieldTypeDictionary;
@@ -185,13 +185,33 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Try to find a field and its type by the field name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field was not found,
+        /// Otherwise returns an IFieldNameValuePair which contains the field type
+        /// </returns>
+        public IFieldNameValuePair<TFieldType> FindField(string fieldName)
+        {
+            IFieldNameValuePair<TFieldType> fieldItem = null;
+            TFieldType fieldType;
+            
+            if (TryGetValue(fieldName, out fieldType))
+            {
+                fieldItem = new FieldNameValuePair<TFieldType>(fieldName, fieldType);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
         /// Get an dictionary enumerator of the field names and their types
         /// </summary>
         /// <returns>
         /// Enumerator of fields in the schema, 
         /// each field is encoded in a KeyValuePair containing the field name and its type information
         /// </returns>
-        public IEnumerator<KeyValuePair<string, TFieldType>> 
+        public IEnumerator<IFieldNameValuePair<TFieldType>> 
         GetEnumerator()
         {
             for(int fieldPosition = 0; fieldPosition < FieldNameList.Count; fieldPosition++)
@@ -199,7 +219,7 @@ namespace Upstream.System.Records
                 string fieldName = FieldNameList[fieldPosition];
                 TFieldType fieldType = FieldTypeDictionary[fieldName];
 
-                yield return new KeyValuePair<string,TFieldType>(fieldName, fieldType);
+                yield return new FieldNameValuePair<TFieldType>(fieldName, fieldType);
             }
         }
 

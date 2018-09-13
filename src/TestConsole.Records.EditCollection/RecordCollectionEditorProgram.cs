@@ -427,10 +427,10 @@ namespace Upstream.System.Records.Csv
                             while (csvIn.ReadValue())
                             {
                                 string fieldSpec = csvIn.ValueText;
-                                KeyValuePair<string,FieldSchemaSpecFieldType<object>> fieldInfo
+                                IFieldNameValuePair<IRecordFieldType<object>> fieldInfo
                                     = fieldSpecEncoding.DecodeField(fieldSpec, startPosition, specParserBuffer);
-                                string fieldName = fieldInfo.Key;
-                                FieldSchemaSpecFieldType<object> fieldType = fieldInfo.Value;
+                                string fieldName = fieldInfo.Name;
+                                IRecordFieldType<object> fieldType = fieldInfo.Value;
                                 recordSchemaIn.AddField(
                                      fieldName
                                     ,fieldType
@@ -445,12 +445,12 @@ namespace Upstream.System.Records.Csv
                         // append the additional fields specified on the commandline only to the recordList
                         if (!String.IsNullOrEmpty(appendFieldSchemaSpec))
                         {
-                            IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<object>>> fieldInfoEnumeration
+                            IEnumerable<IFieldNameValuePair<IRecordFieldType<object>>> fieldInfoEnumeration
                             = fieldSpecEncoding.DecodeEnumerable(appendFieldSchemaSpec);
-                            foreach(KeyValuePair<string,FieldSchemaSpecFieldType<object>> fieldInfo in fieldInfoEnumeration)
+                            foreach(IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in fieldInfoEnumeration)
                             {
-                                string fieldName = fieldInfo.Key;
-                                FieldSchemaSpecFieldType<object> fieldType = fieldInfo.Value;
+                                string fieldName = fieldInfo.Name;
+                                IRecordFieldType<object> fieldType = fieldInfo.Value;
                                 recordList.AddField(
                                      fieldName
                                     ,fieldType
@@ -506,7 +506,7 @@ namespace Upstream.System.Records.Csv
 
                     // Write the records from the list to the output stream:
 
-                    IRecordSchemaAccessor<IRecordFieldType<object>> recordSchemaOut = recordList.RecordSchema;
+                    IRecordSchemaViewer<IRecordFieldType<object>> recordSchemaOut = recordList.RecordSchema;
                     IRecordEnumerator<object> recordEnumerator = recordList.GetRecordEnumerator();
 
                     TextWriter textStreamOut = outs;
@@ -521,9 +521,9 @@ namespace Upstream.System.Records.Csv
                     // and build a list of the field names
                     IList<string> fieldNameListOut = new List<string>();
                     csvOut.WriteStartRecord();
-                    foreach (KeyValuePair<string,IRecordFieldType<object>> fieldInfo in recordSchemaOut)
+                    foreach (IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in recordSchemaOut)
                     {
-                        string fieldName = fieldInfo.Key;
+                        string fieldName = fieldInfo.Name;
                         IRecordFieldType<object> fieldType = fieldInfo.Value;
                         string fieldSpecString = fieldSpecEncoding.EncodeField(fieldName, fieldType);
                         fieldNameListOut.Add(fieldName);
@@ -605,7 +605,7 @@ namespace Upstream.System.Records.Csv
             int currentRecordPosition = 0;
             int currentFieldPosition = 0;
             string currentFieldName = String.Empty;
-            IRecordSchemaAccessor<IRecordFieldType<object>> recordSchema = recordList.RecordSchema;
+            IRecordSchemaViewer<IRecordFieldType<object>> recordSchema = recordList.RecordSchema;
             PrintingRecordAccessor<object,IRecordFieldType<object>> printingRecordAccessor = new PrintingRecordAccessor<object,IRecordFieldType<object>>(
                 recordSchema
                 ,cultureInfoOut
@@ -624,7 +624,7 @@ namespace Upstream.System.Records.Csv
             =>
             {
                 csvWriter.WriteStartRecord();
-                foreach(KeyValuePair<string,string> field in strRecord)
+                foreach(IFieldNameValuePair<string> field in strRecord)
                 {
                     csvWriter.WriteValue(field.Value);
                 }
@@ -635,10 +635,10 @@ namespace Upstream.System.Records.Csv
             = (CsvWriter csvWriter, IRecordAccessor<string> strRecord)
             =>
             {
-                foreach(KeyValuePair<string,string> field in strRecord)
+                foreach(IFieldNameValuePair<string> field in strRecord)
                 {
                     csvWriter.WriteStartRecord();
-                    csvWriter.WriteValue(field.Key);
+                    csvWriter.WriteValue(field.Name);
                     csvWriter.WriteValue(field.Value);
                     csvWriter.WriteEndRecord();
                 }
@@ -829,9 +829,9 @@ namespace Upstream.System.Records.Csv
                     )
                 {
                     csvOut.WriteStartRecord();
-                    foreach (KeyValuePair<string,IRecordFieldType<object>> fieldInfo in recordList.RecordSchema)
+                    foreach (IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in recordList.RecordSchema)
                     {
-                        string fieldName = fieldInfo.Key;
+                        string fieldName = fieldInfo.Name;
                         IRecordFieldType<object> fieldType = fieldInfo.Value;
                         string fieldSpecString = fieldSpecEncoding.EncodeField(fieldName, fieldType);
                         csvOut.WriteValue(fieldSpecString);

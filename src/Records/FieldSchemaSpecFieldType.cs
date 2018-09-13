@@ -181,6 +181,34 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Try to find a field and its value by the field name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field is not found</returns>
+        public IFieldNameValuePair<object> FindField(string fieldName)
+        {
+            IFieldNameValuePair<object> fieldItem = null;
+            object fieldValue;
+
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<object>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
+        /// Try to get a field's position by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>negative if field name was not found</returns>
+        public int IndexOfField(string fieldName)
+        {
+            return FindMetaFieldPosition(fieldName);
+        }
+
+        /// <summary>
         /// Determine if a field value is valid for storage in the field described by this record
         /// </summary>
         /// <param name="fieldValue"></param>
@@ -237,7 +265,7 @@ namespace Upstream.System.Records
         /// Get an enumerator of the metafields for this field
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<object>> GetEnumerator()
         {
             int fieldPosition = 0;
 
@@ -248,7 +276,7 @@ namespace Upstream.System.Records
                 string fieldName = _metaFieldNameArray[fieldPosition];
                 object fieldValue = _metaValueArray[fieldPosition];
 
-                yield return new KeyValuePair<string,object>(fieldName, fieldValue);
+                yield return new FieldNameValuePair<object>(fieldName, fieldValue);
 
                 fieldPosition += 1;
             }

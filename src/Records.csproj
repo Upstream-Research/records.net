@@ -45,9 +45,11 @@
     <Compile Include="Records\BasicRecordFieldType.cs" />
     <Compile Include="Records\BasicRecordSchema.cs" />
     <Compile Include="Records\DictionaryRecordAccessor.cs" />
+    <Compile Include="Records\FieldNameValuePair.cs" />
     <Compile Include="Records\FieldSchemaSpecEncoding.cs" />
     <Compile Include="Records\FieldSchemaSpecFieldType.cs" />
     <Compile Include="Records\IFieldValueStringRepresentation.cs" />
+    <Compile Include="Records\IFieldNameValuePair.cs" />
     <Compile Include="Records\IRecordAccessorAdapter.cs" />
     <Compile Include="Records\IRecordCollectionBuilder.cs" />
     <Compile Include="Records\IRecordCollector.cs" />
@@ -57,7 +59,8 @@
     <Compile Include="Records\IRecordFieldType.cs" />
     <Compile Include="Records\IRecordList.cs" />
     <Compile Include="Records\IRecordListVisitor.cs" />
-    <Compile Include="Records\IRecordSchemaAccessor.cs" />
+    <Compile Include="Records\IRecordSchemaViewer.cs" />
+    <Compile Include="Records\IRecordViewer.cs" />
     <Compile Include="Records\ListRecordAccessor.cs" />
     <Compile Include="Records\IRecordEnumerator.cs" />
     <Compile Include="Records\ParsingRecordAccessor.cs" />

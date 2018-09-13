@@ -48,7 +48,7 @@ namespace Upstream.System.Records
             _baseRecordList = recordList;
 
             IList<IEqualityComparer<TValue>> fieldComparerList = new List<IEqualityComparer<TValue>>();
-            IRecordSchemaAccessor<TFieldType> recordSchema = recordList.RecordSchema;
+            IRecordSchemaViewer<TFieldType> recordSchema = recordList.RecordSchema;
             foreach (string keyFieldName in _keyFieldNameList)
             {
                 TFieldType fieldType = recordSchema[keyFieldName];

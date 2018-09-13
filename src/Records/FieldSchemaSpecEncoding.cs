@@ -299,7 +299,7 @@ namespace Upstream.System.Records
         /// An enumerable collection of KeyValuePairs each containing a field name and field type
         /// for the fields parsed from a field spec string.
         /// </returns>
-        public IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>> 
+        public IEnumerable<IFieldNameValuePair<FieldSchemaSpecFieldType<TValue>>> 
         DecodeEnumerable(
             string fieldSchemaSpecString
         )
@@ -322,7 +322,7 @@ namespace Upstream.System.Records
         /// If no field is decoded, then the field name and field type will be set to a null reference.
         /// If no field type is parsed then the field type object will be set to a default (which may be a null reference).
         /// </returns>
-        public KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>
+        public IFieldNameValuePair<FieldSchemaSpecFieldType<TValue>>
         DecodeField(
              string fieldSchemaSpecString
             ,int startPosition = 0
@@ -350,7 +350,7 @@ namespace Upstream.System.Records
                 ,buffer
                 );
             
-            return new KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>(fieldName,fieldType);
+            return new FieldNameValuePair<FieldSchemaSpecFieldType<TValue>>(fieldName,fieldType);
         }
 
         /// <summary>
@@ -523,14 +523,11 @@ namespace Upstream.System.Records
                         Type dataType = FindDataTypeForFieldTypeName(fieldTypeName);
 
                         fieldName = fieldName.Trim();
-                        if (null != dataType)
-                        {
-                            fieldType = new FieldSchemaSpecFieldType<TValue>(
-                                 fieldName
-                                ,fieldTypeName
-                                ,dataType
-                                );
-                        }
+                        fieldType = new FieldSchemaSpecFieldType<TValue>(
+                                fieldName
+                            ,fieldTypeName
+                            ,dataType
+                            );
                     }
                 }
             }
@@ -543,7 +540,7 @@ namespace Upstream.System.Records
         /// Implements an IEnumerable interface that parses a field schema spec string
         /// </summary>
         private class FieldSchemaSpecEnumeration
-        : IEnumerable<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>>
+        : IEnumerable<IFieldNameValuePair<FieldSchemaSpecFieldType<TValue>>>
         {
             private readonly FieldSchemaSpecEncoding<TValue> _encoding;
             private readonly string _fieldSchemaSpecString;
@@ -557,7 +554,7 @@ namespace Upstream.System.Records
                 _fieldSchemaSpecString = fieldSchemaSpecString;
             }
 
-            public IEnumerator<KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>>
+            public IEnumerator<IFieldNameValuePair<FieldSchemaSpecFieldType<TValue>>>
             GetEnumerator()
             {
                 string specString = _fieldSchemaSpecString;
@@ -594,7 +591,7 @@ namespace Upstream.System.Records
                             && null != fieldType
                             )
                         {
-                            yield return new KeyValuePair<string,FieldSchemaSpecFieldType<TValue>>(fieldName, fieldType);
+                            yield return new FieldNameValuePair<FieldSchemaSpecFieldType<TValue>>(fieldName, fieldType);
                         }
 
                     }

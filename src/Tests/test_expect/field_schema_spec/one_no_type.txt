@@ -1,1 +1,1 @@
-one,System.Object
+one,System.String

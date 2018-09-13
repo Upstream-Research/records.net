@@ -16,7 +16,7 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<TValue,IList<TValue>>
     where TFieldType : IRecordFieldType<TValue>
     {
-        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
+        private readonly IRecordSchemaViewer<TFieldType> _recordSchema;
         private IList<TValue> _fieldValueList;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="recordSchema"></param>
         public ListRecordAccessor(
-              IRecordSchemaAccessor<TFieldType> recordSchema
+              IRecordSchemaViewer<TFieldType> recordSchema
             )
         {
             if (null == recordSchema)
@@ -44,7 +44,7 @@ namespace Upstream.System.Records
         /// <param name="recordSchema"></param>
         /// <param name="fieldValueList"></param>
         public ListRecordAccessor(
-              IRecordSchemaAccessor<TFieldType> recordSchema
+              IRecordSchemaViewer<TFieldType> recordSchema
              ,IList<TValue> fieldValueList
             )
             :this(recordSchema)
@@ -55,7 +55,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the record schema associated with this record
         /// </summary>
-        private IRecordSchemaAccessor<TFieldType> RecordSchema
+        private IRecordSchemaViewer<TFieldType> RecordSchema
         {
             get
             {
@@ -200,6 +200,24 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Try to find a field and its value by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field was not found</returns>
+        public IFieldNameValuePair<TValue> FindField(string fieldName)
+        {
+            IFieldNameValuePair<TValue> fieldItem = null;
+            TValue fieldValue;
+            
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<TValue>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
         /// Get the number of values in this record.
         /// </summary>
         public int GetFieldCount()
@@ -282,7 +300,7 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public IEnumerator<string> GetFieldNameEnumerator()
         {
-            return RecordSchema.GetFieldNameEnumerator();
+            return RecordSchema.FieldNames.GetEnumerator();
         }
 
 
@@ -290,7 +308,7 @@ namespace Upstream.System.Records
         /// Get an enumerator of field names and field values in this record
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, TValue>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<TValue>> GetEnumerator()
         {
             IList<TValue> fieldValueList = GetFieldValueList();
             IEnumerator<TValue> fieldValueEnumerator = fieldValueList.GetEnumerator();
@@ -302,7 +320,7 @@ namespace Upstream.System.Records
             {
                 string fieldName = fieldNameEnumerator.Current;
                 TValue fieldValue = fieldValueEnumerator.Current;
-                yield return new KeyValuePair<string,TValue>(fieldName,fieldValue);
+                yield return new FieldNameValuePair<TValue>(fieldName,fieldValue);
             }
         }
 

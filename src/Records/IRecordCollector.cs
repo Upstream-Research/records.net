@@ -20,7 +20,7 @@ namespace Upstream.System.Records
         /// <returns>
         /// True if the item was successfully added
         /// </returns>
-        bool Add(IRecordAccessor<TValue> recordItem);
+        bool Add(IRecordViewer<TValue> recordItem);
 
     } // /interface
 

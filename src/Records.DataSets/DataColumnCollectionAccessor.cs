@@ -16,7 +16,7 @@ namespace Upstream.System.Records.DataSets
     /// </summary>
     public class DataColumnCollectionAccessor
     : IRecordAccessorAdapter<DataColumnFieldType, DataColumnCollection>
-     ,IRecordSchemaAccessor<DataColumnFieldType>
+     ,IRecordSchemaViewer<DataColumnFieldType>
     {
         private DataColumnCollection _columnCollection;
         private DataColumnNameEnumeration _columnNameEnumeration;
@@ -39,6 +39,9 @@ namespace Upstream.System.Records.DataSets
             AttachTo(baseColumnCollection);
         }
 
+        /// <summary>
+        /// Get an enumerable collection of the field/column names
+        /// </summary>
         public IEnumerable<string> FieldNames
         {
             get
@@ -158,12 +161,36 @@ namespace Upstream.System.Records.DataSets
         }
 
         /// <summary>
+        /// Try to find a field and its value by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field was not found.</returns>
+        public IFieldNameValuePair<DataColumnFieldType> FindField(string fieldName)
+        {
+            IFieldNameValuePair<DataColumnFieldType> fieldItem = null;
+            DataColumnFieldType fieldValue;
+
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<DataColumnFieldType>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
         /// Get an enumerator of field names and types
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, DataColumnFieldType>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<DataColumnFieldType>> GetEnumerator()
         {
-            return _columnFieldTypeDictionary.GetEnumerator();
+            foreach (DataColumnFieldType columnFieldType in _columnFieldTypeList)
+            {
+                DataColumn column = columnFieldType.DataColumn;
+                string fieldName = column.ColumnName;
+
+                yield return new FieldNameValuePair<DataColumnFieldType>(fieldName, columnFieldType);
+            }
         }
 
         /// <summary>

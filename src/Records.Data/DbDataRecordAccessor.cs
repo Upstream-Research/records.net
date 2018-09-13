@@ -150,6 +150,43 @@ namespace Upstream.System.Records.Data
         }
 
         /// <summary>
+        /// Try to find a field and its value by name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field was not found.</returns>
+        private IFieldNameValuePair<object> FindField(string fieldName)
+        {
+            IFieldNameValuePair<object> fieldItem = null;
+            object fieldValue;
+
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<object>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
+        /// Try to get the position of a field in the record
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>-1 if the field cannot be found</returns>
+        public int IndexOfField(string fieldName)
+        {
+            int fieldPosition = -1;
+            try
+            { 
+                fieldPosition = DataRecord.GetOrdinal(fieldName);
+            }
+            catch (IndexOutOfRangeException)
+            {
+            }
+
+            return fieldPosition;
+        }
+
+        /// <summary>
         /// Centralized method to get a field value from the base record
         /// </summary>
         /// <param name="record"></param>
@@ -193,7 +230,7 @@ namespace Upstream.System.Records.Data
         /// Get an enumerator of field names and their values
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<object>> GetEnumerator()
         {
             IDataRecord record = DataRecord;
             
@@ -205,7 +242,7 @@ namespace Upstream.System.Records.Data
                     string fieldName = record.GetName(fieldPosition);
                     object fieldValue = GetFieldValue(record, fieldPosition);
 
-                    yield return new KeyValuePair<string,object>(fieldName, fieldValue);
+                    yield return new FieldNameValuePair<object>(fieldName, fieldValue);
 
                     fieldPosition += 1;
                 }

@@ -32,7 +32,7 @@ namespace Upstream.System.Records
         {
             if (null == dataType)
             {
-                throw new ArgumentNullException("dataType");
+                //throw new ArgumentNullException("dataType");
             }
             if (null == sortComparer)
             {

@@ -18,15 +18,15 @@ namespace Upstream.System.Records
      ,IEqualityComparer<TValue>
     {
         /// <summary>
-        /// Get the datatype for all values in this field
+        /// Basic datatype associated with values in this field.
         /// </summary>
         Type DataType { get; }
 
         /// <summary>
         /// Determine if a value is valid (i.e. in the domain) for this field
         /// </summary>
-        /// <param name="fieldValue"></param>
-        /// <returns></returns>
+        /// <param name="fieldValue">A field value to test for validity</param>
+        /// <returns>True if the field value is within the field's domain.</returns>
         bool IsValid(TValue fieldValue);
     } // /interface
 } // /namespace

@@ -299,9 +299,9 @@ namespace Upstream.System.Records.Csv
                         while (csvIn.ReadValue())
                         {
                             string fieldSpec = csvIn.ValueText;
-                            KeyValuePair<string,FieldSchemaSpecFieldType<object>> fieldInfo
+                            IFieldNameValuePair<FieldSchemaSpecFieldType<object>> fieldInfo
                                 = fieldSpecEncoding.DecodeField(fieldSpec, startPosition, specParserBuffer);
-                            string fieldName = fieldInfo.Key;
+                            string fieldName = fieldInfo.Name;
                             FieldSchemaSpecFieldType<object> fieldType = fieldInfo.Value;
                             fieldNameList.Add(fieldName);
                             fieldTypeList.Add(fieldType);
@@ -310,9 +310,9 @@ namespace Upstream.System.Records.Csv
 
                         // write header row to output CSV
                         csvOut.WriteStartRecord();
-                        foreach (KeyValuePair<string,IRecordFieldType<object>> fieldInfo in recordSchema)
+                        foreach (IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in recordSchema)
                         {
-                            string fieldName = fieldInfo.Key;
+                            string fieldName = fieldInfo.Name;
                             IRecordFieldType<object> fieldType = fieldInfo.Value;
                             string fieldSpecString = fieldSpecEncoding.EncodeField(fieldName, fieldType);
                             csvOut.WriteValue(fieldSpecString);
@@ -367,7 +367,7 @@ namespace Upstream.System.Records.Csv
                 }
                 catch (Exception ex)
                 {
-                    errorMessage = ex.Message;
+                    errorMessage = ex.ToString();
                     errs.WriteLine(errorMessage);
                     exitCode = 1;
                 }

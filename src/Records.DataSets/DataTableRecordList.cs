@@ -112,7 +112,7 @@ namespace Upstream.System.Records.DataSets
         /// <summary>
         /// Get an object that describes the fields in this record collection
         /// </summary>
-        public IRecordSchemaAccessor<DataColumnFieldType> RecordSchema
+        public IRecordSchemaViewer<DataColumnFieldType> RecordSchema
         {
             get
             {
@@ -186,20 +186,11 @@ namespace Upstream.System.Records.DataSets
         private void 
         CopyRecordInto(
              DataRow targetRow
-            ,IRecordAccessor<object> record
+            ,IRecordViewer<object> record
             )
         {
             IRecordAccessor<object> targetRecord = CreateDataRowRecordAccessor(targetRow);
-            IEnumerator<string> fieldNameEnumerator = targetRecord.GetFieldNameEnumerator();
-            while (fieldNameEnumerator.MoveNext())
-            {
-                string fieldName = fieldNameEnumerator.Current;
-                object fieldValue;
-                if (record.TryGetValue(fieldName, out fieldValue))
-                {
-                    targetRecord[fieldName] = fieldValue;
-                }
-            }
+            RecordIO.CopyInto(targetRecord, record);
         }
 
         /// <summary>

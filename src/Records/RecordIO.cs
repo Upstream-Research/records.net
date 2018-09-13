@@ -18,35 +18,100 @@ namespace Upstream.System.Records
     public class RecordIO
     {
         /// <summary>
+        /// Create a "mapping" that can be used to quickly match fields from records in two different schema.
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="targetRecord"></param>
+        /// <param name="sourceRecord"></param>
+        /// <returns>An object that can be passed to the CopyInto() method</returns>
+        public static IEnumerable<int> 
+        CreateFieldPositionMapping<TValue>(
+            IRecordAccessor<TValue> targetRecord
+            ,IRecordViewer<TValue> sourceRecord
+            )
+        {
+            // sourcePositionArray will be an array that contains the positions from the source record,
+            //  it will have one item for each field in the target record.
+            int[] sourcePositionArray = null;
+
+            if (null != targetRecord    
+                && null != sourceRecord
+                )
+            {
+                int sourceFieldCount = sourceRecord.GetFieldCount();
+                string[] sourceFieldNameArray = new string[sourceFieldCount];
+                int sourceFieldPosition = 0;
+                foreach(IFieldNameValuePair<TValue> sourceFieldItem in sourceRecord)
+                {
+                    string sourceFieldName = sourceFieldItem.Name;
+                    sourceFieldNameArray[sourceFieldPosition] = sourceFieldName;
+                    sourceFieldPosition += 1;
+                }
+
+                int targetFieldCount = targetRecord.GetFieldCount();
+                sourcePositionArray = new int[targetFieldCount];
+                int targetFieldPosition = 0;
+                foreach (IFieldNameValuePair<TValue> targetFieldItem in targetRecord)
+                {
+                    string targetFieldName = targetFieldItem.Name;
+                    int foundSourceFieldPosition = -1;
+                    sourceFieldPosition = 0;
+                    while (0 > foundSourceFieldPosition
+                        && sourceFieldNameArray.Length > sourceFieldPosition
+                        )
+                    {
+                        string sourceFieldName = sourceFieldNameArray[sourceFieldPosition];
+                        if (FieldNamesAreEqual(sourceFieldName, targetFieldName))
+                        {
+                            foundSourceFieldPosition = sourceFieldPosition;
+                        }
+                        sourceFieldPosition += 1;
+                    }
+                    sourcePositionArray[targetFieldPosition] = foundSourceFieldPosition;
+                    targetFieldPosition += 1;
+                }
+
+            }
+
+            return sourcePositionArray;
+        }
+
+        /// <summary>
         /// Copy the fields from a record into a target record
         /// </summary>
         /// <typeparam name="TValue"></typeparam>
         /// <param name="targetRecord"></param>
         /// <param name="record"></param>
+        /// <param name="fieldPositionMapping">
+        /// An enumeration of field positions for each field in the target record,
+        /// fields that do not map into the target record will have a position of -1.
+        /// </param>
         public static void 
         CopyInto<TValue>(
             IRecordAccessor<TValue> targetRecord
-            ,IRecordAccessor<TValue> record
+            ,IRecordViewer<TValue> record
+            ,IEnumerable<int> fieldPositionMapping = null
             )
         {
+            if (null == fieldPositionMapping)
+            {
+                fieldPositionMapping = CreateFieldPositionMapping(targetRecord, record);
+            }
             if (null != targetRecord
                 && null != record
                 )
             {
-                IEnumerator<string> fieldNameEnumerator = targetRecord.GetFieldNameEnumerator();
-                int fieldPosition = 0;
-                while (fieldNameEnumerator.MoveNext())
+                int fieldCount = record.GetFieldCount();
+                int targetFieldPosition = 0;
+                foreach (int fieldPosition in fieldPositionMapping)
                 {
-                    string fieldName = fieldNameEnumerator.Current;
-                    TValue fieldValue;
-                    if (record.TryGetValue(fieldName, out fieldValue))
+                    if (0 <= fieldPosition
+                        && fieldPosition < fieldCount
+                        )
                     {
-                        // set using fieldPosition instead of fieldName
-                        //  since fieldPosition is typically faster
-                        targetRecord[fieldPosition] = fieldValue;
+                        targetRecord[targetFieldPosition] = record[fieldPosition];
                     }
-
-                    fieldPosition += 1;
+                    targetFieldPosition += 1;
                 }
             }
         }
@@ -81,6 +146,17 @@ namespace Upstream.System.Records
             return recordCount;
         }
 
+        /// <summary>
+        /// Determine if two field names are equivalent
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <param name="fieldName2"></param>
+        /// <returns></returns>
+        private static bool
+        FieldNamesAreEqual(string fieldName, string fieldName2)
+        {
+            return (0 == String.Compare(fieldName, fieldName2, StringComparison.Ordinal));
+        }
     } // /class
 
 } // /class

@@ -11,7 +11,7 @@ namespace Upstream.System.Records
     /// </summary>
     /// <typeparam name="TValue">datatype for field values</typeparam>
     public interface IRecordAccessor<TValue>
-    : IEnumerable<KeyValuePair<string,TValue>>
+    : IRecordViewer<TValue>
     {
         /// <summary>
         /// Lookup a value associated with a field name.
@@ -23,6 +23,7 @@ namespace Upstream.System.Records
         /// (just like generic IDictionary), but client code should not make this assumption.
         /// Some implementations may return a null reference value.
         /// </remarks>
+        new 
         TValue this[string fieldName] { get; set; }
 
         /// <summary>
@@ -30,6 +31,7 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="fieldPosition"></param>
         /// <returns></returns>
+        new
         TValue this[int fieldPosition] { get; set; }
 
         /// <summary>
@@ -40,38 +42,6 @@ namespace Upstream.System.Records
         /// <param name="outValue"></param>
         /// <returns>True if a value was found for the specified field name, False if the field was not found.</returns>
         bool TryGetValue(string fieldName, out TValue outValue);
-
-        /*
-        /// <summary>
-        /// Compare the value of a field in this record to some field value.
-        /// Comparison is done according to the field's domain (i.e. collation rules)
-        /// </summary>
-        /// <param name="fieldName"></param>
-        /// <param name="fieldValue2"></param>
-        /// <returns>0 if the values are equivalent,
-        /// negative if this field value sorts less than the input value,
-        /// postive if this field value sorts greater than the input value.
-        /// null is equivalent to null.
-        /// null should compare less than non-null.
-        /// </returns>
-        int CompareFieldTo(string fieldName, TValue fieldValue2);
-        */
-
-        /// <summary>
-        /// Get the number of fields in the record
-        /// </summary>
-        /// <remarks>
-        /// This was defined as a method and not as a property
-        /// so that types that derive from this, and which represent "strongly-typed" records
-        /// can use properties exclusively for field values.
-        /// </remarks>
-        int GetFieldCount();
-
-        /// <summary>
-        /// Get an enumerator of the field names for this record
-        /// </summary>
-        /// <returns></returns>
-        IEnumerator<string> GetFieldNameEnumerator();
 
     } // /interface
     

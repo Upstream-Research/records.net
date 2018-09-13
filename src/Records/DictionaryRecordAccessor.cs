@@ -16,7 +16,7 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<TValue,IDictionary<string,TValue>>
     where TFieldType : IRecordFieldType<TValue>
     {
-        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
+        private readonly IRecordSchemaViewer<TFieldType> _recordSchema;
         private IDictionary<string,TValue> _baseDictionary;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Upstream.System.Records
         /// </summary>
         /// <param name="recordSchema"></param>
         public DictionaryRecordAccessor(
-            IRecordSchemaAccessor<TFieldType> recordSchema
+            IRecordSchemaViewer<TFieldType> recordSchema
             )
         {
             if (null == recordSchema)
@@ -42,7 +42,7 @@ namespace Upstream.System.Records
         /// <param name="recordSchema"></param>
         /// <param name="baseDictionary"></param>
         public DictionaryRecordAccessor(
-            IRecordSchemaAccessor<TFieldType> recordSchema
+            IRecordSchemaViewer<TFieldType> recordSchema
             ,IDictionary<string,TValue> baseDictionary
             )
             : this(recordSchema)
@@ -75,7 +75,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the record schema associated with this record
         /// </summary>
-        private IRecordSchemaAccessor<TFieldType> RecordSchema
+        private IRecordSchemaViewer<TFieldType> RecordSchema
         {
             get
             {
@@ -116,10 +116,11 @@ namespace Upstream.System.Records
         private bool FieldValueIsValid(string fieldName, TValue fieldValue)
         {
             bool isValid = true;
-            TFieldType fieldType;
+            int fieldPosition = RecordSchema.IndexOfField(fieldName);
             
-            if (RecordSchema.TryGetValue(fieldName, out fieldType))
+            if (0 <= fieldPosition)
             {
+                TFieldType fieldType = RecordSchema[fieldPosition];
                 if (null != fieldType)
                 {
                     isValid = fieldType.IsValid(fieldValue);
@@ -187,6 +188,34 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Try to find a field and its value by the field name.
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field is not found</returns>
+        private IFieldNameValuePair<TValue> FindField(string fieldName)
+        {
+            IFieldNameValuePair<TValue> fieldItem = null;
+            TValue fieldValue;
+
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<TValue>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
+        /// Get the position of a field by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public int IndexOfField(string fieldName)
+        {
+            return RecordSchema.IndexOfField(fieldName);
+        }
+
+        /// <summary>
         /// Get the number of fields in the underlying record
         /// </summary>
         public int GetFieldCount()
@@ -229,14 +258,11 @@ namespace Upstream.System.Records
                 && null != fieldValue2
                 )
             {
-                TFieldType fieldType2;
-                if (RecordSchema.TryGetValue(fieldName, out fieldType2))
+                TFieldType fieldType2 = RecordSchema[fieldName];
+                IComparer<TValue> sortComparer2 = fieldType2 as IComparer<TValue>;
+                if (null != sortComparer2)
                 {
-                    IComparer<TValue> sortComparer2 = fieldType2 as IComparer<TValue>;
-                    if (null != sortComparer2)
-                    {
-                        sortComparer = sortComparer2;
-                    }
+                    sortComparer = sortComparer2;
                 }
 
                 resultNum = sortComparer.Compare(fieldValue, fieldValue2);
@@ -251,14 +277,14 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public IEnumerator<string> GetFieldNameEnumerator()
         {
-            return RecordSchema.GetFieldNameEnumerator();
+            return RecordSchema.FieldNames.GetEnumerator();
         }
 
         /// <summary>
         /// Get an enumerator of the fields and values for the record
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, TValue>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<TValue>> GetEnumerator()
         {
             IDictionary<string,TValue> fieldValueDictionary = GetFieldValueDictionary();
             IEnumerator<string> fieldNameEnumerator = GetFieldNameEnumerator();
@@ -268,7 +294,7 @@ namespace Upstream.System.Records
             {
                 fieldName = fieldNameEnumerator.Current;
                 fieldValue = fieldValueDictionary[fieldName];
-                yield return new KeyValuePair<string,TValue>(fieldName,fieldValue);
+                yield return new FieldNameValuePair<TValue>(fieldName,fieldValue);
             }
         }
 

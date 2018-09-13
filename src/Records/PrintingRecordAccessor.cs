@@ -18,7 +18,7 @@ namespace Upstream.System.Records
     : IRecordAccessorAdapter<string, IRecordAccessor<TValue>>
     where TFieldType: IRecordFieldType<TValue>
     {
-        private readonly IRecordSchemaAccessor<TFieldType> _recordSchema;
+        private readonly IRecordSchemaViewer<TFieldType> _recordSchema;
         private readonly CultureInfo _stringCulture;
         private IRecordAccessor<TValue> _baseRecord;
 
@@ -29,7 +29,7 @@ namespace Upstream.System.Records
         /// <param name="recordSchema">field schema of the underlying record type</param>
         /// <param name="stringCulture">culture associated with the string representation</param>
         public PrintingRecordAccessor(
-             IRecordSchemaAccessor<TFieldType> recordSchema
+             IRecordSchemaViewer<TFieldType> recordSchema
             ,CultureInfo stringCulture
             )
         {
@@ -42,7 +42,7 @@ namespace Upstream.System.Records
             _stringCulture = stringCulture;
         }
 
-        private IRecordSchemaAccessor<TFieldType> RecordSchema
+        private IRecordSchemaViewer<TFieldType> RecordSchema
         {
             get
             {
@@ -144,19 +144,51 @@ namespace Upstream.System.Records
         {
             bool hasValue = false;
             TValue fieldValue;
-            TFieldType fieldType;
+            TFieldType fieldType = default(TFieldType);
 
             stringValue = null;
             if (null != BaseRecord
                 && BaseRecord.TryGetValue(fieldName, out fieldValue)
                 )
             {
-                RecordSchema.TryGetValue(fieldName, out fieldType);
+                int fieldPosition = RecordSchema.IndexOfField(fieldName);
+                if (0 <= fieldPosition)
+                {
+                    fieldType = RecordSchema[fieldPosition];
+                }
                 stringValue = PrintFieldValue(fieldValue, fieldType);
                 hasValue = true;
             }
 
             return hasValue;
+        }
+
+        /// <summary>
+        /// Try to find a field and its value by the field name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>null reference if the field is not found.</returns>
+        public IFieldNameValuePair<string> FindField(string fieldName)
+        {
+            IFieldNameValuePair<string> fieldItem = null;
+            string fieldValue;
+
+            if (TryGetValue(fieldName, out fieldValue))
+            {
+                fieldItem = new FieldNameValuePair<string>(fieldName, fieldValue);
+            }
+
+            return fieldItem;
+        }
+
+        /// <summary>
+        /// Try to get a field's position by its name
+        /// </summary>
+        /// <param name="fieldName"></param>
+        /// <returns>negative if field name was not found</returns>
+        public int IndexOfField(string fieldName)
+        {
+            return RecordSchema.IndexOfField(fieldName);
         }
 
         /// <summary>
@@ -233,43 +265,22 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Get an enumerator of field names
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerator<string> GetFieldNameEnumerator()
-        {
-            IEnumerator<string> fieldNameEnumerator;
-
-            if (null == BaseRecord)
-            {
-                IEnumerable<string> emptyEnumeration = new string[0];
-                fieldNameEnumerator = emptyEnumeration.GetEnumerator();
-            }
-            else
-            {
-                fieldNameEnumerator = BaseRecord.GetFieldNameEnumerator();
-            }
-
-            return fieldNameEnumerator;
-        }
-
-        /// <summary>
         /// Get an enumerator of field names and field values as strings
         /// </summary>
         /// <returns></returns>
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+        public IEnumerator<IFieldNameValuePair<string>> GetEnumerator()
         {
             if (null != BaseRecord)
             {
-                IEnumerator<KeyValuePair<string,TValue>> baseEnumerator = BaseRecord.GetEnumerator();
+                IEnumerator<IFieldNameValuePair<TValue>> baseEnumerator = BaseRecord.GetEnumerator();
                 while (baseEnumerator.MoveNext())
                 {
-                    string fieldName = baseEnumerator.Current.Key;
+                    string fieldName = baseEnumerator.Current.Name;
                     TValue fieldValue = baseEnumerator.Current.Value;
                     TFieldType fieldType = RecordSchema[fieldName];
                     string stringValue = PrintFieldValue(fieldValue, fieldType);
 
-                    yield return new KeyValuePair<string,string>(fieldName, stringValue);
+                    yield return new FieldNameValuePair<string>(fieldName, stringValue);
                 }
             }
         }

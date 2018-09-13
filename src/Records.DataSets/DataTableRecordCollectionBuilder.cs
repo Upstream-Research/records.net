@@ -136,7 +136,7 @@ namespace Upstream.System.Records.DataSets
         /// Copy the values from a record into a new row in the table
         /// </summary>
         /// <param name="record"></param>
-        public bool Add(IRecordAccessor<object> record)
+        public bool Add(IRecordViewer<object> record)
         {
             InitializeCurrentItem();
             RecordIO.CopyInto(Current, record);
