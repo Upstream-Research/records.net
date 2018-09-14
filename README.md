@@ -8,11 +8,11 @@ records.net
 The source code for this library is made available under an "MIT" license,
 See the "LICENSE" file for details.
 
-Revised: 2018-09-05 (db)
+Revised: 2018-09-14 (db)
 
-_(20180905 (db) Warning, this is unstable and somewhat untested code.
-It has been released in the interest of getting this code out into the community,
-where it may be further developed into something stable)_
+_(20180914 (db) Warning: this is unstable and somewhat untested code.
+It has been released in the interest of getting it out into the community,
+where people can see it and perhaps take an interest in it.)_
 
 
 ## Overview
@@ -30,30 +30,40 @@ One of the strengths intended for this library is to provide a level of abstract
 which allows for simpler transmission, transformation, and encoding of records
 at the expense of strongly-typed "entity" objects 
 (although strongly-typed records are still possible with this library).
+Since the creation of an effective set of abstractions is a major goal of this project,
+it is anticipated that the existing object interfaces will need to reworked several times
+before they reach their final form.
+Therefore this project, is very much a work-in-progress.
 
-[Library API documentation](https://upstream-research.github.io/projects/records.net/helpdocs)
+Some code documentation has been made available online for convenience,
+however it will not always be 100% up-to-date:
+
+[Records.Net API documentation](https://upstream-research.github.io/projects/records.net/helpdocs)
+
 
 ## Some Remarks On Existing Data Libraries and Frameworks
 
+### ADO.NET ###
 ADO.NET provides two different groups of objects: 
 
-1. Data I/O objects, such as `IDataReader`
-2. Data structure objects, such as `DataTable`
+1. "DbData": Database I/O objects, such as `IDataReader` and `IDbConnection`
+2. "DataSets": Data structure objects, such as `DataSet` and `DataTable`
 
 These are mostly independent groups; perhaps they should have been placed in separate namespaces.
 
 In .NET Core 1.0, Microsoft considered `System.Data` "unsupported"
-and yet provided some implementation of the data I/O objects.
+and yet provided some implementation of the DbData objects.
 It appears that `System.Data` will be supported in .NET Core 2.0 and .NET Standard 2.0.
 
-ORM libraries rely on on "Plain Old Objects", or "Entity" objects
+### ORM/Entity Frameworks ###
+Object/Relational Mapping (ORM) frameworks rely on on "Plain Old Objects", or "Entity" objects
 which attempt to encode record fields as strongly-typed object properties.
 This is often very convenient, but it comes at the expense of generality;
-to handle such entity objects more generally, 
+to handle such entity objects more generally as abstract records, 
 complicated systems involving reflection and collection manipulation have been devised.
 
 
-## Core Record Objects
+## The Core Record Objects
 
 The core of this library lies in the `IRecordAccessor` interface.
 This interface is intended to be relatively light-weight
@@ -100,3 +110,10 @@ but the author believes there are several benefits to this approach that justify
 That said, the test code at the time of writing this isn't very good, 
 but improvements aren't difficult to imagine.
 There has been little time for finishing the library code, much less testing it.
+
+The test console programs also serve as examples for how to use the APIs.
+Presently, there is just one "master" console program called `TestConsole` which wraps
+the other console programs and calls them as subcommands.
+These programs demonstrate some simple CSV reading and writing,
+a parser for a simple CSV-compatible record schema specification mini-language,
+and an interactive and scriptable CSV record editor.
