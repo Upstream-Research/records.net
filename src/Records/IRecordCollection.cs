@@ -1,5 +1,5 @@
-﻿/*  Copyright (c) 2016 Upstream Research, Inc.  */
-/*  Subject to the MIT License. See LICENSE file in top-level directory. */
+﻿/*  Copyright (c) 2016,2018 Upstream Research, Inc.  */
+/*  Subject to an MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections.Generic;
@@ -13,8 +13,8 @@ namespace Upstream.System.Records
     /// since an IRecordAccessor is a "visitor".
     /// </summary>
     /// <typeparam name="TValue">datatype of record field values</typeparam>
-    /// <typeparam name="TField">datatype for field (schema) meta-information</typeparam>
-    public interface IRecordCollection<TValue,TField> 
+    /// <typeparam name="TFieldType">datatype for field (schema) meta-information</typeparam>
+    public interface IRecordCollection<TValue,TFieldType> 
     : IEnumerable<IRecordAccessor<TValue>>
     {
         /// <summary>
@@ -36,7 +36,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get an object that provides access to the field schema
         /// </summary>
-        IRecordSchemaViewer<TField> RecordSchema { get; }
+        IRecordSchemaViewer<TFieldType> RecordSchema { get; }
 
         /// <summary>
         /// Delete all records in this collection

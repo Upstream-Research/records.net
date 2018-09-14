@@ -11,6 +11,16 @@ namespace Upstream.System.Records
     /// This interface is generic and covariant (unlike <see cref="IRecordAccessor{TValue}"/>.
     /// </summary>
     /// <typeparam name="TValue">datatype for field values</typeparam>
+    /// <remarks>
+    /// <para>
+    /// This interface implements <c>IEnumerable{IFieldNameValuePair{V}}</c>.
+    /// <c>IDictionary{K,V}</c> implements <c>IEnumerable{KeyValuePair{K,V}}</c>.
+    /// The use of the <c>IFieldNameValuePair{V}</c> interface
+    /// instead of the <c>KeyValuePair{K,V}</c> value type (struct)
+    /// is to allow covariance in the value type parameter
+    /// (<c>KeyValuePair{K,V}</c> is not covariant).
+    /// </para>
+    /// </remarks>
     public interface IRecordViewer<out TValue>
     : IEnumerable<IFieldNameValuePair<TValue>>
     {

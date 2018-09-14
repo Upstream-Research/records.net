@@ -1,5 +1,5 @@
-﻿/*  Copyright (c) 2016 Upstream Research, Inc.  All Rights Reserved.  */
-/*  Subject to the MIT License. See LICENSE file in top-level directory. */
+﻿/*  Copyright (c) 2016,2018 Upstream Research, Inc.  All Rights Reserved.  */
+/*  Subject to an MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections.Generic;
@@ -13,12 +13,12 @@ namespace Upstream.System.Records
     /// since an IRecordAccessor is a "visitor".
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
-    /// <typeparam name="TField"></typeparam>
+    /// <typeparam name="TFieldType"></typeparam>
     /// <remarks>
     /// RecordCollectionReaders created by this object must read records in the order they are stored in the list.
     /// </remarks>
-    public interface IRecordList<TValue,TField> 
-    : IRecordCollection<TValue,TField>
+    public interface IRecordList<TValue,TFieldType> 
+    : IRecordCollection<TValue,TFieldType>
     {
         /// <summary>
         /// Get a record accessor at a specified position.

@@ -13,8 +13,11 @@ namespace Upstream.System.Records
     public class BasicRecordSchema<TFieldType>
     : IRecordSchemaViewer<TFieldType>
     {
+        // list of field names for fields described in the schema
         private IList<string> _fieldNameList;
-        private IDictionary<string,TFieldType> _fieldTypeDictionary;
+        // list of type information objects for fields described in the schema
+        private IList<TFieldType> _fieldTypeList;
+        // dictionary to allow quick lookup of position of field information in lists based on field name
         private IDictionary<string,int> _fieldPositionDictionary;
 
         /// <summary>
@@ -25,8 +28,8 @@ namespace Upstream.System.Records
         {
             const int fieldCountEstimate = 16;
 
-            _fieldNameList = new List<string>();
-            _fieldTypeDictionary = new Dictionary<string,TFieldType>(fieldCountEstimate);
+            _fieldNameList = new List<string>(fieldCountEstimate);
+            _fieldTypeList = new List<TFieldType>(fieldCountEstimate);
             _fieldPositionDictionary = new Dictionary<string,int>(fieldCountEstimate);
         }
 
@@ -49,11 +52,11 @@ namespace Upstream.System.Records
             }
         }
 
-        private IDictionary<string,TFieldType> FieldTypeDictionary
+        private IList<TFieldType> FieldTypeList
         {
             get
             {
-                return _fieldTypeDictionary;
+                return _fieldTypeList;
             }
         }
 
@@ -78,12 +81,7 @@ namespace Upstream.System.Records
         {
             get
             {
-                string fieldName = FieldNameAt(fieldPosition);
-                return FieldTypeDictionary[fieldName];
-            }
-            set
-            {
-                throw new InvalidOperationException("Cannot set new field type to existing field");
+                return FieldTypeList[fieldPosition];
             }
         }
 
@@ -100,11 +98,15 @@ namespace Upstream.System.Records
         {
             get
             {
-                return FieldTypeDictionary[fieldName];
-            }
-            set
-            {
-                throw new InvalidOperationException("Cannot set new field type to existing field");
+                int fieldPosition = IndexOfField(fieldName);
+                if (0 > fieldPosition
+                    && FieldTypeList.Count <= fieldPosition
+                    )
+                {
+                    throw new KeyNotFoundException(String.Format("Specified field was not found: {0", fieldName));
+                }
+
+                return FieldTypeList[fieldPosition];
             }
         }
 
@@ -181,7 +183,20 @@ namespace Upstream.System.Records
         /// </returns>
         public bool TryGetValue(string fieldName, out TFieldType outValue)
         {
-            return FieldTypeDictionary.TryGetValue(fieldName, out outValue);
+            bool wasFound = false;
+            int fieldPosition;
+
+            outValue = default(TFieldType);
+            fieldPosition = IndexOfField(fieldName);
+            if (0 <= fieldPosition
+                && FieldTypeList.Count > fieldPosition
+                )
+            {
+                outValue = FieldTypeList[fieldPosition];
+                wasFound = true;
+            }
+
+            return wasFound;
         }
 
         /// <summary>
@@ -191,7 +206,7 @@ namespace Upstream.System.Records
         /// <returns>null reference if the field was not found,
         /// Otherwise returns an IFieldNameValuePair which contains the field type
         /// </returns>
-        public IFieldNameValuePair<TFieldType> FindField(string fieldName)
+        private IFieldNameValuePair<TFieldType> FindField(string fieldName)
         {
             IFieldNameValuePair<TFieldType> fieldItem = null;
             TFieldType fieldType;
@@ -217,7 +232,7 @@ namespace Upstream.System.Records
             for(int fieldPosition = 0; fieldPosition < FieldNameList.Count; fieldPosition++)
             {
                 string fieldName = FieldNameList[fieldPosition];
-                TFieldType fieldType = FieldTypeDictionary[fieldName];
+                TFieldType fieldType = FieldTypeList[fieldPosition];
 
                 yield return new FieldNameValuePair<TFieldType>(fieldName, fieldType);
             }
@@ -240,7 +255,7 @@ namespace Upstream.System.Records
             {
                 throw new ArgumentNullException("fieldName");
             }
-            if (FieldTypeDictionary.ContainsKey(fieldName))
+            if (FieldPositionDictionary.ContainsKey(fieldName))
             {
                 throw new ArgumentException(
                      String.Format("field '{0}' already exists in the record schema", fieldName)
@@ -248,9 +263,9 @@ namespace Upstream.System.Records
                     );
             }
 
-            FieldTypeDictionary.Add(fieldName, fieldType);
             FieldPositionDictionary.Add(fieldName, FieldNameList.Count);
             FieldNameList.Add(fieldName);
+            FieldTypeList.Add(fieldType);
         }
         
         /// <summary>
