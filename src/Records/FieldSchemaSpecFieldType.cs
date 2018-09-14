@@ -128,7 +128,7 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public int GetFieldCount()
         {
-            throw new NotImplementedException();
+            return _metaFieldNameArray.Length;
         }
 
         private int 
