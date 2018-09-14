@@ -1,13 +1,14 @@
 ﻿/*  Copyright (c) 2018 Upstream Research, Inc.  */
-/*  Subject to the MIT License. See LICENSE file in top-level directory. */
+/*  Subject to an MIT License. See LICENSE file in top-level directory. */
 
 using System;
-using System.Collections.Generic;  // KeyValuePair
+using System.Collections.Generic;
 
 namespace Upstream.System.Records
 {
     /// <summary>
     /// Defines a basic, readonly, ordered field-value lookup interface for tabular data records.
+    /// This interface is generic and covariant (unlike <see cref="IRecordAccessor{TValue}"/>.
     /// </summary>
     /// <typeparam name="TValue">datatype for field values</typeparam>
     public interface IRecordViewer<out TValue>
