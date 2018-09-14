@@ -187,6 +187,35 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Append a new field to the records in the collection.
+        /// This is an inefficient operation if there are records already in the collection;
+        /// it is best to call it before putting any records in the collection.
+        /// </summary>
+        /// <param name="fieldInfo"></param>
+        public void
+        AddField(IFieldNameValuePair<TFieldType> fieldInfo)
+        {
+            if (null == fieldInfo)
+            {
+                throw new ArgumentNullException("fieldInfo");
+            }
+
+            AddField(fieldInfo.Name, fieldInfo.Value);
+        }
+
+        /// <summary>
+        /// Append a new field to the records in the collection.
+        /// This is an inefficient operation if there are records already in the collection;
+        /// it is best to call it before putting any records in the collection.
+        /// </summary>
+        /// <param name="fieldInfo"></param>
+        public void
+        AddField(KeyValuePair<string, TFieldType> fieldInfo)
+        {
+            AddField(fieldInfo.Key, fieldInfo.Value);
+        }
+
+        /// <summary>
         /// Insert a new record into the list
         /// </summary>
         /// <param name="recordPosition"></param>
@@ -270,11 +299,9 @@ namespace Upstream.System.Records
                 && null != fieldValueArray
                 )
             {
-                IEnumerator<string> fieldNameEnumerator = RecordSchema.FieldNames.GetEnumerator();
                 fieldPosition = 0;
-                while (fieldNameEnumerator.MoveNext())
+                foreach (string fieldName in RecordSchema.FieldNames)
                 {
-                    string fieldName = fieldNameEnumerator.Current;
                     int inputFieldPosition = inputRecord.IndexOfField(fieldName);
                     if (0 <= inputFieldPosition)
                     {

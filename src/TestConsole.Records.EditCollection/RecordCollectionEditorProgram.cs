@@ -52,16 +52,18 @@ namespace Upstream.System.Records.Csv
         +"        print the field schema header\n"
         +"    goto,<N>\n"
         +"        go to record <N>\n"
-        +"    up\n"
-        +"        move 'up' to previous record\n"
-        +"    down\n"
-        +"        move 'down' to next record\n"
-        +"    left\n"
-        +"        move 'left' to the previous field\n"
-        +"    right\n"
-        +"        move 'right' to the next field\n"
+        +"    up[,<N>]\n"
+        +"        move 'up' <N> previous records\n"
+        +"    down[,<N>]\n"
+        +"        move 'down' after <N-1> subsequent records\n"
+        +"    left[,<N>]\n"
+        +"        move 'left' to <N> previous fields\n"
+        +"    right[,<N>]\n"
+        +"        move 'right' after <N-1> subsequent fields\n"
         +"    replace,<V>\n"
         +"        replace the value of the current field with <V>\n"
+        +"    add,<Field1>,<Field2>,...\n"
+        +"        add a new record\n"
         +"\n"
         ;
 
@@ -429,16 +431,8 @@ namespace Upstream.System.Records.Csv
                                 string fieldSpec = csvIn.ValueText;
                                 IFieldNameValuePair<IRecordFieldType<object>> fieldInfo
                                     = fieldSpecEncoding.DecodeField(fieldSpec, startPosition, specParserBuffer);
-                                string fieldName = fieldInfo.Name;
-                                IRecordFieldType<object> fieldType = fieldInfo.Value;
-                                recordSchemaIn.AddField(
-                                     fieldName
-                                    ,fieldType
-                                    );
-                                recordList.AddField(
-                                     fieldName
-                                    ,fieldType
-                                    );
+                                recordSchemaIn.AddField(fieldInfo);
+                                recordList.AddField(fieldInfo);
                             }
                         }
 
@@ -446,15 +440,10 @@ namespace Upstream.System.Records.Csv
                         if (!String.IsNullOrEmpty(appendFieldSchemaSpec))
                         {
                             IEnumerable<IFieldNameValuePair<IRecordFieldType<object>>> fieldInfoEnumeration
-                            = fieldSpecEncoding.DecodeEnumerable(appendFieldSchemaSpec);
+                                = fieldSpecEncoding.DecodeEnumerable(appendFieldSchemaSpec);
                             foreach(IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in fieldInfoEnumeration)
                             {
-                                string fieldName = fieldInfo.Name;
-                                IRecordFieldType<object> fieldType = fieldInfo.Value;
-                                recordList.AddField(
-                                     fieldName
-                                    ,fieldType
-                                    );
+                                recordList.AddField(fieldInfo);
                             }
                         }
 
@@ -874,6 +863,38 @@ namespace Upstream.System.Records.Csv
                         printingRecordAccessor.AttachTo(currentRecord);
                         PrintField(csvOut, printingRecordAccessor, currentFieldName);
                     }
+                }
+                else if (CmdNamesAreEqual("a", cmdName)
+                    || CmdNamesAreEqual("add", cmdName)
+                    || CmdNamesAreEqual("append", cmdName)
+                    )
+                {
+                    int newPosition = recordList.Count;
+                    IRecordCollectionBuilder<object> recordBuilder = recordList.GetRecordCollectionBuilder();
+                    int fieldPosition = 0;
+
+                    recordBuilder.InitializeCurrentItem();
+                    while (csvIn.ReadValue())
+                    {
+                        IRecordFieldType<object> fieldType = recordSchema[fieldPosition];
+                        Type dataType = fieldType.DataType;
+                        BasicFieldValueStringRepresentation<object> fieldFormatter = new BasicFieldValueStringRepresentation<object>(dataType, cultureInfoIn);
+                        string fieldValueString = csvIn.ValueText;
+                        object fieldValue;
+                        fieldFormatter.TryParse(fieldValueString, out fieldValue);
+                        recordBuilder.Current[fieldPosition] = fieldValue;                        
+                        fieldPosition += 1;
+                    }
+                    if (recordBuilder.AddCurrentItem()
+                        && recordVisitor.MoveTo(newPosition)
+                        )
+                    {
+                        currentRecordPosition = newPosition;
+                        currentRecord = recordVisitor.Current;
+                        printingRecordAccessor.AttachTo(currentRecord);
+                        PrintRecordInRow(csvOut, printingRecordAccessor);
+                    }
+                    
                 }
                 else if (!String.IsNullOrWhiteSpace(cmdName))
                 {

@@ -10,7 +10,8 @@ using System.Globalization;
 namespace Upstream.System.Records
 {
     /// <summary>
-    /// Implements IRecordAccessorAdapter to convert field values from a base record into string values
+    /// Adapts from an object record accessor to a string record accessor
+    /// by formatting (aka. "printing") field values from an underlying record as strings
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TFieldType"></typeparam>

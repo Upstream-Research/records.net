@@ -25,8 +25,12 @@ namespace Upstream.System.Records
         /// Create a record accessor that will parse strings
         /// according to the field types provided.
         /// </summary>
-        /// <param name="recordSchema"></param>
-        /// <param name="stringCulture">culture associated with the base record string representation</param>
+        /// <param name="recordSchema">
+        /// record schema for the parsed records.
+        /// </param>
+        /// <param name="stringCulture">
+        /// culture associated with the base record string representation
+        /// </param>
         public ParsingRecordAccessor(
             IRecordSchemaViewer<TFieldType> recordSchema
             ,CultureInfo stringCulture

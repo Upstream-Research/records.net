@@ -103,7 +103,7 @@ namespace Upstream.System.Records
                     && FieldTypeList.Count <= fieldPosition
                     )
                 {
-                    throw new KeyNotFoundException(String.Format("Specified field was not found: {0", fieldName));
+                    throw new KeyNotFoundException(String.Format("Specified field was not found: {0}", fieldName));
                 }
 
                 return FieldTypeList[fieldPosition];
@@ -130,9 +130,13 @@ namespace Upstream.System.Records
         /// </returns>
         public int IndexOfField(string fieldName)
         {
-            int fieldPosition = -1;
+            const int invalidFieldPosition = -1;
+            int fieldPosition;
 
-            FieldPositionDictionary.TryGetValue(fieldName, out fieldPosition);
+            if (false == FieldPositionDictionary.TryGetValue(fieldName, out fieldPosition))
+            {
+                fieldPosition = invalidFieldPosition;
+            }
 
             return fieldPosition;
         }
@@ -278,6 +282,18 @@ namespace Upstream.System.Records
         public void AddField(KeyValuePair<string,TFieldType> fieldInfo)
         {
             AddField(fieldInfo.Key, fieldInfo.Value);
+        }
+
+        /// <summary>
+        /// Add a new field to the record schema.
+        /// If the field name is already in the schema, an exception will be raised.
+        /// </summary>
+        /// <param name="fieldInfo">
+        /// IFieldNameValuePair containing name of field and field type for the field to be added to the schema
+        /// </param>
+        public void AddField(IFieldNameValuePair<TFieldType> fieldInfo)
+        {
+            AddField(fieldInfo.Name, fieldInfo.Value);
         }
 
     } // /class
