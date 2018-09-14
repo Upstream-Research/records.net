@@ -8,7 +8,7 @@ namespace Upstream.System.Records
 {
     /// <summary>
     /// Defines a basic, readonly, ordered field-value lookup interface for tabular data records.
-    /// This interface is generic and covariant (unlike <see cref="IRecordAccessor{TValue}"/>.
+    /// This interface is generic and covariant (unlike <see cref="IRecordAccessor{TValue}"/>).
     /// </summary>
     /// <typeparam name="TValue">datatype for field values</typeparam>
     /// <remarks>
