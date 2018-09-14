@@ -163,42 +163,41 @@ namespace Upstream.System.Csv
             if (null != _currentTextLine)
             {
                 bool isInsideQuotation = false;
-                int readCount = 0;
+                int readCount;
+                int initialTextLineIndex;
 
                 _currentValueBuffer.Clear();
-                readCount = _csvEncoding.DecodeInto(_currentValueBuffer, ref isInsideQuotation, _currentTextLine, _currentTextLineIndex);
+                initialTextLineIndex = _currentTextLineIndex;
+                readCount = _csvEncoding.DecodeInto(_currentValueBuffer, ref isInsideQuotation, ref _currentTextLineIndex, _currentTextLine);
                 while (isInsideQuotation
                     && null != _currentTextLine
                     )
                 {
                     _currentTextLine = _baseReader.ReadLine();
                     _currentTextLineIndex = 0;
+                    initialTextLineIndex = _currentTextLineIndex;
                     readCount = 0;
                     if (null != _currentTextLine)
                     {
                         // insert a newline/record-separator between each new line that we decode
                         _currentValueBuffer.Append(_csvEncoding.RecordSeparator);
-                        readCount = _csvEncoding.DecodeInto(_currentValueBuffer, ref isInsideQuotation, _currentTextLine, _currentTextLineIndex);
+                        readCount = _csvEncoding.DecodeInto(_currentValueBuffer, ref isInsideQuotation, ref _currentTextLineIndex, _currentTextLine);
                     }
                 }
-                _currentTextLineIndex += readCount;
 
                 if (null != _currentTextLine)
                 {
-                    if (_currentTextLineIndex >= _currentTextLine.Length)
+                    // if (initialTextLineIndex + readCount < _currentTextLineIndex)
+                    // then we read a unit separator, and although there is nothing left to read from the text line,
+                    //  there is still an empty value to read back to the client on a subsequent call to this function.
+                    if (_currentTextLineIndex >= _currentTextLine.Length
+                        && initialTextLineIndex + readCount == _currentTextLineIndex
+                        )
                     {
                         // we just read the last value in the record
                         // set _currentTextLine to null to signal that there are no more values to read
                         _currentTextLine = null;
                         _currentTextLineIndex = 0;
-                    }
-                    else
-                    {
-                        // ASSERT _csvEncoding.EqualsUnitSeparator(_currentTextLine, _currentTextLineIndex)
-                        if (_csvEncoding.EqualsUnitSeparator(_currentTextLine, _currentTextLineIndex))
-                        {
-                            _currentTextLineIndex += _csvEncoding.UnitSeparator.Length;
-                        }
                     }
                 }
                 _currentValueString = _currentValueBuffer.ToString();

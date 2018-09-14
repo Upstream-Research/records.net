@@ -261,17 +261,21 @@ namespace Upstream.System.Csv
         /// Stores the state of the decoder;
         /// will be set to true if a quote is started but left unfinished.
         /// </param>
+        /// <param name="encodedTextOffset">
+        /// on entry, the offset in the encodedText string where decoding should begin.
+        /// on exit, the offset of the next place in the encodedText string where decoding should continue.
+        /// </param>
         /// <param name="encodedText">encoded text to read</param>
-        /// <param name="encodedTextInitialIndex">index to start reading</param>
         /// <returns>
-        /// Number of characters read from the encodedText string
+        /// Number of characters read from the encodedText string,
+        /// this will include quotes, but will not include the terminating separator (if there is one).
         /// </returns>
         public int
         DecodeInto(
              StringBuilder decodedValueBuffer
             ,ref bool isInsideQuotation
+            ,ref int encodedTextOffset
             ,string encodedText
-            ,int encodedTextInitialIndex = 0
             )
         {
             string recordSeparator = RecordSeparator;
@@ -279,36 +283,36 @@ namespace Upstream.System.Csv
             string quote = Quote;
             string quoteEscape = QuoteEscape;
             int encodedTextReadCount = 0;
-            int encodedTextIndex = encodedTextInitialIndex;
-            int separatorIndex = -1;
+            //int encodedTextInitialOffset = encodedTextOffset;
+            int separatorOffset = -1;
             
             if (null == decodedValueBuffer)
             {
                 throw new ArgumentNullException("decodedValueBuffer");
             }
-            if (0 > encodedTextInitialIndex)
+            if (0 > encodedTextOffset)
             {
-                throw new ArgumentOutOfRangeException("encodedTextInitialIndex");
+                throw new ArgumentOutOfRangeException("encodedTextOffset");
             }
             if (null == encodedText)
             {
                 return encodedTextReadCount;
             }
             
-            while (encodedTextIndex < encodedText.Length
-                && 0 > separatorIndex
+            while (encodedTextOffset < encodedText.Length
+                && 0 > separatorOffset
                 )
             {
                 int symbolLength = 0;
 
                 if (isInsideQuotation)
                 {
-                    if (EqualsCode(encodedText, QuoteEscape, encodedTextIndex))
+                    if (EqualsCode(encodedText, QuoteEscape, encodedTextOffset))
                     {
                         decodedValueBuffer.Append(Quote);
                         symbolLength = QuoteEscape.Length;
                     }
-                    else if (EqualsCode(encodedText, Quote, encodedTextIndex))
+                    else if (EqualsCode(encodedText, Quote, encodedTextOffset))
                     {
                         isInsideQuotation = false;
                         symbolLength = Quote.Length;
@@ -316,30 +320,33 @@ namespace Upstream.System.Csv
                 }
                 else
                 {
-                    if (EqualsCode(encodedText, Quote, encodedTextIndex))
+                    if (EqualsCode(encodedText, Quote, encodedTextOffset))
                     {
                         isInsideQuotation = true;
                         symbolLength = Quote.Length;
                     }
-                    else if (EqualsCode(encodedText, RecordSeparator, encodedTextIndex))
+                    else if (EqualsCode(encodedText, RecordSeparator, encodedTextOffset))
                     {
                         symbolLength = RecordSeparator.Length;
-                        separatorIndex = encodedTextIndex;
+                        separatorOffset = encodedTextOffset;
                     }
-                    else if (EqualsCode(encodedText, UnitSeparator, encodedTextIndex))
+                    else if (EqualsCode(encodedText, UnitSeparator, encodedTextOffset))
                     {
                         symbolLength = UnitSeparator.Length;
-                        separatorIndex = encodedTextIndex;
+                        separatorOffset = encodedTextOffset;
                     }
                 }
                 if (0 == symbolLength)
                 {
-                    decodedValueBuffer.Append(encodedText[encodedTextIndex]);
+                    decodedValueBuffer.Append(encodedText[encodedTextOffset]);
                     symbolLength = 1;
                 }
 
-                encodedTextIndex += symbolLength;
-                encodedTextReadCount += symbolLength;
+                encodedTextOffset += symbolLength;
+                if (0 > separatorOffset)
+                {
+                    encodedTextReadCount += symbolLength;
+                }
             }
 
             return encodedTextReadCount;
