@@ -8,7 +8,7 @@ records.net
 The source code for this library is made available under an "MIT" license,
 See the "LICENSE" file for details.
 
-Revised: 2018-09-14 (db)
+Revised: 2018-09-21 (db)
 
 _(20180914 (db) Warning: this is unstable and somewhat untested code.
 It has been released in the interest of getting it out into the community,
@@ -17,7 +17,9 @@ where people can see it and perhaps take an interest in it.)_
 
 ## Overview
 
-This is a data support library intended to provide access to tabular/record data similar to ADO.NET (i.e. System.Data).
+This is a data support library intended to provide generalized access to tabular/record data.
+It is somewhat similar to the DataSets in ADO.NET (i.e. System.Data),
+but with a different emphasis.
 
 The goals are to provide a finer set of core interfaces than System.Data
 as well as to provide a .NET Standard implementation for basic tabular data access.
