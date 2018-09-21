@@ -568,11 +568,22 @@ namespace Upstream.System.Records
                     string fieldName = inputFieldItem.Name;                        
                     TValue inputFieldValue = inputFieldItem.Value;
                     int fieldPosition = record.IndexOfField(fieldName);
-                    TValue fieldValue = record[fieldPosition];
-                    IComparer<TValue> fieldComparer = RecordSchema[fieldPosition];
+                    if (0 > fieldPosition)
+                    {
+                        // field from input record does not exist in record list schema,
+                        //  according to our function definition, the input record cannot match anything.
+                        // TODO: check for field compatibility before looping over all records
+                        fieldsAreEqual = false;
+                    }
+                    else
+                    {
+                        TValue fieldValue = record[fieldPosition];
+                        //IComparer<TValue> fieldSortComparer = RecordSchema[fieldPosition];
+                        IEqualityComparer<TValue> fieldEqualityComparer = RecordSchema[fieldPosition];
                     
-                    //fieldsAreEqual = (0 == record.CompareFieldTo(fieldName, inputFieldValue));
-                    fieldsAreEqual = (0 == fieldComparer.Compare(fieldValue, inputFieldValue));
+                        //fieldsAreEqual = (0 == fieldSortComparer.Compare(fieldValue, inputFieldValue));
+                        fieldsAreEqual = fieldEqualityComparer.Equals(fieldValue, inputFieldValue);
+                    }
                 }
 
                 if (fieldsAreEqual)

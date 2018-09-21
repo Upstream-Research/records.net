@@ -17,7 +17,7 @@ namespace Upstream.System.Records.Csv
     class RecordCollectionEditorProgram
     {
         const string HelpText = 
-         "rcd-edit tool version 20180905\n"
+         "rcd-edit tool version 20180905:20180921\n"
         +"\n"
         +"rcd-edit [OPTIONS] [InputFile]\n"
         +"\n"
@@ -42,29 +42,48 @@ namespace Upstream.System.Records.Csv
         +"\n"
         +"COMMANDS\n"
         +"\n"
-        +"    help\n"
+        +"    ?| help\n"
         +"        prints this help information.\n"
-        +"    quit\n"
-        +"        get out of here.\n"
-        +"    print\n"
-        +"        print the record to the console\n"
-        +"    header\n"
-        +"        print the field schema header\n"
-        +"    goto,<N>\n"
-        +"        go to record <N>\n"
-        +"    up[,<N>]\n"
-        +"        move 'up' <N> previous records\n"
-        +"    down[,<N>]\n"
-        +"        move 'down' after <N-1> subsequent records\n"
-        +"    left[,<N>]\n"
-        +"        move 'left' to <N> previous fields\n"
-        +"    right[,<N>]\n"
-        +"        move 'right' after <N-1> subsequent fields\n"
-        +"    replace,<V>\n"
-        +"        replace the value of the current field with <V>\n"
-        +"    add,<Field1>,<Field2>,...\n"
-        +"        add a new record\n"
+        +"    q| done\n"
+        +"        quit and print out the entire recordset to STDOUT.\n"
+        +"    p| print[,<N>]\n"
+        +"        print the next <N> records to the console\n"
+        +"    H| header\n"
+        +"        print the field schema header as a single line\n"
+        +"    HH| header-details\n"
+        +"        print the field schema header in separate lines\n"
         +"\n"
+        +"    f| goto-field,<N|F>\n"
+        +"        go to a field by it's field position <N>, or by its name <F>\n"
+        +"    g| goto,<N>\n"
+        +"        go to record <N>\n"
+        +"    h| left[,<N>]\n"
+        +"        move 'left' to <N> previous fields\n"
+        +"    j| down[,<N>]\n"
+        +"        move 'down' after <N-1> subsequent records\n"
+        +"    k| up[,<N>]\n"
+        +"        move 'up' <N> previous records\n"
+        +"    l| right[,<N>]\n"
+        +"        move 'right' after <N-1> subsequent fields\n"
+        +"    gg| goto-start\n"
+        +"    G| goto-end\n"
+        +"    ff| goto-first-field\n"
+        +"    F| goto-last-field\n"
+        +"\n"
+        +"    r| replace,<Field1>,<Field2>,...\n"
+        +"        replace field values starting at the current field\n"
+        +"    a| add,<Field1>,<Field2>,...\n"
+        +"        add a new record to the end of the record collection*\n"
+        +"    i| insert,<Field1>,<Field2>,...\n"
+        +"        insert a new record after the current record*\n"
+        +"    I| insert-before,<Field1>,<Field2>,...\n"
+        +"        insert a new record before the current record*\n"
+        +"    dd| delete[,<N>]\n"
+        +"        delete <N> records starting with the current record\n"
+        +"\n"
+        +"* When inserting or adding a record, fields prior to the current field\n"
+        +"  will be copied from the current record to the new record.\n"
+        +"\n" 
         ;
 
         const string EditorBannerText = 
@@ -590,7 +609,6 @@ namespace Upstream.System.Records.Csv
             string helpText = EditorHelpText;
             string promptTemplateString = EditorPromptTemplateString;
             string promptString;
-            string cmdName;
             int currentRecordPosition = 0;
             int currentFieldPosition = 0;
             string currentFieldName = String.Empty;
@@ -644,7 +662,32 @@ namespace Upstream.System.Records.Csv
                 csvWriter.WriteEndRecord();
             }
             ;
-            Func<CsvReader,int,int> ParseInt32
+            Func<CsvReader,string> ReadString
+            = (CsvReader csvReader)
+            =>
+            {
+                string s = null;
+                if (csvReader.ReadValue())
+                {
+                    s = csvReader.ValueText;
+                }
+                return s;
+            }
+            ;
+            Func<string,int,int> ParseInt32
+            = (string valueString, int defaultValue)
+            =>
+            {
+                int parsedValue = defaultValue;
+                if (!Int32.TryParse(valueString, NumberStyles.Integer, cultureInfoIn, out parsedValue))
+                {
+                    parsedValue = defaultValue;
+                }
+
+                return parsedValue;
+            }
+            ;
+            Func<CsvReader,int,int> ReadInt32
             = (CsvReader csvReader, int defaultValue)
             =>
             {
@@ -694,12 +737,161 @@ namespace Upstream.System.Records.Csv
                 && csvIn.ReadRecord()
                 )
             {
-                cmdName = null;
+                string cmdName = null;
+                string originalCmdName;
+                int newPosition = -1;
+                int newFieldPosition = -1;
+
                 if (csvIn.ReadValue())
                 {
                     cmdName = csvIn.ValueText;    
                 }
 
+                // pre-process command:
+                originalCmdName = cmdName;
+                if (null == cmdName)
+                {
+                    cmdName = String.Empty;
+                }
+                else if (CmdNamesAreEqual("g", cmdName)
+                    || CmdNamesAreEqual("goto", cmdName)
+                    )
+                {
+                    newPosition = ReadInt32(csvIn, currentRecordPosition);
+                    cmdName = "goto";
+                }
+                else if (CmdNamesAreEqual("gg", cmdName)
+                    || CmdNamesAreEqual("goto-start", cmdName)
+                    )
+                {
+                    newPosition = 0;
+                    cmdName = "goto";
+                }
+                else if (CmdNamesAreEqual("G", cmdName)
+                    || CmdNamesAreEqual("goto-end", cmdName)
+                    )
+                {
+                    newPosition = recordList.Count - 1;
+                    cmdName = "goto";
+                }
+                else if (CmdNamesAreEqual("j", cmdName)
+                    || CmdNamesAreEqual("down", cmdName)
+                    )
+                {
+                    int defaultOffset = 1;
+                    int offset = ReadInt32(csvIn, defaultOffset);
+                    newPosition = currentRecordPosition + offset;
+                    cmdName = "goto";
+                }
+                else if (CmdNamesAreEqual("k", cmdName)
+                    || CmdNamesAreEqual("up", cmdName)
+                    )
+                {
+                    int defaultOffset = 1;
+                    int offset = ReadInt32(csvIn, defaultOffset);
+                    if (offset <= currentRecordPosition)
+                    {
+                        newPosition = currentRecordPosition - offset;
+                    }
+                    cmdName = "goto";
+                }
+                else if (CmdNamesAreEqual("f", cmdName)
+                    || CmdNamesAreEqual("goto-field", cmdName)
+                    )
+                {
+                    string arg = ReadString(csvIn);
+                    string fieldName = null;
+                    // if the first argument parses as an int32,
+                    //   then we will use it as a field position
+                    //   otherwise we will try to interpret it as a field name
+                    if (null != arg)
+                    {
+                        newFieldPosition = ParseInt32(arg, -1);
+                        if (0 > newFieldPosition)
+                        {
+                            fieldName = arg;
+                        }
+                    }
+                    // try to get another argument, maybe it will be a field name...
+                    if (0 > newFieldPosition
+                        && String.IsNullOrEmpty(fieldName)
+                        && csvIn.ReadValue()
+                        )
+                    {
+                        fieldName = csvIn.ValueText;
+                    }
+                    if (null != fieldName)
+                    {
+                        int fieldPosition = recordList.RecordSchema.IndexOfField(fieldName);
+                        if (0 <= fieldPosition)
+                        {
+                            newFieldPosition = fieldPosition;
+                        }
+                    }
+                    cmdName = "goto-field";
+                }
+                else if (CmdNamesAreEqual("ff", cmdName)
+                    || CmdNamesAreEqual("0", cmdName)
+                    || CmdNamesAreEqual("goto-first-field", cmdName)
+                    )
+                {
+                    newFieldPosition = 0;
+                    cmdName = "goto-field";
+                }
+                else if (CmdNamesAreEqual("F", cmdName)
+                    || CmdNamesAreEqual("$", cmdName)
+                    || CmdNamesAreEqual("goto-last-field", cmdName)
+                    )
+                {
+                    newFieldPosition = recordList.FieldCount - 1;
+                    cmdName = "goto-field";
+                }
+                else if (CmdNamesAreEqual("h", cmdName)
+                    || CmdNamesAreEqual("left", cmdName)
+                    )
+                {
+                    int defaultOffset = 1;
+                    int offset = ReadInt32(csvIn, defaultOffset);
+                    newFieldPosition = currentFieldPosition - offset;
+                    cmdName = "goto-field";
+                }
+                else if (CmdNamesAreEqual("l", cmdName)
+                    || CmdNamesAreEqual("right", cmdName)
+                    )
+                {
+                    int defaultOffset = 1;
+                    int offset = ReadInt32(csvIn, defaultOffset);
+                    newFieldPosition = currentFieldPosition + offset;
+                    cmdName = "goto-field";
+                }
+                else if (CmdNamesAreEqual("a", cmdName)
+                    || CmdNamesAreEqual("add", cmdName)
+                    || CmdNamesAreEqual("append", cmdName)
+                    )
+                {
+                    newPosition = recordList.Count;
+                    cmdName = "insert";
+                }
+                else if (CmdNamesAreEqual("i", cmdName)
+                    || CmdNamesAreEqual("insert-after", cmdName)
+                    || CmdNamesAreEqual("insert", cmdName)
+                    )
+                {
+                    int offset = 1;
+                    newPosition = currentRecordPosition + offset;
+                    cmdName = "insert";
+                }
+                else if (CmdNamesAreEqual("I", cmdName)
+                    || CmdNamesAreEqual("insert-before", cmdName)
+                    )
+                {
+                    int offset = 0;
+                    newPosition = currentRecordPosition + offset;
+                    cmdName = "insert";
+                }
+
+
+                // execute command:
                 if (null == cmdName)
                 {
                     // continue;
@@ -707,6 +899,7 @@ namespace Upstream.System.Records.Csv
                 else if (CmdNamesAreEqual("q", cmdName)
                     || CmdNamesAreEqual("quit", cmdName)
                     || CmdNamesAreEqual("exit", cmdName)
+                    || CmdNamesAreEqual("done", cmdName)
                     )
                 {
                     shouldQuit = true;
@@ -720,12 +913,11 @@ namespace Upstream.System.Records.Csv
                         promptOut.Write(helpText);
                     }
                 }
-                else if (CmdNamesAreEqual("g", cmdName)
-                    || CmdNamesAreEqual("goto", cmdName)
-                    )
+                else if (CmdNamesAreEqual("goto", cmdName))
                 {
-                    int newPosition = ParseInt32(csvIn, currentRecordPosition);
-                    if (newPosition < recordList.Count)
+                    if (0 <= newPosition
+                        && newPosition < recordList.Count
+                        )
                     {
                         if (recordVisitor.MoveTo(newPosition))
                         {
@@ -736,68 +928,13 @@ namespace Upstream.System.Records.Csv
                         }
                     }
                 }
-                else if (CmdNamesAreEqual("j", cmdName)
-                    || CmdNamesAreEqual("down", cmdName)
-                    )
+                else if (CmdNamesAreEqual("goto-field", cmdName))
                 {
-                    int defaultOffset = 1;
-                    int offset = ParseInt32(csvIn, defaultOffset);
-                    int newPosition = currentRecordPosition + offset;
-                    if (newPosition < recordList.Count)
+                    if (0 <= newFieldPosition
+                        && newFieldPosition < recordList.FieldCount
+                        )
                     {
-                        if (recordVisitor.MoveTo(newPosition))
-                        {
-                            currentRecordPosition = newPosition;
-                            currentRecord = recordVisitor.Current;
-                            printingRecordAccessor.AttachTo(currentRecord);
-                            PrintRecordInRow(csvOut, printingRecordAccessor);
-                        }
-                    }
-                }
-                else if (CmdNamesAreEqual("k", cmdName)
-                    || CmdNamesAreEqual("up", cmdName)
-                    )
-                {
-                    int defaultOffset = 1;
-                    int offset = ParseInt32(csvIn, defaultOffset);
-                    if (offset <= currentRecordPosition)
-                    {
-                        int newPosition = currentRecordPosition - offset;
-                        if (recordVisitor.MoveTo(newPosition))
-                        {
-                            currentRecordPosition = newPosition;
-                            currentRecord = recordVisitor.Current;
-                            printingRecordAccessor.AttachTo(currentRecord);
-                            PrintRecordInRow(csvOut, printingRecordAccessor);
-                        }
-                    }
-                }
-                else if (CmdNamesAreEqual("h", cmdName)
-                    || CmdNamesAreEqual("left", cmdName)
-                    )
-                {
-                    int defaultOffset = 1;
-                    int offset = ParseInt32(csvIn, defaultOffset);
-                    if (offset <= currentFieldPosition)
-                    {
-                        currentFieldPosition -= offset;
-                        currentFieldName = recordSchema.FieldNameAt(currentFieldPosition);
-                        if (null != currentRecord)
-                        {
-                            printingRecordAccessor.AttachTo(currentRecord);
-                            PrintField(csvOut, printingRecordAccessor, currentFieldName);
-                        }
-                    }
-                }
-                else if (CmdNamesAreEqual("l", cmdName)
-                    || CmdNamesAreEqual("right", cmdName)
-                    )
-                {
-                    int defaultOffset = 1;
-                    int offset = ParseInt32(csvIn, defaultOffset);
-                    if (currentFieldPosition + offset < recordList.FieldCount)
-                    {
-                        currentFieldPosition += offset;
+                        currentFieldPosition = newFieldPosition;
                         currentFieldName = recordSchema.FieldNameAt(currentFieldPosition);
                         if (null != currentRecord)
                         {
@@ -810,8 +947,24 @@ namespace Upstream.System.Records.Csv
                     || CmdNamesAreEqual("print", cmdName)
                     )
                 {
-                    printingRecordAccessor.AttachTo(currentRecord);
-                    PrintRecordInRow(csvOut, printingRecordAccessor);
+                    int n = ReadInt32(csvIn, 1);
+                    IRecordListVisitor<object> printVisitor = recordList.GetRecordListVisitor();
+                    if (printVisitor.MoveTo(currentRecordPosition))
+                    {
+                        while (n > 0)
+                        {
+                            printingRecordAccessor.AttachTo(printVisitor.Current);
+                            PrintRecordInRow(csvOut, printingRecordAccessor);
+                            if (printVisitor.MoveNext())
+                            {
+                                n -= 1;
+                            }
+                            else
+                            {
+                                n = 0;
+                            }
+                        }
+                    }
                 }
                 else if (CmdNamesAreEqual("H", cmdName)
                     || CmdNamesAreEqual("header", cmdName)
@@ -826,6 +979,24 @@ namespace Upstream.System.Records.Csv
                         csvOut.WriteValue(fieldSpecString);
                     }
                     csvOut.WriteEndRecord();
+                }
+                else if (CmdNamesAreEqual("HH", cmdName)
+                    || CmdNamesAreEqual("header-details", cmdName)
+                    )
+                {
+                    int fieldPosition = 0;
+
+                    foreach (IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in recordList.RecordSchema)
+                    {
+                        csvOut.WriteStartRecord();
+                        string fieldName = fieldInfo.Name;
+                        IRecordFieldType<object> fieldType = fieldInfo.Value;
+                        string fieldSpecString = fieldSpecEncoding.EncodeField(fieldName, fieldType);
+                        csvOut.WriteValue(String.Format("{0}", fieldPosition));
+                        csvOut.WriteValue(fieldSpecString);
+                        csvOut.WriteEndRecord();
+                        fieldPosition += 1;
+                    }
                 }
                 else if (CmdNamesAreEqual("x", cmdName)
                     || CmdNamesAreEqual("set_null", cmdName)
@@ -843,38 +1014,51 @@ namespace Upstream.System.Records.Csv
                     || CmdNamesAreEqual("replace", cmdName)
                     )
                 {
-                    string fieldValueString = null;
+                    int fieldPosition = currentFieldPosition;
 
-                    if (csvIn.ReadValue())
-                    {
-                        fieldValueString = csvIn.ValueText;
-                    }
-                    if (null != currentRecord
-                        && 0 <= currentFieldPosition
-                        && recordList.FieldCount > currentFieldPosition
+                    while (null != currentRecord
+                        && 0 <= fieldPosition
+                        && recordList.FieldCount > fieldPosition
+                        && csvIn.ReadValue()
                         )
                     {
-                        IRecordFieldType<object> fieldType = recordSchema[currentFieldPosition];
+                        string fieldValueString = csvIn.ValueText;
+                        IRecordFieldType<object> fieldType = recordSchema[fieldPosition];
                         Type dataType = fieldType.DataType;
                         BasicFieldValueStringRepresentation<object> fieldFormatter = new BasicFieldValueStringRepresentation<object>(dataType, cultureInfoIn);
                         object fieldValue;
                         fieldFormatter.TryParse(fieldValueString, out fieldValue);
-                        currentRecord[currentFieldPosition] = fieldValue;
+                        currentRecord[fieldPosition] = fieldValue;
+                    }
+                    if (null != currentRecord)
+                    {
                         printingRecordAccessor.AttachTo(currentRecord);
-                        PrintField(csvOut, printingRecordAccessor, currentFieldName);
+                        PrintRecordInRow(csvOut, printingRecordAccessor);
                     }
                 }
-                else if (CmdNamesAreEqual("a", cmdName)
-                    || CmdNamesAreEqual("add", cmdName)
-                    || CmdNamesAreEqual("append", cmdName)
-                    )
+                else if (CmdNamesAreEqual("insert", cmdName))
                 {
-                    int newPosition = recordList.Count;
-                    IRecordCollectionBuilder<object> recordBuilder = recordList.GetRecordCollectionBuilder();
+                    int fieldCount = recordSchema.GetFieldCount();
+                    IRecordAccessor<object> newRecord = new ListRecordAccessor<object,IRecordFieldType<object>>(
+                        recordSchema
+                        ,new object[fieldCount]
+                        );
+                    
                     int fieldPosition = 0;
-
-                    recordBuilder.InitializeCurrentItem();
-                    while (csvIn.ReadValue())
+                    // copy fields upto the current field position
+                    while (fieldPosition < fieldCount
+                        && fieldPosition < currentFieldPosition
+                        )
+                    {
+                        if (null != currentRecord)
+                        {
+                            newRecord[fieldPosition] = currentRecord[fieldPosition];
+                        }
+                        fieldPosition += 1;
+                    }
+                    while (fieldPosition < fieldCount
+                        && csvIn.ReadValue()
+                        )
                     {
                         IRecordFieldType<object> fieldType = recordSchema[fieldPosition];
                         Type dataType = fieldType.DataType;
@@ -882,10 +1066,45 @@ namespace Upstream.System.Records.Csv
                         string fieldValueString = csvIn.ValueText;
                         object fieldValue;
                         fieldFormatter.TryParse(fieldValueString, out fieldValue);
-                        recordBuilder.Current[fieldPosition] = fieldValue;                        
+                        newRecord[fieldPosition] = fieldValue;                        
                         fieldPosition += 1;
                     }
-                    if (recordBuilder.AddCurrentItem()
+                    if (0 <= newPosition
+                        && recordList.Count >= newPosition
+                        )
+                    {
+                        recordList.Insert(newPosition, newRecord);
+                        if (recordVisitor.MoveTo(newPosition))
+                        {
+                            currentRecordPosition = newPosition;
+                            currentRecord = recordVisitor.Current;
+                            printingRecordAccessor.AttachTo(currentRecord);
+                            PrintRecordInRow(csvOut, printingRecordAccessor);
+                        }
+                    }
+                }
+                else if (CmdNamesAreEqual("dd", cmdName)
+                    || CmdNamesAreEqual("delete", cmdName)
+                    )
+                {
+                    int n = ReadInt32(csvIn, 1);
+                    newPosition = currentRecordPosition;
+                    while (0 <= newPosition
+                        && recordList.Count > newPosition
+                        && 0 < n
+                        )
+                    {
+                        recordList.RemoveAt(newPosition);
+                        if (recordList.Count <= newPosition)
+                        {
+                            newPosition = recordList.Count - 1;
+                        }
+                        n -= 1;
+                    }
+
+                    currentRecordPosition = -1;
+                    currentRecord = null;
+                    if (0 <= newPosition
                         && recordVisitor.MoveTo(newPosition)
                         )
                     {
@@ -894,13 +1113,12 @@ namespace Upstream.System.Records.Csv
                         printingRecordAccessor.AttachTo(currentRecord);
                         PrintRecordInRow(csvOut, printingRecordAccessor);
                     }
-                    
                 }
                 else if (!String.IsNullOrWhiteSpace(cmdName))
                 {
                     csvOut.WriteStartRecord();
                     csvOut.WriteValue("unknown_command");
-                    csvOut.WriteValue(cmdName);
+                    csvOut.WriteValue(originalCmdName);
                     csvOut.WriteEndRecord();
                 }
 
