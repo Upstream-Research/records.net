@@ -10,7 +10,8 @@ See the "LICENSE" file for details.
 
 Revised: 2018-09-21 (db)
 
-_(20180914 (db) Warning: this is unstable and somewhat untested code.
+_(20180921 (db) Warning: this is "alpha" quality code.
+It works, but it is not yet ready for use in a production environment.
 It has been released in the interest of getting it out into the community,
 where people can see it and perhaps take an interest in it.)_
 
@@ -23,6 +24,9 @@ but with a different emphasis.
 
 The goals are to provide a finer set of core interfaces than System.Data
 as well as to provide a .NET Standard implementation for basic tabular data access.
+It provides, for example, interfaces such as `IRecordAccessor` and `IRecordCollection`
+which may be implemented by a variety of sources,
+including CSV, database, JSON, XML, .NET reflection or other back-end sources.
 
 This library provides an alternative and a complement to ORM (Object/Relational Mapping) frameworks.
 It is an alternative because it does not try to hide the tabular nature of relational data,
@@ -114,8 +118,17 @@ but improvements aren't difficult to imagine.
 There has been little time for finishing the library code, much less testing it.
 
 The test console programs also serve as examples for how to use the APIs.
-Presently, there is just one "master" console program called `TestConsole` which wraps
+Presently, there is a "master" console program called `TestConsole` which wraps
 the other console programs and calls them as subcommands.
 These programs demonstrate some simple CSV reading and writing,
 a parser for a simple CSV-compatible record schema specification mini-language,
 and an interactive and scriptable CSV record editor.
+
+The record editor is also compiled into a stand-alone executable called `rcd-editor`,
+and it is by far the most complicated (and arguably the most useful) of the test programs.
+It provides an interactive, scriptable command interpreter for manipulating records
+in a record collection stored as a CSV file.
+While it is not nearly as friendly as Excel (when Excel is not being unfriendly),
+it provides a fairly independent means for manually adjusting CSV data.
+Since it is scriptable, it can, in principle, be used for automated adjustment of CSV data too.
+
