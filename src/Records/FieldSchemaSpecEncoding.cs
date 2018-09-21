@@ -296,6 +296,77 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
+        /// Create a record schema from a field schema spec string
+        /// </summary>
+        /// <param name="fieldSchemaSpecString">
+        /// a string consisting of comma-separated field specifications
+        /// </param>
+        /// <returns></returns>
+        public IRecordSchemaViewer<FieldSchemaSpecFieldType<TValue>>
+        DecodeRecordSchema(
+            string fieldSchemaSpecString
+            )
+        {
+            BasicRecordSchema<FieldSchemaSpecFieldType<TValue>> recordSchema 
+                = new BasicRecordSchema<FieldSchemaSpecFieldType<TValue>>();
+            
+            recordSchema.AddFields(DecodeEnumerable(fieldSchemaSpecString));
+
+            return recordSchema;
+        }
+
+        /// <summary>
+        /// Create a record schema from an enumerator of field specs
+        /// </summary>
+        /// <param name="fieldSpecEnumerator">
+        /// an enumerator of field specification strings
+        /// </param>
+        /// <returns></returns>
+        public IRecordSchemaViewer<FieldSchemaSpecFieldType<TValue>>
+        DecodeRecordSchema(
+            IEnumerator<string> fieldSpecEnumerator
+            )
+        {
+            BasicRecordSchema<FieldSchemaSpecFieldType<TValue>> recordSchema 
+                = new BasicRecordSchema<FieldSchemaSpecFieldType<TValue>>();
+            StringBuilder buffer = new StringBuilder();
+            const int startPosition = 0;
+
+            while (fieldSpecEnumerator.MoveNext())
+            {
+                string fieldSpec = fieldSpecEnumerator.Current;
+                IFieldNameValuePair<FieldSchemaSpecFieldType<TValue>> fieldInfo
+                    = DecodeField(fieldSpec, startPosition, buffer);
+
+                recordSchema.AddField(fieldInfo);
+            }
+            
+            return recordSchema;
+        }
+
+        /// <summary>
+        /// Create a record schema from an enumeration of field specs
+        /// </summary>
+        /// <param name="fieldSpecEnumeration">
+        /// an enumeration of field specification strings
+        /// </param>
+        /// <returns></returns>
+        public IRecordSchemaViewer<FieldSchemaSpecFieldType<TValue>>
+        DecodeRecordSchema(
+            IEnumerable<string> fieldSpecEnumeration
+            )
+        {
+            IRecordSchemaViewer<FieldSchemaSpecFieldType<TValue>> recordSchema = null;
+
+            if (null != fieldSpecEnumeration)
+            {
+                recordSchema = DecodeRecordSchema(fieldSpecEnumeration.GetEnumerator());
+            }
+            
+            return recordSchema;
+        }
+
+        /// <summary>
         /// Parse a field schema spec into an enumeration of record field type objects
         /// </summary>
         /// <returns>

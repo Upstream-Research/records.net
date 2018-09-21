@@ -2,6 +2,7 @@
 /*  Subject to the MIT License. See LICENSE file in top-level directory. */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Upstream.System.Csv
     /// </summary>
     public class CsvReader
     : IDisposable
+     ,IEnumerator<string>
     {
         private readonly CsvEncoding _csvEncoding;
         private TextReader _baseReader;
@@ -116,6 +118,22 @@ namespace Upstream.System.Csv
             }
         }
 
+        string IEnumerator<string>.Current
+        {
+            get
+            {
+                return ValueText;
+            }
+        }
+
+        object IEnumerator.Current
+        {
+            get
+            {
+                return ValueText;
+            }
+        }
+
         /// <summary>
         /// Read the beginning of the next record.
         /// Unit values must be read by calling ReadValue() until it returns false.
@@ -205,6 +223,23 @@ namespace Upstream.System.Csv
             }
 
             return hasReadValue;
+        }
+
+        /// <summary>
+        /// Iterating the enumerator moves to the next cell
+        /// </summary>
+        /// <returns></returns>
+        bool IEnumerator.MoveNext()
+        {
+            return ReadValue();
+        }
+
+        /// <summary>
+        /// Resetting the enumerator tries to move to the next record
+        /// </summary>
+        void IEnumerator.Reset()
+        {
+            ReadRecord();
         }
 
     } // /class

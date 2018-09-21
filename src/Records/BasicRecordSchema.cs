@@ -296,5 +296,22 @@ namespace Upstream.System.Records
             AddField(fieldInfo.Name, fieldInfo.Value);
         }
 
+        /// <summary>
+        /// Add a range of fields from an enumeration of field name/type objects
+        /// </summary>
+        /// <param name="fieldInfoEnumeration"></param>
+        public void AddFields(
+            IEnumerable<IFieldNameValuePair<TFieldType>> fieldInfoEnumeration
+            )
+        {
+            if (null != fieldInfoEnumeration)
+            {
+                foreach (IFieldNameValuePair<TFieldType> fieldInfo in fieldInfoEnumeration)
+                {
+                    AddField(fieldInfo);
+                }
+            }
+        }
+
     } // /class
 } // /namespace
