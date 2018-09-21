@@ -27,7 +27,8 @@ array set env {DIRECTORY_TEST_CASE_NAME "."}
 array set env {DIFF diff}
 #array set env {FC cmp}
 
-array set env [list TCON [file join [file dirname $env(TC_ROOT)] bin debug Upstream.System.TestConsole.exe]]
+array set env [list TCON [file join [file dirname $env(TC_ROOT)] "bin" "debug" "Upstream.System.TestConsole.exe"]]
+array set env [list RCD_ED [file join [file dirname $env(TC_ROOT)] "bin" "debug" "rcd-editor.exe"]]
 
 
 set test_util_dir [file join $env(TC_ROOT) "_tcl"]

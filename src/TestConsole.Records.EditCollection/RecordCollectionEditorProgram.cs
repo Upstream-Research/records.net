@@ -25,6 +25,7 @@ namespace Upstream.System.Records.Csv
         +"    -a {S}  Comma-separated list of fields to append to records\n"
         +"    -J {F}  Editor script file name\n"
         +"    -o {F}  Output file name\n"
+        +"    -q      Run quietly; don't print feedback to STDERR\n"
         +"    -W,-w   Read-write mode (output file is same as input file)\n"
         +"\n"
         +"Reads an input file into memory and then enters a command interpreter.\n"
@@ -112,6 +113,7 @@ namespace Upstream.System.Records.Csv
             TextWriter outs = Console.Out;
             TextWriter errs = Console.Error;
             bool showHelp = false;
+            bool beQuiet = false;
             string errorMessage = null;
 
             //const string textEncodingDefault = "utf-8";
@@ -166,6 +168,12 @@ namespace Upstream.System.Records.Csv
                     )
                 {
                     showHelp = true;
+                }
+                else if (ArgOptionEquals("-q", arg)
+                    || ArgOptionEquals("--quiet", arg)
+                    )
+                {
+                    beQuiet = true;
                 }
                 else if (ArgOptionEquals("-a", arg)
                     || ArgOptionEquals("--append-fields", arg)
@@ -417,6 +425,15 @@ namespace Upstream.System.Records.Csv
                 FileStream fileStreamIn = null;
                 FileStream fileStreamOut = null;
 
+                if (beQuiet)
+                {
+                    // TODO: use a null TextWriter,
+                    //   we just want to ignore anything written to scriptStreamOut,
+                    //   and this isn't exactly ignoring it since it accumulates it all in memory.
+                    scriptStreamOut = new StringWriter();
+                    promptStreamOut = scriptStreamOut;
+                }
+
                 try
                 {
                     TextReader scriptStreamIn = ins;
@@ -431,9 +448,23 @@ namespace Upstream.System.Records.Csv
                     FieldSchemaSpecEncoding<object> fieldSpecEncoding = new FieldSchemaSpecEncoding<object>();
                     ArrayRecordList<object,IRecordFieldType<object>> recordList = new ArrayRecordList<object,IRecordFieldType<object>>();
 
-                    // TODO: 20180905 refactor this into a function that reads a CSV file into an IRecordCollection
-                    if (!String.IsNullOrEmpty(fileNameIn))
+                    if (String.IsNullOrEmpty(fileNameIn))
                     {
+                        // no input file
+                        // insert fields specified on the commandline to the recordList
+                        if (!String.IsNullOrEmpty(appendFieldSchemaSpec))
+                        {
+                            IEnumerable<IFieldNameValuePair<IRecordFieldType<object>>> fieldInfoEnumeration
+                                = fieldSpecEncoding.DecodeEnumerable(appendFieldSchemaSpec);
+                            foreach(IFieldNameValuePair<IRecordFieldType<object>> fieldInfo in fieldInfoEnumeration)
+                            {
+                                recordList.AddField(fieldInfo);
+                            }
+                        }
+                    }
+                    else // read records from input file
+                    {
+                        // TODO: 20180905 refactor this into a function that reads a CSV file into an IRecordCollection
                         fileStreamIn = OpenReadOnlyFileStream(fileNameIn);
                         TextReader textStreamIn = CreateTextReader(fileStreamIn, textEncodingIn);
                         CsvReader csvIn = new CsvReader(textStreamIn, csvEncodingIn);
@@ -879,6 +910,10 @@ namespace Upstream.System.Records.Csv
                 {
                     int offset = 1;
                     newPosition = currentRecordPosition + offset;
+                    if (recordList.Count < newPosition)
+                    {
+                        newPosition = recordList.Count;
+                    }
                     cmdName = "insert";
                 }
                 else if (CmdNamesAreEqual("I", cmdName)
@@ -887,6 +922,10 @@ namespace Upstream.System.Records.Csv
                 {
                     int offset = 0;
                     newPosition = currentRecordPosition + offset;
+                    if (recordList.Count < newPosition)
+                    {
+                        newPosition = recordList.Count;
+                    }
                     cmdName = "insert";
                 }
 

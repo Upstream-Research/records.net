@@ -3,7 +3,8 @@
   "dependencies": {},
   "frameworks": {
     ".NETPortable,Version=v4.5,Profile=Profile75": {},
-    ".NETFramework,Version=v4.5": {}
+    ".NETFramework,Version=v4.5": {},
+    ".NETFramework,Version=v4.5.2": {}
   },
   "runtimes": { "win": {} }
 }

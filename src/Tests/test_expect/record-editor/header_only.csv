@@ -1,0 +1,3 @@
+one:varchar,two:int32
+hello,20
+HELLO,30

@@ -46,7 +46,7 @@ namespace Upstream.System.Records
             TextWriter errs = stderr;
             string arg;
             bool showHelp = false;
-            FieldSchemaSpecEncoding<object> specParser = new FieldSchemaSpecEncoding<object>();
+            FieldSchemaSpecEncoding<object> specParser = new FieldSchemaSpecEncoding<object>("unknown");
             IEnumerable<IFieldNameValuePair<FieldSchemaSpecFieldType<object>>> fieldEnumeration;
             string fieldSpecString = null;
             IEnumerator<string> argsEnum = args.GetEnumerator();

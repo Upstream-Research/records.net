@@ -4,16 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F715141F-CFA9-4B2D-AF3E-179987A41AED}</ProjectGuid>
+    <ProjectGuid>{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>TestConsole.AssemblyProperties</AppDesignerFolder>
-    <RootNamespace>Upstream.System</RootNamespace>
-    <AssemblyName>Upstream.System.TestConsole</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <AppDesignerFolder>RecordCollectionEditorConsole.AssemblyProperties</AppDesignerFolder>
+    <RootNamespace>Upstream.System.Records</RootNamespace>
+    <AssemblyName>rcd-editor</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <NoWin32Manifest>False</NoWin32Manifest>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,21 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Upstream.System.TestConsoleProgram</StartupObject>
+    <StartupObject>Upstream.System.Records.Csv.RecordCollectionEditorProgram</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestConsole.Csv\CsvTranslateProgram.cs" />
-    <Compile Include="TestConsole.AssemblyProperties\AssemblyInfo.cs" />
+    <Compile Include="RecordCollectionEditorConsole.AssemblyProperties\AssemblyInfo.cs" />
     <Compile Include="TestConsole.Records.EditCollection\RecordCollectionEditorProgram.cs" />
-    <Compile Include="TestConsole.Records\FieldSchemaSpecPrintProgram.cs" />
-    <Compile Include="TestConsole.Records.Csv\CsvRecordTranslateProgram.cs" />
-    <Compile Include="TestConsole\TestConsoleProgram.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Csv.csproj">
@@ -64,24 +56,10 @@
       <Project>{6a809a06-ccdb-44b6-9db6-fbd9dddf4cd8}</Project>
       <Name>Records.Csv</Name>
     </ProjectReference>
-    <ProjectReference Include="Records.Data.csproj">
-      <Project>{e7f7c4fe-4d60-4250-9e01-3c3943554853}</Project>
-      <Name>Records.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="Records.DataSets.csproj">
-      <Project>{b8d44ff1-e4c3-4b08-84ae-9c5c4423b448}</Project>
-      <Name>Records.DataSets</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestConsole.config" />
-    <None Include="Tests\ReadMe-Tests.md" />
-    <None Include="Tests\run_tests.tcl" />
-    <None Include="Tests\_tcl\pexec.tcl" />
-    <None Include="Tests\_tcl\procs.tcl" />
-    <None Include="Tests\_test.env.tcl" />
+    <None Include="RecordCollectionEditorConsole.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

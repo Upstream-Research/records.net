@@ -25,6 +25,8 @@ Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "HelpDocs.SHFB.Records.Porta
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{06BC532B-7DA1-4DEF-B611-9F6A90735ED0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecordCollectionEditorConsole", "RecordCollectionEditorConsole.csproj", "{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{4654C52A-065D-40F4-BE39-D3C1833B5C69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4654C52A-065D-40F4-BE39-D3C1833B5C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4654C52A-065D-40F4-BE39-D3C1833B5C69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

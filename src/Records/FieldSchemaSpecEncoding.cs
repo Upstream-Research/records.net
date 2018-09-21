@@ -32,7 +32,7 @@ namespace Upstream.System.Records
         private readonly IDictionary<Type,string> _dataTypeNameDictionary;
 
         private readonly string _defaultFieldTypeName;
-        //private readonly Type _defaultDataType = typeof(Object);
+        private readonly Type _defaultDataType;
 
         /// <summary>
         /// Create a new field schema spec encoding that will recognize a very basic set of datatypes 
@@ -52,6 +52,7 @@ namespace Upstream.System.Records
             _defaultFieldTypeName = defaultFieldTypeName;
 
             AddDefaultDataTypesTo(_dataTypeDictionary, _dataTypeNameDictionary);
+            _defaultDataType = FindDataTypeForFieldTypeName(_defaultFieldTypeName);
         }
 
         /// <summary>
@@ -93,6 +94,8 @@ namespace Upstream.System.Records
                     }
                 }
             }
+
+            _defaultDataType = FindDataTypeForFieldTypeName(_defaultFieldTypeName);
         }
 
         /// <summary>
@@ -376,6 +379,7 @@ namespace Upstream.System.Records
         {
             string specString = fieldSchemaSpecString;
             string defaultFieldTypeName = _defaultFieldTypeName;
+            Type defaultDataType = _defaultDataType;
             string fieldDelimiter = ",";
             string typeDelimiter =  ":";
             string optionStartDelimiter = "(";
@@ -510,7 +514,7 @@ namespace Upstream.System.Records
                         && null != fieldName
                         )
                     {
-                        if (null == fieldTypeName)
+                        if (String.IsNullOrEmpty(fieldTypeName))
                         {
                             fieldTypeName = defaultFieldTypeName;
                         }
@@ -521,10 +525,16 @@ namespace Upstream.System.Records
 
                         fieldTypeName = fieldTypeName.Trim();
                         Type dataType = FindDataTypeForFieldTypeName(fieldTypeName);
+                        // if we don't recognize the type, then use our default type
+                        if (null == dataType)
+                        {
+                            fieldTypeName = defaultFieldTypeName;
+                            dataType = defaultDataType;
+                        }
 
                         fieldName = fieldName.Trim();
                         fieldType = new FieldSchemaSpecFieldType<TValue>(
-                                fieldName
+                             fieldName
                             ,fieldTypeName
                             ,dataType
                             );
