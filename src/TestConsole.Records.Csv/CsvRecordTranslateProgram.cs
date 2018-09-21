@@ -284,8 +284,8 @@ namespace Upstream.System.Records.Csv
                     CsvReader csvIn = new CsvReader(ins, csvEncodingIn);
                     CsvWriter csvOut = new CsvWriter(outs, csvEncodingOut);
                     StringComparer csvFieldValueComparer = StringComparer.Ordinal;
-                    IComparer csvFieldValueSortComparer = csvFieldValueComparer;
-                    IEqualityComparer csvFieldValueEqualityComparer = csvFieldValueComparer;
+                    IComparer<string> csvFieldValueSortComparer = csvFieldValueComparer;
+                    IEqualityComparer<string> csvFieldValueEqualityComparer = csvFieldValueComparer;
                     FieldSchemaSpecEncoding<object> fieldSpecEncoding = new FieldSchemaSpecEncoding<object>();
                     StringBuilder specParserBuffer = new StringBuilder();
                     int startPosition = 0;

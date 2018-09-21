@@ -15,8 +15,8 @@ namespace Upstream.System.Records
     : IRecordFieldType<TValue>
     {
         private Type _dataType;
-        private IComparer _sortComparer;
-        private IEqualityComparer _equalityComparer;
+        private IComparer<TValue> _sortComparer;
+        private IEqualityComparer<TValue> _equalityComparer;
 
         /// <summary>
         /// Create a new field meta-properties object
@@ -26,8 +26,8 @@ namespace Upstream.System.Records
         /// <param name="equalityComparer"></param>
         public BasicRecordFieldType(
              Type dataType
-            ,IComparer sortComparer
-            ,IEqualityComparer equalityComparer
+            ,IComparer<TValue> sortComparer
+            ,IEqualityComparer<TValue> equalityComparer
             )
         {
             if (null == dataType)
@@ -85,7 +85,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get an object that can compare two values for this field to determine their sort order
         /// </summary>
-        private IComparer ValueSortComparer
+        private IComparer<TValue> ValueSortComparer
         {
             get
             {
@@ -97,7 +97,7 @@ namespace Upstream.System.Records
         /// Get an object that can compare two field values for equivalence
         /// and can be used for generating dictionary keys for values of this field.
         /// </summary>
-        private IEqualityComparer ValueEqualityComparer
+        private IEqualityComparer<TValue> ValueEqualityComparer
         {
             get
             {

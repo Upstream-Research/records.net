@@ -31,8 +31,8 @@ namespace Upstream.System.Records.Csv
         public CsvRecordEnumerator(
              CsvReader csvReader
             ,IEnumerable<string> fieldNameEnumeration
-            ,IComparer fieldValueSortComparer
-            ,IEqualityComparer fieldValueEqualityComparer
+            ,IComparer<string> fieldValueSortComparer
+            ,IEqualityComparer<string> fieldValueEqualityComparer
             )
         {
             int fieldCount = 0;

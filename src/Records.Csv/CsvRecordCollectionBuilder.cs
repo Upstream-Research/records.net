@@ -31,8 +31,8 @@ namespace Upstream.System.Records.Csv
         public CsvRecordCollectionBuilder(
              CsvWriter csvWriter
             ,IEnumerable<string> fieldNameEnumeration
-            ,IComparer fieldValueSortComparer
-            ,IEqualityComparer fieldValueEqualityComparer
+            ,IComparer<string> fieldValueSortComparer
+            ,IEqualityComparer<string> fieldValueEqualityComparer
             )
         {
             int fieldCount = 0;
