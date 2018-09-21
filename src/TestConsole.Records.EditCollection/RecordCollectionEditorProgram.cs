@@ -17,9 +17,9 @@ namespace Upstream.System.Records.Csv
     class RecordCollectionEditorProgram
     {
         const string HelpText = 
-         "rcd-edit tool version 20180905:20180921\n"
+         "rcd-editor tool version 20180905:20180921\n"
         +"\n"
-        +"rcd-edit [OPTIONS] [InputFile]\n"
+        +"rcd-editor [OPTIONS] [InputFile]\n"
         +"\n"
         +"OPTIONS\n"
         +"    -a {S}  Comma-separated list of fields to append to records\n"
@@ -33,6 +33,9 @@ namespace Upstream.System.Records.Csv
         +"If no input file is specified, then a new recordset will be created in memory.\n"
         +"If no output file is specified, then output will be written to STDOUT.\n"
         +"All prompts and results of interpreter output are sent to STDERR.\n"
+        +"\n"
+        +"The editor interpreter takes a long list of commands.\n"
+        +"To see the list of commands start the interpreter and type 'help'.\n"
         ;
 
         const string EditorHelpText = 
@@ -40,6 +43,8 @@ namespace Upstream.System.Records.Csv
         +"\n"
         +"Commands are CSV-formatted lists of variable (and optional) length.\n"
         +"The first value is the command name, followed by optional parameters.\n"
+        +"Command names have a short version (eg. 'g') and a long version (eg. 'goto').\n"
+        +"Both names are given, separated by a '|' character in the list below.\n"
         +"\n"
         +"COMMANDS\n"
         +"\n"
@@ -84,7 +89,7 @@ namespace Upstream.System.Records.Csv
         +"\n"
         +"* When inserting or adding a record, fields prior to the current field\n"
         +"  will be copied from the current record to the new record.\n"
-        +"\n" 
+        +"\n"
         ;
 
         const string EditorBannerText = 
