@@ -67,8 +67,9 @@ namespace Upstream.System
             
             // register available test program commands in a dictionary
             cmdDictionary.Add("csv-translate", Csv.CsvTranslateProgram.Main);
-            cmdDictionary.Add("rcd-csv-translate", Records.Csv.CsvRecordTranslateProgram.Main);
             cmdDictionary.Add("field_schema_spec-print", Records.FieldSchemaSpecPrintProgram.Main);
+            cmdDictionary.Add("rcd-csv-translate", Records.Csv.CsvRecordTranslateProgram.Main);
+            cmdDictionary.Add("rcd-csv-select", Records.Csv.CsvRecordSelectionProgram.Main);
             cmdDictionary.Add("rcd-editor", Records.Csv.RecordCollectionEditorProgram.Main);
 
             // insert command names into the help text
