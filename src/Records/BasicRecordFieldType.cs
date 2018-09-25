@@ -1,5 +1,5 @@
-﻿/*  Copyright (c) 2016-2017 Upstream Research, Inc.  */
-/*  Subject to the MIT License. See LICENSE file in top-level directory. */
+﻿/*  Copyright (c) 2016-2018 Upstream Research, Inc.  */
+/*  Subject to an MIT License. See LICENSE file in top-level directory. */
 
 using System;
 using System.Collections;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Upstream.System.Records
 {
     /// <summary>
-    /// Provides the obvious implementation for IRecordFieldProperties
+    /// Provides the obvious implementation for BasicRecordFieldType
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
     public class BasicRecordFieldType<TValue>
@@ -19,7 +19,7 @@ namespace Upstream.System.Records
         private IEqualityComparer<TValue> _equalityComparer;
 
         /// <summary>
-        /// Create a new field meta-properties object
+        /// Create a new field type object
         /// </summary>
         /// <param name="dataType"></param>
         /// <param name="sortComparer"></param>

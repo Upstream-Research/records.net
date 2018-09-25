@@ -49,6 +49,7 @@
     <Compile Include="Records\FieldNameValuePair.cs" />
     <Compile Include="Records\FieldSchemaSpecEncoding.cs" />
     <Compile Include="Records\FieldSchemaSpecFieldType.cs" />
+    <Compile Include="Records\FieldSelectionRecordAccessorAdapter.cs" />
     <Compile Include="Records\IFieldValueStringRepresentation.cs" />
     <Compile Include="Records\IFieldNameValuePair.cs" />
     <Compile Include="Records\IRecordAccessorAdapter.cs" />
