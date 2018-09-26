@@ -12,7 +12,7 @@ using Upstream.System.Records;
 namespace Upstream.System.Records.DataSets
 {
     /// <summary>
-    /// Implements IRecordAccessor on a DataColumnCollection
+    /// Implements IRecordSchemaViewer on a DataColumnCollection
     /// </summary>
     public class DataColumnCollectionAccessor
     : IRecordAccessorAdapter<DataColumnFieldType, DataColumnCollection>

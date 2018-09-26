@@ -18,6 +18,13 @@ namespace Upstream.System.Records
     public class RecordIO
     {
         /// <summary>
+        /// This class should not be instantiated.
+        /// </summary>
+        private RecordIO()
+        {
+        }
+
+        /// <summary>
         /// Create a "mapping" that can be used to quickly match fields from records in two different schema.
         /// </summary>
         /// <typeparam name="TValue"></typeparam>

@@ -11,9 +11,9 @@
     <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
     <AssemblyName>HelpDocs.SHFB.Records.Portable</AssemblyName>
     <RootNamespace>Upstream</RootNamespace>
-    <Name>HelpDocs.SHFB.Records.Portable</Name>
+    <Name>HelpDocs.SHFB.Records</Name>
     <!-- SHFB properties -->
-    <FrameworkVersion>.NET Portable Library 4.5</FrameworkVersion>
+    <FrameworkVersion>.NET Framework 4.5</FrameworkVersion>
     <OutputPath>..\bin\Help\</OutputPath>
     <HtmlHelpName>HelpDocs.SHFB.Records.Portable</HtmlHelpName>
     <Language>en-US</Language>
@@ -47,14 +47,19 @@
       <DocumentationSource sourceFile="..\Csv.csproj" />
       <DocumentationSource sourceFile="..\Records.csproj" />
       <DocumentationSource sourceFile="..\Records.Csv.csproj" />
+      <DocumentationSource sourceFile="..\Records.Data.csproj" />
+      <DocumentationSource sourceFile="..\Records.DataSets.csproj" />
     </DocumentationSources>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />
 <NamespaceSummaryItem name="Upstream.System.Csv" isDocumented="True">Provides basic objects for reading and writing general "Code Separated Value" format - which includes the familiar "Comma Separated Value" and Tab delimited formats as a specific cases.</NamespaceSummaryItem>
 <NamespaceSummaryItem name="Upstream.System.Records" isDocumented="True">Provides core interfaces with some basic implemention classes for objects that manipulate data records consisting of named fields.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="Upstream.System.Records.Csv" isDocumented="True">Implements some basic record interfaces using CSV reader/writer objects.</NamespaceSummaryItem></NamespaceSummaries>
+<NamespaceSummaryItem name="Upstream.System.Records.Csv" isDocumented="True">Implements some basic record interfaces using CSV reader/writer objects.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="Upstream.System.Records.Data" isDocumented="True">Provides some implementations for Record interfaces using ADO.Net types</NamespaceSummaryItem>
+<NamespaceSummaryItem name="Upstream.System.Records.DataSets" isDocumented="True">Implements Record interfaces using ADO.Net DataSet objects</NamespaceSummaryItem></NamespaceSummaries>
     <ProjectSummary>Records.net is an object library for manipulating record-based data.
 It provides a set of data record interfaces that can be used as a basis for record I/O streams and for record-based data models.</ProjectSummary>
+    <MissingTags>Summary, Namespace</MissingTags>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
@@ -76,13 +81,10 @@ It provides a set of data record interfaces that can be used as a basis for reco
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Content" />
-    <Folder Include="Content\VersionHistory" />
     <Folder Include="icons" />
     <Folder Include="media" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Content\VersionHistory\v1.0.0.0.aml" />
-    <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\Welcome.aml" />
   </ItemGroup>
   <ItemGroup>
