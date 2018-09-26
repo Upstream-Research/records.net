@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{690E77C5-0690-4825-BA88-48C9B7AD0ADB}"
 	ProjectSection(SolutionItems) = preProject
 		..\LICENSE = ..\LICENSE
+		project.json = project.json
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
@@ -26,6 +27,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{06BC532B-7DA1-4DEF-B611-9F6A90735ED0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecordCollectionEditorConsole", "RecordCollectionEditorConsole.csproj", "{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Json", "Json.csproj", "{6EFE93A0-F73B-4A44-8697-7D9294C1EF88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSJson", "NSJson.csproj", "{534104B7-93CE-47F6-917E-B721A5774DF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +69,13 @@ Global
 		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFE93A0-F73B-4A44-8697-7D9294C1EF88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFE93A0-F73B-4A44-8697-7D9294C1EF88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFE93A0-F73B-4A44-8697-7D9294C1EF88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFE93A0-F73B-4A44-8697-7D9294C1EF88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{534104B7-93CE-47F6-917E-B721A5774DF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{534104B7-93CE-47F6-917E-B721A5774DF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{534104B7-93CE-47F6-917E-B721A5774DF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

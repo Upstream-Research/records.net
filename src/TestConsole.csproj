@@ -9,7 +9,7 @@
     <AppDesignerFolder>TestConsole.AssemblyProperties</AppDesignerFolder>
     <RootNamespace>Upstream.System</RootNamespace>
     <AssemblyName>Upstream.System.TestConsole</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NoWin32Manifest>False</NoWin32Manifest>
@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TestConsole.config" />
+    <None Include="TestConsole.project.json" />
     <None Include="Tests\ReadMe-Tests.md" />
     <None Include="Tests\run_tests.tcl" />
     <None Include="Tests\_tcl\pexec.tcl" />

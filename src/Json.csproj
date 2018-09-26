@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D5119502-EB0C-48F5-B0C7-826D5B7F0D6C}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <AppDesignerFolder>RecordCollectionEditorConsole.AssemblyProperties</AppDesignerFolder>
-    <RootNamespace>Upstream.System.Records</RootNamespace>
-    <AssemblyName>rcd-editor</AssemblyName>
+    <ProjectGuid>{6EFE93A0-F73B-4A44-8697-7D9294C1EF88}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Json.AssemblyProperties</AppDesignerFolder>
+    <RootNamespace>Upstream.System.Json</RootNamespace>
+    <AssemblyName>Upstream.System.Json</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,34 +29,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Upstream.System.Records.Csv.RecordCollectionEditorProgram</StartupObject>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <Compile Include="Json.AssemblyProperties\AssemblyInfo.cs" />
+    <Compile Include="Json\IJsonCodec.cs" />
+    <Compile Include="Json\IJsonReader.cs" />
+    <Compile Include="Json\IJsonWriter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RecordCollectionEditorConsole.AssemblyProperties\AssemblyInfo.cs" />
-    <Compile Include="TestConsole.Records.EditCollection\RecordCollectionEditorProgram.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Csv.csproj">
-      <Project>{17210683-66dd-4027-888b-0ae2d4651f4f}</Project>
-      <Name>Csv</Name>
-    </ProjectReference>
-    <ProjectReference Include="Records.csproj">
-      <Project>{a40e07cf-8dd1-49e7-a4bf-a1fea0f275c2}</Project>
-      <Name>Records</Name>
-    </ProjectReference>
-    <ProjectReference Include="Records.Csv.csproj">
-      <Project>{6a809a06-ccdb-44b6-9db6-fbd9dddf4cd8}</Project>
-      <Name>Records.Csv</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="RecordCollectionEditorConsole.config" />
-    <None Include="RecordCollectionEditorConsole.project.json" />
+    <None Include="Json.project.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

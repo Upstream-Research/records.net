@@ -9,7 +9,7 @@
     <AppDesignerFolder>Records.AssemblyProperties</AppDesignerFolder>
     <RootNamespace>Upstream.System</RootNamespace>
     <AssemblyName>Upstream.System.Records</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="Records.project.json" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Records.AssemblyProperties\AssemblyInfo.cs" />

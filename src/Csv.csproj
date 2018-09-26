@@ -9,7 +9,7 @@
     <AppDesignerFolder>Csv.AssemblyProperties</AppDesignerFolder>
     <RootNamespace>Upstream.System.Csv</RootNamespace>
     <AssemblyName>Upstream.System.Csv</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="Csv.project.json" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Csv.AssemblyProperties\AssemblyInfo.cs" />
