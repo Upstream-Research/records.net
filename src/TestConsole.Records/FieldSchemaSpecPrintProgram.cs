@@ -95,7 +95,7 @@ namespace Upstream.System.Records
                 {
                     string fieldName = fieldPair.Name;
                     IRecordFieldType<object> fieldType = fieldPair.Value;
-                    Type dataType = fieldType.DataType;
+                    Type dataType = fieldType.SystemType;
                     string dataTypeName = "<unknown>";
                     if (null != dataType)
                     {

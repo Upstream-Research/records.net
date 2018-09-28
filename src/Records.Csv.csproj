@@ -49,6 +49,7 @@
     <Compile Include="Records.Csv.AssemblyProperties\AssemblyInfo.cs" />
     <Compile Include="Records.Csv\CsvRecordCollectionBuilder.cs" />
     <Compile Include="Records.Csv\CsvRecordEnumerator.cs" />
+    <Compile Include="Records.Csv\CsvRecordIO.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Records.Csv.project.json" />

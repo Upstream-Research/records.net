@@ -11,44 +11,45 @@ namespace Upstream.System.Records
     /// Provides access to meta-fields for a field parsed from a Field Schema Spec string.
     /// </summary>
     public class FieldSchemaSpecFieldType<TValue>
-    : IRecordAccessor<object>
+    : IRecordViewer<object>
      , IRecordFieldType<TValue>
     {
-        private const int FieldNamePosition = 0;
-        private const int FieldTypeNamePosition = 1;
-        private const int FieldDataTypePosition = 2;
+        /// <summary>
+        /// A "meta schema" that describes the field type attributes on a FieldSchemaSpecFieldType.
+        /// </summary>
+        private static IRecordSchemaViewer<IRecordFieldType<object>> MetaSchema
+         = new BasicRecordSchema<IRecordFieldType<object>>(
+            new FieldNameValuePairEnumeration<IRecordFieldType<object>>(
+                new string[] {
+                     "type_name"
+                }
+                ,new IRecordFieldType<object>[] {
+                    new BasicRecordFieldType<object>(typeof(string))
+                }
+            )
+        );
+        
+        private const int FieldTypeNamePosition = 0;
 
-        private string[] _metaFieldNameArray = new string[]
-            {
-                 "name"
-                ,"type_name"
-                ,"datatype"
-            };
-        private object[] _metaValueArray = new object[]
-            {
-                 null
-                ,null
-                ,null
-            };
+        private readonly IRecordAccessor<object> _metaFields;
         private BasicRecordFieldType<TValue>  _baseFieldType;
 
         /// <summary>
         /// Create a new field description record for a field parsed from a field schema spec string
         /// </summary>
-        /// <param name="fieldName"></param>
         /// <param name="fieldTypeName"></param>
-        /// <param name="dataType"></param>
+        /// <param name="systemType"></param>
         internal FieldSchemaSpecFieldType(
-             string fieldName
-            ,string fieldTypeName
-            ,Type dataType
+             string fieldTypeName
+            ,Type systemType
             )
         {
-            _baseFieldType = new BasicRecordFieldType<TValue>(dataType);
-            
-            _metaValueArray[FieldNamePosition] = fieldName;
-            _metaValueArray[FieldTypeNamePosition] = fieldTypeName;
-            _metaValueArray[FieldDataTypePosition] = dataType;
+            IList<object> metaValueList = new object[] {
+                fieldTypeName
+            };
+
+            _baseFieldType = new BasicRecordFieldType<TValue>(systemType);
+            _metaFields = new ListRecordAccessor<object,IRecordFieldType<object>>(MetaSchema, metaValueList);
         }
 
         /// <summary>
@@ -60,13 +61,12 @@ namespace Upstream.System.Records
         {
             get
             {
-                return _metaValueArray[fieldPosition];
+                return _metaFields[fieldPosition];
             }
 
             set
             {
-                object metaValue = value;
-                _metaValueArray[fieldPosition] = metaValue;
+                _metaFields[fieldPosition] = value;
             }
         }
 
@@ -79,24 +79,12 @@ namespace Upstream.System.Records
         {
             get
             {
-                object fieldValue = null;
-                int fieldPosition = FindMetaFieldPosition(fieldName);
-                if (0 <= fieldPosition)
-                {
-                    fieldValue = _metaValueArray[fieldPosition];
-                }
-
-                return fieldValue;
+                return _metaFields[fieldName];
             }
 
             set
             {
-                object fieldValue = value;
-                int fieldPosition = FindMetaFieldPosition(fieldName);
-                if (0 <= fieldPosition)
-                {
-                    _metaValueArray[fieldPosition] = fieldValue;
-                }
+                _metaFields[fieldName] = value;
             }
         }
 
@@ -107,18 +95,18 @@ namespace Upstream.System.Records
         {
             get
             {
-                return (string)_metaValueArray[FieldTypeNamePosition];
+                return (string)_metaFields[FieldTypeNamePosition];
             }
         }
 
         /// <summary>
         /// Get the .NET datatype for field values belonging to the field described by this record
         /// </summary>
-        public Type DataType
+        public Type SystemType
         {
             get
             {
-                return (Type)_metaValueArray[FieldDataTypePosition];
+                return _baseFieldType.SystemType;
             }
         }
 
@@ -128,38 +116,9 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public int GetFieldCount()
         {
-            return _metaFieldNameArray.Length;
+            return _metaFields.GetFieldCount();
         }
-
-        private int 
-        FindMetaFieldPosition(string searchFieldName)
-        {
-            int invalidPosition = -1;
-            int foundFieldPosition = invalidPosition;
-            int fieldPosition;
-
-            fieldPosition = 0;
-            while (fieldPosition < _metaFieldNameArray.Length
-                && invalidPosition == foundFieldPosition
-                )
-            {
-                string fieldName = _metaFieldNameArray[fieldPosition];
-                if (MetaFieldNamesAreEqual(fieldName, searchFieldName))
-                {
-                    foundFieldPosition = fieldPosition;
-                }
-                fieldPosition += 1;
-            }
-
-            return foundFieldPosition;
-        }
-
-        private bool 
-        MetaFieldNamesAreEqual(string fieldName1, string fieldName2)
-        {
-            return (0 == String.Compare(fieldName1, fieldName2, StringComparison.OrdinalIgnoreCase));
-        }
-
+        
         /// <summary>
         /// Try to get the value of a metafield by name
         /// </summary>
@@ -168,16 +127,7 @@ namespace Upstream.System.Records
         /// <returns></returns>
         public bool TryGetValue(string fieldName, out object fieldValue)
         {
-            bool hasValue = false;
-            int fieldPosition = FindMetaFieldPosition(fieldName);
-            fieldValue = null;
-            if (0 <= fieldPosition)
-            {
-                fieldValue = _metaValueArray[fieldPosition];
-                hasValue = true;
-            }
-
-            return hasValue;
+            return _metaFields.TryGetValue(fieldName, out fieldValue);
         }
 
         /// <summary>
@@ -205,7 +155,7 @@ namespace Upstream.System.Records
         /// <returns>negative if field name was not found</returns>
         public int IndexOfField(string fieldName)
         {
-            return FindMetaFieldPosition(fieldName);
+            return _metaFields.IndexOfField(fieldName);
         }
 
         /// <summary>
@@ -251,35 +201,12 @@ namespace Upstream.System.Records
         }
 
         /// <summary>
-        /// Get an enumerator for the metafield names for this field
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerator<string> GetFieldNameEnumerator()
-        {
-            IEnumerable<string> metaFieldNameEnumeration = _metaFieldNameArray;
-
-            return metaFieldNameEnumeration.GetEnumerator();
-        }
-
-        /// <summary>
         /// Get an enumerator of the metafields for this field
         /// </summary>
         /// <returns></returns>
         public IEnumerator<IFieldNameValuePair<object>> GetEnumerator()
         {
-            int fieldPosition = 0;
-
-            while (fieldPosition < _metaFieldNameArray.Length
-                && fieldPosition < _metaValueArray.Length
-                )
-            {
-                string fieldName = _metaFieldNameArray[fieldPosition];
-                object fieldValue = _metaValueArray[fieldPosition];
-
-                yield return new FieldNameValuePair<object>(fieldName, fieldValue);
-
-                fieldPosition += 1;
-            }
+            return _metaFields.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -47,6 +47,7 @@
     <Compile Include="Records\DictionaryRecordAccessor.cs" />
     <Compile Include="Records\EmptyRecordAccessor.cs" />
     <Compile Include="Records\FieldNameValuePair.cs" />
+    <Compile Include="Records\FieldNameValuePairEnumeration.cs" />
     <Compile Include="Records\FieldSchemaSpecEncoding.cs" />
     <Compile Include="Records\FieldSchemaSpecFieldType.cs" />
     <Compile Include="Records\FieldSelectionRecordAccessorAdapter.cs" />

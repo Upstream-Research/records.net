@@ -9,10 +9,11 @@ using System.Text;
 namespace Upstream.System.Records
 {
     /// <summary>
-    /// Provides methods for parsing a field schema spec mini language
+    /// Provides methods for parsing a "Field Schema Specification" mini language
+    /// which is used for encoding field datatypes for record-based data.
     /// </summary>
     /// <remarks>
-    /// The field schema spec mini language is a comma-separated list
+    /// The Field Schema Specification mini language is a comma-separated list
     /// of field names with optional type information.
     /// Type information is appended to the field name after a colon character.
     /// For example: "id:varchar,name:varchar,age:int32".
@@ -279,7 +280,7 @@ namespace Upstream.System.Records
             else if (null != fieldType)
             {
                 string unknownFieldTypeName = null;
-                fieldTypeName = GetFieldTypeName(fieldType.DataType, unknownFieldTypeName);
+                fieldTypeName = GetFieldTypeName(fieldType.SystemType, unknownFieldTypeName);
             }
 
             if (!String.IsNullOrEmpty(fieldName)
@@ -605,8 +606,7 @@ namespace Upstream.System.Records
 
                         fieldName = fieldName.Trim();
                         fieldType = new FieldSchemaSpecFieldType<TValue>(
-                             fieldName
-                            ,fieldTypeName
+                             fieldTypeName
                             ,dataType
                             );
                     }

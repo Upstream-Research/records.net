@@ -16,7 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{690E77C5-0690-4825-BA88-48C9B7AD0ADB}"
 	ProjectSection(SolutionItems) = preProject
 		..\LICENSE = ..\LICENSE
-		project.json = project.json
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject

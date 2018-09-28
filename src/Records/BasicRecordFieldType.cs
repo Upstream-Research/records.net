@@ -14,23 +14,29 @@ namespace Upstream.System.Records
     public class BasicRecordFieldType<TValue>
     : IRecordFieldType<TValue>
     {
-        private Type _dataType;
+        private Type _systemType;
         private IComparer<TValue> _sortComparer;
         private IEqualityComparer<TValue> _equalityComparer;
 
         /// <summary>
         /// Create a new field type object
         /// </summary>
-        /// <param name="dataType"></param>
-        /// <param name="sortComparer"></param>
-        /// <param name="equalityComparer"></param>
+        /// <param name="systemType">
+        /// Type which should be assigned to non-null values of associated with fields of this type.
+        /// </param>
+        /// <param name="sortComparer">
+        /// Comparer to use when sorting records using fields associated with this type.
+        /// </param>
+        /// <param name="equalityComparer">
+        /// Comparer to use when searching and indexing records using fields associated with this type
+        /// </param>
         public BasicRecordFieldType(
-             Type dataType
+             Type systemType
             ,IComparer<TValue> sortComparer
             ,IEqualityComparer<TValue> equalityComparer
             )
         {
-            if (null == dataType)
+            if (null == systemType)
             {
                 //throw new ArgumentNullException("dataType");
             }
@@ -43,7 +49,7 @@ namespace Upstream.System.Records
                 throw new ArgumentNullException("equalityComparer");
             }
 
-            _dataType = dataType;
+            _systemType = systemType;
             _sortComparer = sortComparer;
             _equalityComparer = equalityComparer;
         }
@@ -51,12 +57,14 @@ namespace Upstream.System.Records
         /// <summary>
         /// Create a field descriptor that will use the default characteristics of a data type
         /// </summary>
-        /// <param name="dataType"></param>
+        /// <param name="systemType">
+        /// System Type associated with values in fields of this type.
+        /// </param>
         public BasicRecordFieldType(
-            Type dataType
+            Type systemType
             )
         : this(
-             dataType
+             systemType
             ,Comparer<TValue>.Default
             ,EqualityComparer<TValue>.Default
             )
@@ -74,11 +82,11 @@ namespace Upstream.System.Records
         /// <summary>
         /// Get the .NET type that is compatible with this field
         /// </summary>
-        public Type DataType
+        public Type SystemType
         {
             get
             {
-                return _dataType;
+                return _systemType;
             }
         }
 
@@ -123,7 +131,7 @@ namespace Upstream.System.Records
                 Type fieldValueType = fieldValue.GetType();
                 // [20170810 [db] IsAssignableFrom() would be a better method to use,
                 //  but it requires the System.Reflection extensions in .NET Core]
-                if (DataType.Equals(fieldValueType))
+                if (SystemType.Equals(fieldValueType))
                 {
                     isValid = true;
                 }

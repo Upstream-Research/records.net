@@ -228,7 +228,7 @@ namespace Upstream.System.Records
             {
                 if (null != fieldType)
                 {
-                    Type dataType = fieldType.DataType;
+                    Type dataType = fieldType.SystemType;
                     object fieldValueObject = Convert.ChangeType(stringValue, dataType, StringCulture);
                     if (null != fieldValueObject)
                     {

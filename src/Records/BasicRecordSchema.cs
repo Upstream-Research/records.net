@@ -33,6 +33,24 @@ namespace Upstream.System.Records
             _fieldPositionDictionary = new Dictionary<string,int>(fieldCountEstimate);
         }
 
+        /// <summary>
+        /// Create a new record schema from parallel enumerations of 
+        /// the field names and types for fields in the schema
+        /// </summary>
+        /// <param name="fieldInfoEnumeration">
+        /// An enumeration of the field names and their types.
+        /// </param>
+        public BasicRecordSchema(
+             IEnumerable<IFieldNameValuePair<TFieldType>> fieldInfoEnumeration
+            )
+            : this()
+        {
+            AddFields(fieldInfoEnumeration);
+        }
+
+        /// <summary>
+        /// IList of field names in this schema
+        /// </summary>
         private IList<string> FieldNameList
         {
             get
@@ -293,7 +311,10 @@ namespace Upstream.System.Records
         /// </param>
         public void AddField(IFieldNameValuePair<TFieldType> fieldInfo)
         {
-            AddField(fieldInfo.Name, fieldInfo.Value);
+            if (null != fieldInfo)
+            {
+                AddField(fieldInfo.Name, fieldInfo.Value);
+            }
         }
 
         /// <summary>

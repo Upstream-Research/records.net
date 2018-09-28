@@ -20,7 +20,7 @@ namespace Upstream.System.Records
         /// <summary>
         /// Basic datatype associated with values in this field.
         /// </summary>
-        Type DataType { get; }
+        Type SystemType { get; }
 
         /// <summary>
         /// Determine if a value is valid (i.e. in the domain) for this field

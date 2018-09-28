@@ -135,7 +135,7 @@ namespace Upstream.System.Records.Csv
 
             string scriptTextEncodingNameOut = null;
             string scriptCsvSeparatorOut = null;
-            string scriptFileNameOut = null;
+            //string scriptFileNameOut = null;
             Encoding scriptTextEncodingOut = null;
             CsvEncoding scriptCsvEncodingOut = null;
             string scriptCultureNameOut = null;
@@ -1068,7 +1068,7 @@ namespace Upstream.System.Records.Csv
                     {
                         string fieldValueString = csvIn.ValueText;
                         IRecordFieldType<object> fieldType = recordSchema[fieldPosition];
-                        Type dataType = fieldType.DataType;
+                        Type dataType = fieldType.SystemType;
                         BasicFieldValueStringRepresentation<object> fieldFormatter = new BasicFieldValueStringRepresentation<object>(dataType, cultureInfoIn);
                         object fieldValue;
                         fieldFormatter.TryParse(fieldValueString, out fieldValue);
@@ -1105,7 +1105,7 @@ namespace Upstream.System.Records.Csv
                         )
                     {
                         IRecordFieldType<object> fieldType = recordSchema[fieldPosition];
-                        Type dataType = fieldType.DataType;
+                        Type dataType = fieldType.SystemType;
                         BasicFieldValueStringRepresentation<object> fieldFormatter = new BasicFieldValueStringRepresentation<object>(dataType, cultureInfoIn);
                         string fieldValueString = csvIn.ValueText;
                         object fieldValue;

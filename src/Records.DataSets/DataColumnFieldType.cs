@@ -71,7 +71,7 @@ namespace Upstream.System.Records.DataSets
         /// <summary>
         /// Get the data type associated with the data column
         /// </summary>
-        public Type DataType
+        public Type SystemType
         {
             get
             {
@@ -139,7 +139,7 @@ namespace Upstream.System.Records.DataSets
                     fieldValueIsValid = true;
                 }
             }
-            else if (DataType.IsAssignableFrom(fieldValue.GetType()))
+            else if (SystemType.IsAssignableFrom(fieldValue.GetType()))
             {
                 fieldValueIsValid = true;
             }
