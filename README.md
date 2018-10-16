@@ -23,10 +23,13 @@ It is somewhat similar to the DataSets in ADO.NET (i.e. System.Data),
 but with a different emphasis.
 
 The goals are to provide a finer set of core interfaces than System.Data
-as well as to provide a .NET Standard implementation for basic tabular data access.
+as well as to provide a relatively independent .NET implementation for basic tabular data access.
 It provides, for example, interfaces such as `IRecordAccessor` and `IRecordCollection`
 which may be implemented by a variety of sources,
 including CSV, database, JSON, XML, .NET reflection or other back-end sources.
+The code itself is intended to conform to .NET Standard 1.0;
+the current VS/MSBuild projects target .NET Framework 4.5 
+only for development convenience for the author.
 
 This library provides an alternative and a complement to ORM (Object/Relational Mapping) frameworks.
 It is an alternative because it does not try to hide the tabular nature of relational data,
@@ -37,9 +40,9 @@ which allows for simpler transmission, transformation, and encoding of records
 at the expense of strongly-typed "entity" objects 
 (although strongly-typed records are still possible with this library).
 Since the creation of an effective set of abstractions is a major goal of this project,
-it is anticipated that the existing object interfaces will need to reworked several times
+it is anticipated that the existing object interfaces will need to be reworked several times
 before they reach their final form.
-Therefore this project, is very much a work-in-progress.
+Therefore this project is very much a work-in-progress.
 
 Some code documentation has been made available online for convenience,
 however it will not always be 100% up-to-date:
@@ -93,12 +96,18 @@ This class implements `IRecordCollection` using a dynamic list of static object 
 it provides an alternative to `System.Data.DataTable` without the dependency on `System.Data`.
 
 
-## Project Layout
+## Project Layout and Coding Style
 
 There are several library assembly projects in this code base.
 The libraries are organized by dependency.
 The core library, `Records`, has no significant dependencies and is built to be compatible with .NET Core 1.0.
 Derived libraries, like `Records.Data` have a dependency on `System.Data`.
+
+The code itself is intended to be portable in the general sense:
+it should be relatively straight-forward to translate many of the interfaces and classes
+to another platform, such as Java.
+For this reason, and also because the author is allergic to excessive syntactic sugar,
+the use of fancy .NET features like extension methods and Linq, is avoided.
 
 
 ## Testing
